@@ -618,11 +618,12 @@ function getPhoto(photos, i) {
 }
 
 function PageWrapper({ children, bg }) {
+  const isMobile = useIsMobile();
   return (
     <div className="wb-page" style={{
       position: 'relative',
       width: '100%',
-      height: '100%',
+      minHeight: isMobile ? 560 : 720,
       background: bg || COLORS.white,
       borderRadius: 26,
       overflow: 'hidden',
@@ -748,19 +749,19 @@ function WelcomePage({ state, content }) {
   const dest = state.destination;
   return (
     <PageWrapper bg={COLORS.cream}>
-      <div style={{ padding: '20px 18px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: COLORS.gold, fontWeight: 700 }}>CHAPTER ONE</div>
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 'clamp(22px, 6vw, 30px)',
-          margin: '4px 0 10px',
+          margin: 0,
           lineHeight: 1.15,
           color: COLORS.navy
         }}>
           {content.welcomeTitle}
         </h2>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <div style={{
             paddingTop: '70%',
             backgroundImage: 'url(' + getPhoto(state.photos, 1) + ')',
@@ -777,15 +778,14 @@ function WelcomePage({ state, content }) {
           }} />
         </div>
 
-        <p style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, margin: '4px 0', color: '#2c3a52' }}>
+        <p style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, margin: 0, color: '#2c3a52' }}>
           {content.welcomeParagraph1}
         </p>
-        <p style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, margin: '4px 0 8px', color: '#2c3a52' }}>
+        <p style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, margin: 0, color: '#2c3a52' }}>
           {content.welcomeParagraph2}
         </p>
 
         <div style={{
-          marginTop: 'auto',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: 6,
@@ -816,30 +816,29 @@ function InfoCell({ label, value }) {
 function StoryPage({ state, content }) {
   return (
     <PageWrapper bg={COLORS.white}>
-      <div style={{ padding: '20px 18px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: COLORS.gold, fontWeight: 700 }}>OUR STORY</div>
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 'clamp(20px, 5.5vw, 26px)',
-          margin: '4px 0 10px',
+          margin: 0,
           lineHeight: 1.2,
           color: COLORS.navy
         }}>{content.storyTitle}</h2>
 
         <div style={{
-          height: 150,
+          height: 140,
           backgroundImage: 'url(' + getPhoto(state.photos, 3) + ')',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          borderRadius: 12,
-          marginBottom: 10
+          borderRadius: 12
         }} />
 
-        <div style={{ position: 'relative', fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, color: '#2c3a52', overflow: 'hidden' }}>
+        <div style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, color: '#2c3a52', overflow: 'hidden' }}>
           <span style={{
             float: 'left',
             fontFamily: "'Playfair Display', serif",
-            fontSize: 'clamp(46px, 12vw, 58px)',
+            fontSize: 'clamp(42px, 11vw, 54px)',
             lineHeight: 0.85,
             color: COLORS.gold,
             fontWeight: 800,
@@ -850,7 +849,6 @@ function StoryPage({ state, content }) {
         </div>
 
         <div style={{
-          marginTop: 'auto',
           clear: 'both',
           background: COLORS.cream,
           borderLeft: '4px solid ' + COLORS.gold,
@@ -934,12 +932,12 @@ function QuotePage({ state, content }) {
 function HighlightsPage({ state, content }) {
   return (
     <PageWrapper bg={COLORS.white}>
-      <div style={{ padding: '20px 16px 18px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: COLORS.gold, fontWeight: 700 }}>HIGHLIGHTS</div>
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 'clamp(19px, 5.2vw, 24px)',
-          margin: '4px 0 10px',
+          margin: 0,
           lineHeight: 1.15,
           color: COLORS.navy
         }}>{content.highlightsTitle}</h2>
@@ -950,8 +948,7 @@ function HighlightsPage({ state, content }) {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           borderRadius: 12,
-          position: 'relative',
-          marginBottom: 10
+          position: 'relative'
         }}>
           <div style={{
             position: 'absolute',
@@ -999,12 +996,12 @@ function ScenicPage({ state, content }) {
   const media = DESTINATION_MEDIA[dest.id] || DESTINATION_MEDIA['canary-islands'];
   return (
     <PageWrapper bg={COLORS.white}>
-      <div style={{ padding: '20px 16px 18px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: COLORS.gold, fontWeight: 700 }}>SCENIC</div>
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 'clamp(19px, 5.2vw, 24px)',
-          margin: '4px 0 10px',
+          margin: 0,
           lineHeight: 1.15,
           color: COLORS.navy
         }}>Landscapes of {dest.name}</h2>
@@ -1012,18 +1009,15 @@ function ScenicPage({ state, content }) {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: '1fr 1fr',
-          gap: 6,
-          flex: 1
+          gap: 6
         }}>
-          <div style={{ backgroundImage: 'url(' + media.landmark + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
-          <div style={{ backgroundImage: 'url(' + getPhoto(state.photos, 6) + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
-          <div style={{ backgroundImage: 'url(' + getPhoto(state.photos, 7) + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
-          <div style={{ backgroundImage: 'url(' + media.city + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
+          <div style={{ paddingTop: '85%', backgroundImage: 'url(' + media.landmark + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
+          <div style={{ paddingTop: '85%', backgroundImage: 'url(' + getPhoto(state.photos, 6) + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
+          <div style={{ paddingTop: '85%', backgroundImage: 'url(' + getPhoto(state.photos, 7) + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
+          <div style={{ paddingTop: '85%', backgroundImage: 'url(' + media.city + ')', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 10 }} />
         </div>
 
         <div style={{
-          marginTop: 10,
           fontSize: 'clamp(11px, 3vw, 12.5px)',
           lineHeight: 1.45,
           color: '#2c3a52',
@@ -1041,12 +1035,12 @@ function FoodPage({ state, content }) {
   const media = DESTINATION_MEDIA[dest.id] || DESTINATION_MEDIA['canary-islands'];
   return (
     <PageWrapper bg={COLORS.cream}>
-      <div style={{ padding: '20px 16px 18px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: COLORS.gold, fontWeight: 700 }}>CULINARY DELIGHTS</div>
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 'clamp(19px, 5.2vw, 24px)',
-          margin: '4px 0 10px',
+          margin: 0,
           lineHeight: 1.15,
           color: COLORS.navy
         }}>{content.foodTitle}</h2>
@@ -1056,16 +1050,14 @@ function FoodPage({ state, content }) {
           backgroundImage: 'url(' + media.food + ')',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          borderRadius: 12,
-          marginBottom: 10
+          borderRadius: 12
         }} />
 
-        <p style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, margin: '4px 0 10px', color: '#2c3a52' }}>
+        <p style={{ fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, margin: 0, color: '#2c3a52' }}>
           {content.foodText}
         </p>
 
         <div style={{
-          marginTop: 'auto',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: 8
@@ -1093,12 +1085,12 @@ function FoodPage({ state, content }) {
 function FamilyNotesPage({ content }) {
   return (
     <PageWrapper bg={COLORS.white}>
-      <div style={{ padding: '20px 16px 18px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: 3, color: COLORS.gold, fontWeight: 700 }}>FAMILY NOTES</div>
         <h2 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 'clamp(19px, 5.2vw, 24px)',
-          margin: '4px 0 12px',
+          margin: 0,
           lineHeight: 1.15,
           color: COLORS.navy
         }}>Tips From Our Trip</h2>
@@ -1139,7 +1131,6 @@ function FamilyNotesPage({ content }) {
         </div>
 
         <div style={{
-          marginTop: 'auto',
           background: COLORS.navy,
           color: '#fff',
           padding: '12px 14px',
@@ -1352,8 +1343,10 @@ function ScreenMagazine({ state, content, onReset }) {
   }
 
   const pageWidth = isMobile ? 'calc(100vw - 34px)' : '520px';
-  const pageHeight = isMobile ? 620 : 720;
   const pageMaxWidth = isMobile ? 430 : 520;
+  const btnPad = isMobile ? '8px 12px' : '10px 16px';
+  const btnFont = isMobile ? 11 : 12;
+  const arrowSize = isMobile ? 38 : 42;
 
   return (
     <div className="wb-fade" style={{
@@ -1364,8 +1357,8 @@ function ScreenMagazine({ state, content, onReset }) {
       <div className="wb-no-print" style={{
         display: 'flex',
         justifyContent: 'center',
-        gap: 10,
-        padding: '14px 14px 10px',
+        gap: 8,
+        padding: isMobile ? '10px 10px 6px' : '14px 14px 10px',
         flexWrap: 'wrap'
       }}>
         <button
@@ -1374,14 +1367,14 @@ function ScreenMagazine({ state, content, onReset }) {
             background: COLORS.navy,
             color: '#fff',
             border: 'none',
-            padding: '10px 16px',
+            padding: btnPad,
             borderRadius: 999,
-            fontSize: 12,
+            fontSize: btnFont,
             fontWeight: 700,
-            letterSpacing: 1
+            letterSpacing: 0.5
           }}
         >
-          ⬇ Download / Print PDF
+          ⬇ {isMobile ? 'Print PDF' : 'Download / Print PDF'}
         </button>
         <button
           onClick={onReset}
@@ -1389,11 +1382,11 @@ function ScreenMagazine({ state, content, onReset }) {
             background: COLORS.white,
             color: COLORS.navy,
             border: '1.5px solid ' + COLORS.gold,
-            padding: '10px 16px',
+            padding: btnPad,
             borderRadius: 999,
-            fontSize: 12,
+            fontSize: btnFont,
             fontWeight: 700,
-            letterSpacing: 1
+            letterSpacing: 0.5
           }}
         >
           New Magazine
@@ -1402,10 +1395,9 @@ function ScreenMagazine({ state, content, onReset }) {
 
       <div style={{
         position: 'relative',
-        margin: '8px auto 0',
+        margin: '6px auto 0',
         width: pageWidth,
-        maxWidth: pageMaxWidth,
-        height: pageHeight
+        maxWidth: pageMaxWidth
       }}>
         {pages[page]}
 
@@ -1416,11 +1408,11 @@ function ScreenMagazine({ state, content, onReset }) {
           disabled={page === 0}
           style={{
             position: 'absolute',
-            left: -10,
+            left: -18,
             top: '50%',
             transform: 'translateY(-50%)',
-            width: 42,
-            height: 42,
+            width: arrowSize,
+            height: arrowSize,
             borderRadius: '50%',
             background: page === 0 ? 'rgba(11,37,69,0.25)' : COLORS.navy,
             color: '#fff',
@@ -1439,11 +1431,11 @@ function ScreenMagazine({ state, content, onReset }) {
           disabled={page === total - 1}
           style={{
             position: 'absolute',
-            right: -10,
+            right: -18,
             top: '50%',
             transform: 'translateY(-50%)',
-            width: 42,
-            height: 42,
+            width: arrowSize,
+            height: arrowSize,
             borderRadius: '50%',
             background: page === total - 1 ? 'rgba(11,37,69,0.25)' : COLORS.navy,
             color: '#fff',
