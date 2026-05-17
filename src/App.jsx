@@ -835,7 +835,7 @@ function StoryPage({ state, content }) {
           marginBottom: 10
         }} />
 
-        <div style={{ position: 'relative', fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, color: '#2c3a52' }}>
+        <div style={{ position: 'relative', fontSize: 'clamp(11px, 3.1vw, 13px)', lineHeight: 1.45, color: '#2c3a52', overflow: 'hidden' }}>
           <span style={{
             float: 'left',
             fontFamily: "'Playfair Display', serif",
@@ -851,6 +851,7 @@ function StoryPage({ state, content }) {
 
         <div style={{
           marginTop: 'auto',
+          clear: 'both',
           background: COLORS.cream,
           borderLeft: '4px solid ' + COLORS.gold,
           padding: '8px 12px',
