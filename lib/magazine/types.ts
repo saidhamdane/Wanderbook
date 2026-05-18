@@ -57,7 +57,7 @@ export type MagazineTemplate = {
 export type PhotoAnalysis = {
   id: string;
   url: string;
-  file?: File;
+  originalName?: string;
   width: number;
   height: number;
   orientation: 'portrait' | 'landscape' | 'square';
@@ -78,6 +78,7 @@ export type MagazineDocument = {
   templateId: string;
   destination: string;
   generatedAt: string;
+  sessionId?: string;
   pages: Array<{
     pageId: string;
     layout: string;
@@ -93,12 +94,15 @@ export type LayoutProps = {
   pageIndex: number;
 };
 
+import type { UploadedPhoto } from '@/lib/upload-handler';
+
 export type GenerateMagazineInput = {
   templateId: string;
   destination: string;
   travelers: string;
   style: string;
   notes?: string;
-  userPhotos: File[];
+  userPhotos: UploadedPhoto[];
   useStockFallback: boolean;
+  sessionId?: string;
 };

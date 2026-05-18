@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import { loadMagazine } from '@/lib/magazine/store';
+import { cleanupSession } from '@/lib/upload-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
+
+const CLEANUP_DELAY_MS = 5 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   let magazineId = '';
@@ -51,6 +54,13 @@ export async function POST(req: NextRequest) {
       doc.destination.toLowerCase().replace(/[^a-z0-9]+/g, '-') +
       '.pdf';
 
+    if (doc.sessionId) {
+      const sid = doc.sessionId;
+      setTimeout(() => {
+        cleanupSession(sid).catch(() => undefined);
+      }, CLEANUP_DELAY_MS).unref?.();
+    }
+
     return new Response(Buffer.from(pdf), {
       headers: {
         'Content-Type': 'application/pdf',
@@ -59,7 +69,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: unknown) {
     if (browser) {
-      try { await browser.close(); } catch {}
+      try {
+        await browser.close();
+      } catch {}
     }
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: 'PDF generation failed', detail: message }, { status: 500 });

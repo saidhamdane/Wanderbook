@@ -2,11 +2,10 @@ import {
   GenerateMagazineInput,
   ImageSlot,
   MagazineDocument,
-  PhotoAnalysis,
   StockPhoto
 } from './types';
 import { getTemplateById } from './template-registry';
-import { analyzePhotos } from './analyze-photos';
+import { analyzeUploadedPhotos } from './analyze-photos';
 import { assignImagesToTemplate } from './assign-images';
 import { generateEditorialCopy } from './generate-copy';
 import { fetchPexelsPhotos } from './pexels';
@@ -26,7 +25,7 @@ export async function generateMagazine(
 ): Promise<MagazineDocument> {
   const template = getTemplateById(input.templateId);
 
-  const analyzed: PhotoAnalysis[] = await analyzePhotos(input.userPhotos);
+  const analyzed = analyzeUploadedPhotos(input.userPhotos);
 
   let stockPhotos: StockPhoto[] = [];
   const totalImageSlots = countImageSlots(template);
@@ -66,6 +65,7 @@ export async function generateMagazine(
     templateId: input.templateId,
     destination: input.destination,
     generatedAt: new Date().toISOString(),
+    sessionId: input.sessionId,
     pages,
     template
   };

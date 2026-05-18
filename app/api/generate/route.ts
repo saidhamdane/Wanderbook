@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { saveUploadedFiles } from '@/lib/upload-handler';
 import { generateMagazine } from '@/lib/magazine/generate-magazine';
 import { saveMagazine } from '@/lib/magazine/store';
 
@@ -23,10 +24,12 @@ export async function POST(req: NextRequest) {
     }
 
     const fileEntries = form.getAll('photos');
-    const userPhotos: File[] = [];
+    const photoFiles: File[] = [];
     for (const entry of fileEntries) {
-      if (entry instanceof File && entry.size > 0) userPhotos.push(entry);
+      if (entry instanceof File && entry.size > 0) photoFiles.push(entry);
     }
+
+    const { sessionId, photos } = await saveUploadedFiles(photoFiles);
 
     const doc = await generateMagazine({
       templateId,
@@ -34,8 +37,9 @@ export async function POST(req: NextRequest) {
       travelers,
       style,
       notes,
-      userPhotos,
-      useStockFallback
+      userPhotos: photos,
+      useStockFallback,
+      sessionId
     });
 
     await saveMagazine(doc);
