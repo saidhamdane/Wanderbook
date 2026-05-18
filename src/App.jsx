@@ -632,7 +632,7 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
   const c = template.colors;
   const photo = (destination && destination.image) || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200&q=80';
   const layout = template.coverLayout;
-  const previewHeight = isMobile ? 190 : 220;
+  const previewHeight = isMobile ? 240 : 280;
   const rot = typeof rotation === 'number' ? rotation : 0;
 
   function renderMini() {
@@ -648,29 +648,29 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
           <div style={{
             flex: 1,
             background: c.page,
-            padding: '12px 10px',
+            padding: '14px 12px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
           }}>
             <div>
-              <div style={{ fontSize: 9, letterSpacing: 2, color: c.accent, fontWeight: 700 }}>ISSUE 01</div>
-              <div style={{ width: 22, height: 2, background: c.accent, marginTop: 6 }} />
+              <div style={{ fontSize: 10, letterSpacing: 2.5, color: c.accent, fontWeight: 700 }}>ISSUE 01</div>
+              <div style={{ width: 26, height: 2, background: c.accent, marginTop: 8 }} />
             </div>
             <div>
               <div style={{
                 fontFamily: template.fonts.display,
                 fontWeight: 800,
-                fontSize: 22,
+                fontSize: 30,
                 color: c.primary,
                 lineHeight: 0.9
               }}>Travel</div>
               <div style={{
                 fontFamily: template.fonts.display,
                 fontStyle: 'italic',
-                fontSize: 11,
+                fontSize: 13,
                 color: c.muted,
-                marginTop: 4
+                marginTop: 6
               }}>Editorial</div>
             </div>
           </div>
@@ -702,9 +702,9 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
           <div style={{
             fontFamily: template.fonts.display,
             fontWeight: 700,
-            fontSize: 24,
+            fontSize: 32,
             color: c.primary,
-            marginTop: 8,
+            marginTop: 10,
             lineHeight: 1
           }}>Traveller</div>
           <div style={{
@@ -761,12 +761,12 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
           </div>
           <div style={{
             position: 'absolute',
-            bottom: 8,
-            left: 10,
+            bottom: 12,
+            left: 14,
             color: '#fff',
             fontFamily: template.fonts.display,
             fontWeight: 800,
-            fontSize: 16,
+            fontSize: 22,
             textShadow: '0 2px 8px rgba(0,0,0,0.6)'
           }}>FRAMES</div>
         </div>
@@ -800,21 +800,21 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
           }}>ACT 01</div>
           <div style={{
             position: 'absolute',
-            bottom: 12,
-            left: 12,
-            right: 12,
+            bottom: 14,
+            left: 14,
+            right: 14,
             color: '#fff'
           }}>
             <div style={{
               fontFamily: template.fonts.display,
               fontWeight: 800,
-              fontSize: 22,
+              fontSize: 30,
               lineHeight: 0.9,
               letterSpacing: -0.5
             }}>Wild</div>
-            <div style={{ width: 26, height: 2, background: c.accent, margin: '6px 0' }} />
+            <div style={{ width: 30, height: 2, background: c.accent, margin: '8px 0' }} />
             <div style={{
-              fontSize: 9,
+              fontSize: 10,
               letterSpacing: 2,
               color: c.accentLight,
               fontStyle: 'italic'
@@ -834,17 +834,17 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
         }}>
           <div style={{
             position: 'absolute',
-            top: 12,
+            top: 18,
             left: '50%',
             transform: 'translateX(-50%) rotate(-4deg)',
-            width: '68%',
+            width: '72%',
             background: '#fff',
-            padding: 6,
-            paddingBottom: 18,
-            boxShadow: '0 8px 18px rgba(0,0,0,0.18)'
+            padding: 8,
+            paddingBottom: 24,
+            boxShadow: '0 12px 22px rgba(0,0,0,0.22)'
           }}>
             <div style={{
-              height: 80,
+              height: 120,
               backgroundImage: 'url(' + photo + ')',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
@@ -852,13 +852,13 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
           </div>
           <div style={{
             position: 'absolute',
-            bottom: 10,
+            bottom: 14,
             left: 0,
             right: 0,
             textAlign: 'center',
             fontFamily: template.fonts.display,
             fontWeight: 700,
-            fontSize: 24,
+            fontSize: 34,
             color: c.primary,
             transform: 'rotate(-2deg)'
           }}>Our Trip</div>
@@ -897,22 +897,22 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
         </div>
         <div style={{
           position: 'absolute',
-          bottom: 12,
-          left: 12,
-          right: 12,
+          bottom: 14,
+          left: 14,
+          right: 14,
           color: '#fff'
         }}>
           <div style={{
             fontFamily: template.fonts.display,
             fontWeight: 800,
-            fontSize: 22,
+            fontSize: 30,
             lineHeight: 0.95
           }}>My Trip</div>
           <div style={{
-            fontSize: 10,
+            fontSize: 11,
             letterSpacing: 1.5,
             color: c.accentLight,
-            marginTop: 4,
+            marginTop: 5,
             fontStyle: 'italic'
           }}>Travel</div>
         </div>
@@ -921,8 +921,8 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
   }
 
   const shadow = selected
-    ? '0 30px 50px rgba(0,0,0,0.28), 0 12px 18px rgba(201,145,58,0.35)'
-    : '0 24px 38px rgba(0,0,0,0.22), 0 10px 14px rgba(0,0,0,0.14)';
+    ? '0 34px 60px rgba(0,0,0,0.34), 0 16px 22px rgba(201,145,58,0.42)'
+    : '0 28px 44px rgba(0,0,0,0.28), 0 12px 18px rgba(0,0,0,0.18)';
 
   return (
     <button
@@ -930,9 +930,9 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
       style={{
         textAlign: 'left',
         padding: 10,
-        background: '#fff',
+        background: '#FFFCF6',
         border: selected ? '3px solid #C9913A' : '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 14,
+        borderRadius: 10,
         boxShadow: shadow,
         transition: 'transform 0.25s ease, box-shadow 0.25s ease',
         transform: 'rotate(' + rot + 'deg)',
@@ -941,7 +941,7 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
         flexDirection: 'column',
         gap: 10,
         width: '100%',
-        maxWidth: 430,
+        maxWidth: 360,
         marginLeft: 'auto',
         marginRight: 'auto'
       }}
@@ -949,11 +949,12 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
       <div style={{
         width: '100%',
         height: previewHeight,
-        maxHeight: 220,
+        maxHeight: 280,
         overflow: 'hidden',
-        borderRadius: 8,
+        borderRadius: 6,
         position: 'relative',
-        background: c.bg
+        background: c.bg,
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.6)'
       }}>
         {renderMini()}
       </div>
@@ -1014,23 +1015,41 @@ function ScreenTemplate({ state, setState, onNext, onBack }) {
 
       <div className="wb-beach" style={{
         position: 'relative',
-        padding: isMobile ? '34px 14px 38px' : '40px 28px 44px',
+        padding: isMobile ? '60px 8px 36px' : '70px 24px 44px',
         borderRadius: 28,
-        background: 'linear-gradient(180deg, #8FCDE6 0%, #B8DCE6 20%, #F2E0B5 52%, #E5C68C 100%)',
-        boxShadow: 'inset 0 0 80px rgba(0,0,0,0.06)',
+        background: 'linear-gradient(180deg, #F6E6BD 0%, #EFD9A4 35%, #E5C68C 70%, #DBB97A 100%)',
+        boxShadow: 'inset 0 0 80px rgba(120,80,30,0.08)',
         overflow: 'hidden'
       }}>
+        <div className="wb-beach-sea" style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: 48,
+          background: 'linear-gradient(180deg, #6FB8D6 0%, #A6D6E5 65%, rgba(166,214,229,0) 100%)',
+          pointerEvents: 'none'
+        }} />
+        <div className="wb-beach-waves" style={{
+          position: 'absolute',
+          top: 36,
+          left: 0,
+          right: 0,
+          height: 16,
+          background:
+            'repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 6px, rgba(255,255,255,0) 6px 18px)',
+          opacity: 0.6,
+          pointerEvents: 'none'
+        }} />
         <div className="wb-beach-shine" style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.55), transparent 55%), radial-gradient(ellipse at 80% 95%, rgba(255,255,255,0.35), transparent 60%)',
+          background: 'radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.45), transparent 60%), radial-gradient(ellipse at 80% 95%, rgba(255,255,255,0.25), transparent 60%)',
           pointerEvents: 'none'
         }} />
         <div style={{
           position: 'relative',
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: isMobile ? 30 : 36,
+          gap: isMobile ? 26 : 32,
           justifyItems: 'center'
         }}>
           {TEMPLATES.map((t, i) => (
