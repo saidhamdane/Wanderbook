@@ -630,7 +630,7 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
   const c = template.colors;
   const photo = (destination && destination.image) || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200&q=80';
   const layout = template.coverLayout;
-  const previewHeight = isMobile ? 220 : 260;
+  const previewHeight = isMobile ? 190 : 220;
 
   function renderMini() {
     if (layout === 'split') {
@@ -645,29 +645,29 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
           <div style={{
             flex: 1,
             background: c.page,
-            padding: '14px 12px',
+            padding: '12px 10px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
           }}>
             <div>
-              <div style={{ fontSize: 9, letterSpacing: 2.5, color: c.accent, fontWeight: 700 }}>ISSUE 01</div>
-              <div style={{ width: 26, height: 2, background: c.accent, marginTop: 8 }} />
+              <div style={{ fontSize: 9, letterSpacing: 2, color: c.accent, fontWeight: 700 }}>ISSUE 01</div>
+              <div style={{ width: 22, height: 2, background: c.accent, marginTop: 6 }} />
             </div>
             <div>
               <div style={{
                 fontFamily: template.fonts.display,
                 fontWeight: 800,
-                fontSize: 28,
+                fontSize: 22,
                 color: c.primary,
                 lineHeight: 0.9
               }}>Travel</div>
               <div style={{
                 fontFamily: template.fonts.display,
                 fontStyle: 'italic',
-                fontSize: 12,
+                fontSize: 11,
                 color: c.muted,
-                marginTop: 6
+                marginTop: 4
               }}>Editorial</div>
             </div>
           </div>
@@ -680,7 +680,7 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
         <div style={{
           background: c.page,
           height: '100%',
-          padding: '16px 14px',
+          padding: '12px 12px',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -688,31 +688,32 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
             display: 'flex',
             justifyContent: 'space-between',
             fontSize: 9,
-            letterSpacing: 2.5,
+            letterSpacing: 2,
             color: c.muted,
             fontWeight: 700
           }}>
-            <span>WANDERBOOK</span>
             <span>NO. 01</span>
+            <span>WANDERBOOK</span>
           </div>
-          <div style={{ height: 1, background: '#dadada', marginTop: 8 }} />
+          <div style={{ height: 1, background: '#dadada', marginTop: 6 }} />
           <div style={{
             fontFamily: template.fonts.display,
             fontWeight: 700,
-            fontSize: 30,
+            fontSize: 24,
             color: c.primary,
-            marginTop: 12,
+            marginTop: 8,
             lineHeight: 1
           }}>Traveller</div>
           <div style={{
-            marginTop: 12,
-            height: 70,
+            marginTop: 8,
+            flex: 1,
             backgroundImage: 'url(' + photo + ')',
             backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundPosition: 'center',
+            minHeight: 60
           }} />
           <div style={{
-            marginTop: 'auto',
+            marginTop: 6,
             fontSize: 9,
             letterSpacing: 2,
             color: c.muted
@@ -757,12 +758,12 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
           </div>
           <div style={{
             position: 'absolute',
-            bottom: 10,
-            left: 12,
+            bottom: 8,
+            left: 10,
             color: '#fff',
             fontFamily: template.fonts.display,
             fontWeight: 800,
-            fontSize: 20,
+            fontSize: 16,
             textShadow: '0 2px 8px rgba(0,0,0,0.6)'
           }}>FRAMES</div>
         </div>
@@ -796,19 +797,19 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
           }}>ACT 01</div>
           <div style={{
             position: 'absolute',
-            bottom: 14,
-            left: 14,
-            right: 14,
+            bottom: 12,
+            left: 12,
+            right: 12,
             color: '#fff'
           }}>
             <div style={{
               fontFamily: template.fonts.display,
               fontWeight: 800,
-              fontSize: 28,
+              fontSize: 22,
               lineHeight: 0.9,
               letterSpacing: -0.5
             }}>Wild</div>
-            <div style={{ width: 30, height: 2, background: c.accent, margin: '8px 0' }} />
+            <div style={{ width: 26, height: 2, background: c.accent, margin: '6px 0' }} />
             <div style={{
               fontSize: 9,
               letterSpacing: 2,
@@ -830,17 +831,17 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
         }}>
           <div style={{
             position: 'absolute',
-            top: 16,
+            top: 12,
             left: '50%',
             transform: 'translateX(-50%) rotate(-4deg)',
-            width: '72%',
+            width: '68%',
             background: '#fff',
-            padding: 8,
-            paddingBottom: 26,
-            boxShadow: '0 10px 24px rgba(0,0,0,0.2)'
+            padding: 6,
+            paddingBottom: 18,
+            boxShadow: '0 8px 18px rgba(0,0,0,0.18)'
           }}>
             <div style={{
-              height: 110,
+              height: 80,
               backgroundImage: 'url(' + photo + ')',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
@@ -848,13 +849,13 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
           </div>
           <div style={{
             position: 'absolute',
-            bottom: 14,
+            bottom: 10,
             left: 0,
             right: 0,
             textAlign: 'center',
             fontFamily: template.fonts.display,
             fontWeight: 700,
-            fontSize: 30,
+            fontSize: 24,
             color: c.primary,
             transform: 'rotate(-2deg)'
           }}>Our Trip</div>
@@ -893,15 +894,15 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
         </div>
         <div style={{
           position: 'absolute',
-          bottom: 14,
-          left: 14,
-          right: 14,
+          bottom: 12,
+          left: 12,
+          right: 12,
           color: '#fff'
         }}>
           <div style={{
             fontFamily: template.fonts.display,
             fontWeight: 800,
-            fontSize: 26,
+            fontSize: 22,
             lineHeight: 0.95
           }}>My Trip</div>
           <div style={{
@@ -940,7 +941,7 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
       <div style={{
         width: '100%',
         height: previewHeight,
-        maxHeight: 280,
+        maxHeight: 220,
         overflow: 'hidden',
         borderRadius: 20,
         position: 'relative',
