@@ -1,5 +1,10 @@
 node_modules
+.next
+out
 dist
-.vite
-*.log
+.env*.local
 .DS_Store
+*.log
+.vercel
+next-env.d.ts
+tmp/
