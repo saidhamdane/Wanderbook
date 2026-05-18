@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext, createContext } from 'react';
+import HTMLFlipBook from 'react-pageflip';
 
 const STORAGE_KEY = 'wanderbook.state.v2';
+const FlatContext = createContext(false);
 
 const DESTINATIONS = [
   {
@@ -625,12 +627,13 @@ function ScreenDestination({ state, setState, onNext }) {
   );
 }
 
-function TemplatePreviewCard({ template, destination, selected, onSelect }) {
+function TemplatePreviewCard({ template, destination, selected, onSelect, rotation }) {
   const isMobile = useIsMobile();
   const c = template.colors;
   const photo = (destination && destination.image) || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200&q=80';
   const layout = template.coverLayout;
   const previewHeight = isMobile ? 190 : 220;
+  const rot = typeof rotation === 'number' ? rotation : 0;
 
   function renderMini() {
     if (layout === 'split') {
@@ -917,25 +920,30 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
     );
   }
 
+  const shadow = selected
+    ? '0 30px 50px rgba(0,0,0,0.28), 0 12px 18px rgba(201,145,58,0.35)'
+    : '0 24px 38px rgba(0,0,0,0.22), 0 10px 14px rgba(0,0,0,0.14)';
+
   return (
     <button
       onClick={() => onSelect(template)}
       style={{
         textAlign: 'left',
-        padding: 14,
+        padding: 10,
         background: '#fff',
-        border: selected ? '3px solid #C9913A' : '3px solid transparent',
-        borderRadius: 26,
-        boxShadow: selected ? '0 12px 28px rgba(201,145,58,0.35)' : '0 4px 14px rgba(11,37,69,0.08)',
-        transition: 'all 0.25s ease',
+        border: selected ? '3px solid #C9913A' : '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 14,
+        boxShadow: shadow,
+        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+        transform: 'rotate(' + rot + 'deg)',
+        transformOrigin: 'center center',
         display: 'flex',
         flexDirection: 'column',
-        gap: 12,
+        gap: 10,
         width: '100%',
         maxWidth: 430,
         marginLeft: 'auto',
-        marginRight: 'auto',
-        marginBottom: 0
+        marginRight: 'auto'
       }}
     >
       <div style={{
@@ -943,37 +951,37 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
         height: previewHeight,
         maxHeight: 220,
         overflow: 'hidden',
-        borderRadius: 20,
+        borderRadius: 8,
         position: 'relative',
         background: c.bg
       }}>
         {renderMini()}
       </div>
-      <div style={{ padding: '0 2px 2px' }}>
+      <div style={{ padding: '2px 4px 2px' }}>
         <div style={{
           fontSize: 9,
           letterSpacing: 2.5,
           color: '#C9913A',
           fontWeight: 700
-        }}>MAGAZINE TEMPLATE</div>
+        }}>MAGAZINE</div>
         <div style={{
           fontFamily: "'Playfair Display', serif",
           fontWeight: 700,
-          fontSize: 18,
+          fontSize: 17,
           color: '#0B2545',
-          marginTop: 3,
+          marginTop: 2,
           lineHeight: 1.2
         }}>{template.name}</div>
         <div style={{
-          fontSize: 12,
+          fontSize: 11,
           color: '#5a6678',
-          marginTop: 4,
-          lineHeight: 1.45
+          marginTop: 3,
+          lineHeight: 1.4
         }}>{template.description}</div>
         <div style={{
-          marginTop: 12,
+          marginTop: 10,
           display: 'inline-block',
-          padding: '8px 16px',
+          padding: '7px 14px',
           borderRadius: 999,
           background: selected ? '#C9913A' : '#0B2545',
           color: '#fff',
@@ -990,34 +998,52 @@ function TemplatePreviewCard({ template, destination, selected, onSelect }) {
 
 function ScreenTemplate({ state, setState, onNext, onBack }) {
   const isMobile = useIsMobile();
+  const rotations = [-3, 2.5, -2, 3, -2.5, 2];
   return (
     <div className="wb-fade" style={{ padding: '14px 16px 40px', maxWidth: 1100, margin: '0 auto' }}>
       <Stepper step={1} />
-      <div style={{ textAlign: 'center', margin: '14px 0 16px' }}>
+      <div style={{ textAlign: 'center', margin: '14px 0 14px' }}>
         <div style={{ fontSize: 11, letterSpacing: 3, color: '#C9913A', fontWeight: 700 }}>STEP 2 OF 4</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", margin: '6px 0 4px', fontSize: 'clamp(24px, 6vw, 34px)' }}>
-          Choose your magazine template
+          Choose your magazine style
         </h1>
         <p style={{ margin: 0, color: '#54607a', fontSize: 13 }}>
-          Six original layouts inspired by premium travel magazines.
+          Pick a travel magazine resting on the beach.
         </p>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: isMobile ? 18 : 18,
-        justifyItems: 'center'
+      <div className="wb-beach" style={{
+        position: 'relative',
+        padding: isMobile ? '34px 14px 38px' : '40px 28px 44px',
+        borderRadius: 28,
+        background: 'linear-gradient(180deg, #8FCDE6 0%, #B8DCE6 20%, #F2E0B5 52%, #E5C68C 100%)',
+        boxShadow: 'inset 0 0 80px rgba(0,0,0,0.06)',
+        overflow: 'hidden'
       }}>
-        {TEMPLATES.map((t) => (
-          <TemplatePreviewCard
-            key={t.id}
-            template={t}
-            destination={state.destination}
-            selected={state.templateId === t.id}
-            onSelect={(tpl) => setState({ ...state, templateId: tpl.id })}
-          />
-        ))}
+        <div className="wb-beach-shine" style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.55), transparent 55%), radial-gradient(ellipse at 80% 95%, rgba(255,255,255,0.35), transparent 60%)',
+          pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'relative',
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: isMobile ? 30 : 36,
+          justifyItems: 'center'
+        }}>
+          {TEMPLATES.map((t, i) => (
+            <TemplatePreviewCard
+              key={t.id}
+              template={t}
+              destination={state.destination}
+              selected={state.templateId === t.id}
+              onSelect={(tpl) => setState({ ...state, templateId: tpl.id })}
+              rotation={rotations[i % rotations.length]}
+            />
+          ))}
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
@@ -1286,15 +1312,17 @@ function ScreenGenerating({ state, onDone }) {
 
 function PageWrapper({ children, bg, template, fullBleed }) {
   const isMobile = useIsMobile();
+  const flat = useContext(FlatContext);
   return (
     <div className="wb-page" style={{
       position: 'relative',
       width: '100%',
-      minHeight: isMobile ? 560 : 720,
+      height: flat ? '100%' : 'auto',
+      minHeight: flat ? undefined : (isMobile ? 560 : 720),
       background: bg || (template && template.colors.page) || '#fff',
-      borderRadius: 24,
+      borderRadius: flat ? 0 : 24,
       overflow: 'hidden',
-      boxShadow: '0 18px 50px rgba(11,37,69,0.25)',
+      boxShadow: flat ? 'none' : '0 18px 50px rgba(11,37,69,0.25)',
       color: template ? template.colors.text : '#0B2545',
       fontFamily: template ? template.fonts.body : "'Montserrat', sans-serif"
     }}>
@@ -2268,8 +2296,111 @@ function BackCoverPage({ state, template, content, editMode, ctx }) {
   );
 }
 
+function MagazineFlipbook({ pages, editMode }) {
+  const flipRef = useRef(null);
+  const [dims, setDims] = useState(() => computeDims());
+
+  function computeDims() {
+    if (typeof window === 'undefined') return { width: 380, height: 560, isMobile: true };
+    const w = window.innerWidth;
+    const isMobile = w < 760;
+    const width = isMobile ? Math.min(Math.max(w - 32, 280), 430) : 460;
+    const height = isMobile ? Math.round(width * 1.55) : 660;
+    return { width, height, isMobile };
+  }
+
+  useEffect(() => {
+    function onResize() { setDims(computeDims()); }
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  function flipPrev() {
+    if (flipRef.current && flipRef.current.pageFlip()) {
+      flipRef.current.pageFlip().flipPrev();
+    }
+  }
+  function flipNext() {
+    if (flipRef.current && flipRef.current.pageFlip()) {
+      flipRef.current.pageFlip().flipNext();
+    }
+  }
+
+  const arrowSize = dims.isMobile ? 38 : 42;
+  const arrowBase = {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: arrowSize,
+    height: arrowSize,
+    borderRadius: '50%',
+    background: '#0B2545',
+    color: '#fff',
+    border: '2px solid #fff',
+    fontSize: 18,
+    fontWeight: 800,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+    zIndex: 20,
+    cursor: 'pointer'
+  };
+
+  return (
+    <div className="wb-flipbook-stage wb-no-print" style={{
+      position: 'relative',
+      margin: '6px auto 0',
+      width: dims.width,
+      maxWidth: 430
+    }}>
+      <FlatContext.Provider value={true}>
+        <HTMLFlipBook
+          width={dims.width}
+          height={dims.height}
+          size="fixed"
+          minWidth={280}
+          maxWidth={500}
+          minHeight={420}
+          maxHeight={760}
+          showCover={false}
+          drawShadow={true}
+          flippingTime={650}
+          mobileScrollSupport={true}
+          useMouseEvents={!editMode}
+          swipeDistance={28}
+          usePortrait={true}
+          maxShadowOpacity={0.5}
+          ref={flipRef}
+          className="wb-flipbook"
+          style={{ background: 'transparent' }}
+        >
+          {pages.map((p, i) => (
+            <div
+              key={i}
+              className="wb-flip-page"
+              style={{ background: '#fff', overflow: 'hidden' }}
+            >
+              {p}
+            </div>
+          ))}
+        </HTMLFlipBook>
+      </FlatContext.Provider>
+
+      <button
+        aria-label="Previous page"
+        className="wb-arrow wb-no-print"
+        onClick={flipPrev}
+        style={Object.assign({}, arrowBase, { left: -14 })}
+      >‹</button>
+      <button
+        aria-label="Next page"
+        className="wb-arrow wb-no-print"
+        onClick={flipNext}
+        style={Object.assign({}, arrowBase, { right: -14 })}
+      >›</button>
+    </div>
+  );
+}
+
 function ScreenMagazine({ state, setState, onReset, editMode }) {
-  const [page, setPage] = useState(0);
   const isMobile = useIsMobile();
   const template = TEMPLATES.find((t) => t.id === state.templateId) || TEMPLATES[0];
   const content = state.content;
@@ -2301,12 +2432,7 @@ function ScreenMagazine({ state, setState, onReset, editMode }) {
     <BackCoverPage state={state} template={template} content={content} editMode={editMode} ctx={ctx} />
   ];
 
-  function go(d) { setPage((p) => Math.max(0, Math.min(pages.length - 1, p + d))); }
   function handlePrint() { window.print(); }
-
-  const pageWidth = isMobile ? 'calc(100vw - 32px)' : '520px';
-  const pageMaxWidth = isMobile ? 430 : 520;
-  const arrowSize = isMobile ? 38 : 42;
 
   return (
     <div className="wb-fade" style={{
@@ -2369,61 +2495,7 @@ function ScreenMagazine({ state, setState, onReset, editMode }) {
         </div>
       )}
 
-      <div className="wb-page-stage wb-no-print-extras" style={{
-        position: 'relative',
-        margin: '6px auto 0',
-        width: pageWidth,
-        maxWidth: pageMaxWidth
-      }}>
-        {pages[page]}
-
-        <button
-          aria-label="Previous page"
-          className="wb-arrow wb-no-print"
-          onClick={() => go(-1)}
-          disabled={page === 0}
-          style={{
-            position: 'absolute',
-            left: -14,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: arrowSize,
-            height: arrowSize,
-            borderRadius: '50%',
-            background: page === 0 ? 'rgba(11,37,69,0.25)' : '#0B2545',
-            color: '#fff',
-            border: '2px solid #fff',
-            fontSize: 18,
-            fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-            zIndex: 10,
-            cursor: page === 0 ? 'default' : 'pointer'
-          }}
-        >‹</button>
-        <button
-          aria-label="Next page"
-          className="wb-arrow wb-no-print"
-          onClick={() => go(1)}
-          disabled={page === pages.length - 1}
-          style={{
-            position: 'absolute',
-            right: -14,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: arrowSize,
-            height: arrowSize,
-            borderRadius: '50%',
-            background: page === pages.length - 1 ? 'rgba(11,37,69,0.25)' : '#0B2545',
-            color: '#fff',
-            border: '2px solid #fff',
-            fontSize: 18,
-            fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-            zIndex: 10,
-            cursor: page === pages.length - 1 ? 'default' : 'pointer'
-          }}
-        >›</button>
-      </div>
+      <MagazineFlipbook pages={pages} editMode={editMode} />
 
       <div className="wb-no-print" style={{
         textAlign: 'center',

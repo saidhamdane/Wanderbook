@@ -16,7 +16,8 @@
     "express": "^4.21.2",
     "openai": "^4.77.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-pageflip": "^2.0.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
