@@ -627,258 +627,176 @@ function ScreenDestination({ state, setState, onNext }) {
   );
 }
 
-function TemplatePreviewCard({ template, destination, selected, onSelect, rotation }) {
-  const isMobile = useIsMobile();
-  const c = template.colors;
-  const photo = (destination && destination.image) || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200&q=80';
-  const layout = template.coverLayout;
-  const previewHeight = isMobile ? 240 : 280;
-  const rot = typeof rotation === 'number' ? rotation : 0;
 
-  function renderMini() {
-    if (layout === 'split') {
-      return (
-        <div style={{ display: 'flex', height: '100%' }}>
-          <div style={{
-            flex: '0 0 55%',
-            backgroundImage: 'url(' + photo + ')',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }} />
-          <div style={{
-            flex: 1,
-            background: c.page,
-            padding: '14px 12px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}>
-            <div>
-              <div style={{ fontSize: 10, letterSpacing: 2.5, color: c.accent, fontWeight: 700 }}>ISSUE 01</div>
-              <div style={{ width: 26, height: 2, background: c.accent, marginTop: 8 }} />
-            </div>
-            <div>
-              <div style={{
-                fontFamily: template.fonts.display,
-                fontWeight: 800,
-                fontSize: 30,
-                color: c.primary,
-                lineHeight: 0.9
-              }}>Travel</div>
-              <div style={{
-                fontFamily: template.fonts.display,
-                fontStyle: 'italic',
-                fontSize: 13,
-                color: c.muted,
-                marginTop: 6
-              }}>Editorial</div>
-            </div>
+function renderTemplateCover(template, photo) {
+  const c = template.colors;
+  const layout = template.coverLayout;
+
+  if (layout === 'split') {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%' }}>
+        <div style={{
+          flex: '0 0 55%',
+          backgroundImage: 'url(' + photo + ')',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }} />
+        <div style={{
+          flex: 1,
+          background: c.page,
+          padding: '14px 12px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: 2.5, color: c.accent, fontWeight: 700 }}>ISSUE 01</div>
+            <div style={{ width: 22, height: 2, background: c.accent, marginTop: 6 }} />
+          </div>
+          <div>
+            <div style={{
+              fontFamily: template.fonts.display,
+              fontWeight: 800,
+              fontSize: 36,
+              color: c.primary,
+              lineHeight: 0.85,
+              letterSpacing: -1
+            }}>TRAVEL</div>
+            <div style={{
+              fontFamily: template.fonts.display,
+              fontStyle: 'italic',
+              fontSize: 12,
+              color: c.muted,
+              marginTop: 6
+            }}>Editorial</div>
+            <div style={{ marginTop: 10, fontSize: 8, letterSpacing: 1.5, color: c.muted }}>NO. 01 · 2026</div>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (layout === 'minimal') {
-      return (
+  if (layout === 'minimal') {
+    return (
+      <div style={{
+        background: c.page,
+        width: '100%',
+        height: '100%',
+        padding: '14px 12px',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         <div style={{
-          background: c.page,
-          height: '100%',
-          padding: '12px 12px',
           display: 'flex',
-          flexDirection: 'column'
+          justifyContent: 'space-between',
+          fontSize: 9,
+          letterSpacing: 2.5,
+          color: c.muted,
+          fontWeight: 700
+        }}>
+          <span>NO. 01</span>
+          <span>WANDERBOOK</span>
+        </div>
+        <div style={{ height: 1, background: '#dadada', marginTop: 8 }} />
+        <div style={{
+          fontFamily: template.fonts.display,
+          fontWeight: 700,
+          fontSize: 32,
+          color: c.primary,
+          marginTop: 12,
+          lineHeight: 1
+        }}>Traveller</div>
+        <div style={{ fontSize: 10, fontStyle: 'italic', color: c.muted, marginTop: 4 }}>
+          The slow journey
+        </div>
+        <div style={{
+          marginTop: 10,
+          flex: 1,
+          backgroundImage: 'url(' + photo + ')',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: 60
+        }} />
+        <div style={{
+          marginTop: 8,
+          fontSize: 9,
+          letterSpacing: 2,
+          color: c.muted
+        }}>ISLAND ISSUE · 2026</div>
+      </div>
+    );
+  }
+
+  if (layout === 'photo-grid') {
+    return (
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: '#111' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gridTemplateRows: '1fr 1fr',
+          gap: 3,
+          height: '100%'
         }}>
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: 9,
-            letterSpacing: 2,
-            color: c.muted,
-            fontWeight: 700
-          }}>
-            <span>NO. 01</span>
-            <span>WANDERBOOK</span>
-          </div>
-          <div style={{ height: 1, background: '#dadada', marginTop: 6 }} />
-          <div style={{
-            fontFamily: template.fonts.display,
-            fontWeight: 700,
-            fontSize: 32,
-            color: c.primary,
-            marginTop: 10,
-            lineHeight: 1
-          }}>Traveller</div>
-          <div style={{
-            marginTop: 8,
-            flex: 1,
             backgroundImage: 'url(' + photo + ')',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            minHeight: 60
+            backgroundPosition: 'left top'
           }} />
           <div style={{
-            marginTop: 6,
-            fontSize: 9,
-            letterSpacing: 2,
-            color: c.muted
-          }}>ISLAND ISSUE</div>
+            backgroundImage: 'url(' + photo + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: 'right top',
+            filter: 'hue-rotate(15deg) brightness(0.85)'
+          }} />
+          <div style={{
+            backgroundImage: 'url(' + photo + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: 'left bottom',
+            filter: 'brightness(0.65) contrast(1.1)'
+          }} />
+          <div style={{
+            backgroundImage: 'url(' + photo + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: 'right bottom',
+            filter: 'sepia(0.4) brightness(0.95)'
+          }} />
         </div>
-      );
-    }
-
-    if (layout === 'photo-grid') {
-      return (
-        <div style={{ height: '100%', position: 'relative', background: '#111' }}>
+        <div style={{
+          position: 'absolute',
+          bottom: 12,
+          left: 12,
+          right: 12,
+          color: '#fff'
+        }}>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gridTemplateRows: '1fr 1fr',
-            gap: 3,
-            height: '100%'
-          }}>
-            <div style={{
-              backgroundImage: 'url(' + photo + ')',
-              backgroundSize: 'cover',
-              backgroundPosition: 'left top'
-            }} />
-            <div style={{
-              backgroundImage: 'url(' + photo + ')',
-              backgroundSize: 'cover',
-              backgroundPosition: 'right top',
-              filter: 'hue-rotate(15deg) brightness(0.85)'
-            }} />
-            <div style={{
-              backgroundImage: 'url(' + photo + ')',
-              backgroundSize: 'cover',
-              backgroundPosition: 'left bottom',
-              filter: 'brightness(0.65) contrast(1.1)'
-            }} />
-            <div style={{
-              backgroundImage: 'url(' + photo + ')',
-              backgroundSize: 'cover',
-              backgroundPosition: 'right bottom',
-              filter: 'sepia(0.4) brightness(0.95)'
-            }} />
-          </div>
-          <div style={{
-            position: 'absolute',
-            bottom: 12,
-            left: 14,
-            color: '#fff',
             fontFamily: template.fonts.display,
             fontWeight: 800,
             fontSize: 22,
             textShadow: '0 2px 8px rgba(0,0,0,0.6)'
           }}>FRAMES</div>
-        </div>
-      );
-    }
-
-    if (layout === 'cinematic') {
-      return (
-        <div style={{ height: '100%', position: 'relative', background: c.bg }}>
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: 'url(' + photo + ')',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'brightness(0.55) saturate(0.85)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(10,14,26,0.15) 0%, rgba(10,14,26,0.9) 100%)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: 12,
-            left: 14,
-            fontSize: 9,
-            letterSpacing: 2.5,
-            color: c.accentLight,
-            fontWeight: 700
-          }}>ACT 01</div>
-          <div style={{
-            position: 'absolute',
-            bottom: 14,
-            left: 14,
-            right: 14,
-            color: '#fff'
-          }}>
-            <div style={{
-              fontFamily: template.fonts.display,
-              fontWeight: 800,
-              fontSize: 30,
-              lineHeight: 0.9,
-              letterSpacing: -0.5
-            }}>Wild</div>
-            <div style={{ width: 30, height: 2, background: c.accent, margin: '8px 0' }} />
-            <div style={{
-              fontSize: 10,
-              letterSpacing: 2,
-              color: c.accentLight,
-              fontStyle: 'italic'
-            }}>ADVENTURE</div>
+          <div style={{ fontSize: 9, letterSpacing: 2, color: c.accentLight, marginTop: 3, textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}>
+            VOLUME 01
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    if (layout === 'polaroid') {
-      return (
-        <div style={{
-          height: '100%',
-          background: c.bg,
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 18,
-            left: '50%',
-            transform: 'translateX(-50%) rotate(-4deg)',
-            width: '72%',
-            background: '#fff',
-            padding: 8,
-            paddingBottom: 24,
-            boxShadow: '0 12px 22px rgba(0,0,0,0.22)'
-          }}>
-            <div style={{
-              height: 120,
-              backgroundImage: 'url(' + photo + ')',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }} />
-          </div>
-          <div style={{
-            position: 'absolute',
-            bottom: 14,
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-            fontFamily: template.fonts.display,
-            fontWeight: 700,
-            fontSize: 34,
-            color: c.primary,
-            transform: 'rotate(-2deg)'
-          }}>Our Trip</div>
-        </div>
-      );
-    }
-
-    // overlay-bottom (luxuryTraveler default)
+  if (layout === 'cinematic') {
     return (
-      <div style={{
-        height: '100%',
-        position: 'relative',
-        backgroundImage: 'url(' + photo + ')',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}>
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: c.bg }}>
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(11,37,69,0.35) 0%, rgba(11,37,69,0.05) 35%, rgba(11,37,69,0.85) 100%)'
+          backgroundImage: 'url(' + photo + ')',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.55) saturate(0.85)'
+        }} />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, rgba(10,14,26,0.15) 0%, rgba(10,14,26,0.92) 100%)'
         }} />
         <div style={{
           position: 'absolute',
@@ -887,84 +805,389 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
           right: 14,
           display: 'flex',
           justifyContent: 'space-between',
-          color: c.accentLight,
           fontSize: 9,
-          letterSpacing: 2,
+          letterSpacing: 2.5,
+          color: c.accentLight,
           fontWeight: 700
         }}>
-          <span>VOL. 01</span>
-          <span>MGZ</span>
+          <span>ACT 01</span>
+          <span>2026</span>
         </div>
-        <div style={{
-          position: 'absolute',
-          bottom: 14,
-          left: 14,
-          right: 14,
-          color: '#fff'
-        }}>
+        <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, color: '#fff' }}>
           <div style={{
             fontFamily: template.fonts.display,
             fontWeight: 800,
-            fontSize: 30,
-            lineHeight: 0.95
-          }}>My Trip</div>
+            fontSize: 32,
+            lineHeight: 0.9,
+            letterSpacing: -0.5
+          }}>Wild</div>
+          <div style={{ width: 30, height: 2, background: c.accent, margin: '8px 0' }} />
           <div style={{
-            fontSize: 11,
-            letterSpacing: 1.5,
+            fontSize: 10,
+            letterSpacing: 2,
             color: c.accentLight,
-            marginTop: 5,
             fontStyle: 'italic'
-          }}>Travel</div>
+          }}>ADVENTURE EDITION</div>
         </div>
       </div>
     );
   }
 
-  const shadow = selected
-    ? '0 34px 60px rgba(0,0,0,0.34), 0 16px 22px rgba(201,145,58,0.42)'
-    : '0 28px 44px rgba(0,0,0,0.28), 0 12px 18px rgba(0,0,0,0.18)';
-
-  return (
-    <button
-      onClick={() => onSelect(template)}
-      style={{
-        textAlign: 'left',
-        padding: 10,
-        background: '#FFFCF6',
-        border: selected ? '3px solid #C9913A' : '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 10,
-        boxShadow: shadow,
-        transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-        transform: 'rotate(' + rot + 'deg)',
-        transformOrigin: 'center center',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-        width: '100%',
-        maxWidth: 360,
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      }}
-    >
+  if (layout === 'polaroid') {
+    return (
       <div style={{
         width: '100%',
-        height: previewHeight,
-        maxHeight: 280,
-        overflow: 'hidden',
-        borderRadius: 6,
-        position: 'relative',
+        height: '100%',
         background: c.bg,
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.6)'
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        {renderMini()}
+        <div style={{
+          position: 'absolute',
+          top: 16,
+          left: '50%',
+          transform: 'translateX(-50%) rotate(-4deg)',
+          width: '70%',
+          background: '#fff',
+          padding: 8,
+          paddingBottom: 22,
+          boxShadow: '0 12px 22px rgba(0,0,0,0.22)'
+        }}>
+          <div style={{
+            height: 110,
+            backgroundImage: 'url(' + photo + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }} />
+        </div>
+        <div style={{
+          position: 'absolute',
+          bottom: 14,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          fontFamily: template.fonts.display,
+          fontWeight: 700,
+          fontSize: 32,
+          color: c.primary,
+          transform: 'rotate(-2deg)'
+        }}>Our Trip</div>
+        <div style={{
+          position: 'absolute',
+          bottom: 6,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          fontSize: 9,
+          letterSpacing: 2,
+          color: c.muted
+        }}>MEMORY · 01</div>
       </div>
-      <div style={{ padding: '2px 4px 2px' }}>
+    );
+  }
+
+  // overlay-bottom (default luxuryTraveler)
+  return (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      position: 'relative',
+      backgroundImage: 'url(' + photo + ')',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(180deg, rgba(11,37,69,0.35) 0%, rgba(11,37,69,0.05) 35%, rgba(11,37,69,0.85) 100%)'
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: 12,
+        left: 14,
+        right: 14,
+        display: 'flex',
+        justifyContent: 'space-between',
+        color: c.accentLight,
+        fontSize: 9,
+        letterSpacing: 2,
+        fontWeight: 700
+      }}>
+        <span>VOL. 01</span>
+        <span>2026</span>
+      </div>
+      <div style={{
+        position: 'absolute',
+        bottom: 14,
+        left: 14,
+        right: 14,
+        color: '#fff'
+      }}>
+        <div style={{
+          fontFamily: template.fonts.display,
+          fontStyle: 'italic',
+          fontSize: 14,
+          lineHeight: 1
+        }}>My Trip</div>
+        <div style={{
+          fontFamily: template.fonts.display,
+          fontWeight: 800,
+          fontSize: 36,
+          lineHeight: 0.85,
+          marginTop: 4
+        }}>Travel</div>
+        <div style={{
+          display: 'inline-block',
+          marginTop: 8,
+          padding: '3px 8px',
+          background: c.accent,
+          color: c.primary,
+          fontSize: 8,
+          fontWeight: 800,
+          letterSpacing: 2.5,
+          borderRadius: 3
+        }}>MGZ</div>
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          display: 'flex',
+          gap: 1
+        }}>
+          {[2,1,2,1,3,1,1,2,1,3,1,2,1].map((w, i) => (
+            <div key={i} style={{ width: w, height: 14, background: '#fff', opacity: 0.85 }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniContents({ template }) {
+  const c = template.colors;
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: c.page,
+      padding: 6,
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <div style={{ height: 2, width: 18, background: c.accent, marginBottom: 4 }} />
+      <div style={{
+        fontFamily: template.fonts.display,
+        fontWeight: 700,
+        fontSize: 9,
+        color: c.primary,
+        lineHeight: 1,
+        marginBottom: 4
+      }}>Contents</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ height: 2, background: c.text, opacity: 0.55, width: '60%' }} />
+          <div style={{ height: 2, background: c.accent, width: 8 }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ height: 2, background: c.text, opacity: 0.55, width: '70%' }} />
+          <div style={{ height: 2, background: c.accent, width: 8 }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ height: 2, background: c.text, opacity: 0.55, width: '50%' }} />
+          <div style={{ height: 2, background: c.accent, width: 8 }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ height: 2, background: c.text, opacity: 0.55, width: '65%' }} />
+          <div style={{ height: 2, background: c.accent, width: 8 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniWelcome({ template, photo }) {
+  const c = template.colors;
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: c.page,
+      padding: 6,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3
+    }}>
+      <div style={{
+        height: '45%',
+        backgroundImage: 'url(' + photo + ')',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        borderRadius: 2
+      }} />
+      <div style={{
+        fontFamily: template.fonts.display,
+        fontWeight: 700,
+        fontSize: 8,
+        color: c.primary,
+        lineHeight: 1
+      }}>Welcome</div>
+      <div style={{ height: 2, background: c.text, opacity: 0.55, width: '95%' }} />
+      <div style={{ height: 2, background: c.text, opacity: 0.55, width: '85%' }} />
+      <div style={{ height: 2, background: c.text, opacity: 0.55, width: '70%' }} />
+    </div>
+  );
+}
+
+function MiniPhotoGrid({ photo }) {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gridTemplateRows: '1fr 1fr',
+      gap: 1.5,
+      padding: 2,
+      background: '#111'
+    }}>
+      <div style={{ backgroundImage: 'url(' + photo + ')', backgroundSize: 'cover', backgroundPosition: 'left top' }} />
+      <div style={{ backgroundImage: 'url(' + photo + ')', backgroundSize: 'cover', backgroundPosition: 'right top', filter: 'brightness(0.85)' }} />
+      <div style={{ backgroundImage: 'url(' + photo + ')', backgroundSize: 'cover', backgroundPosition: 'left bottom', filter: 'sepia(0.3)' }} />
+      <div style={{ backgroundImage: 'url(' + photo + ')', backgroundSize: 'cover', backgroundPosition: 'right bottom', filter: 'brightness(0.7)' }} />
+    </div>
+  );
+}
+
+function MiniScenic({ photo }) {
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      backgroundImage: 'url(' + photo + ')',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }} />
+  );
+}
+
+function MiniFood({ template, photo }) {
+  const c = template.colors;
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      position: 'relative',
+      backgroundImage: 'url(' + photo + ')',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: c.page,
+        padding: '4px 5px'
+      }}>
+        <div style={{ height: 2, background: c.accent, width: 12 }} />
+        <div style={{ height: 2, background: c.text, marginTop: 2, opacity: 0.6, width: '90%' }} />
+      </div>
+    </div>
+  );
+}
+
+function MiniQuote({ template }) {
+  const c = template.colors;
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: c.accent,
+      padding: 6,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: '#fff',
+      fontFamily: template.fonts.display,
+      fontStyle: 'italic',
+      lineHeight: 1
+    }}>
+      <div style={{ fontSize: 18, fontWeight: 700 }}>“ ”</div>
+      <div style={{ marginTop: 3, height: 2, background: 'rgba(255,255,255,0.6)', width: 16 }} />
+      <div style={{ marginTop: 4, fontSize: 7, letterSpacing: 1.5, fontStyle: 'normal' }}>WORDS</div>
+    </div>
+  );
+}
+
+function TemplateKitPreview({ template, destination, selected, onSelect }) {
+  const isMobile = useIsMobile();
+  const c = template.colors;
+  const photo = (destination && destination.image) || 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1200&q=80';
+
+  const allMinis = [
+    <MiniContents template={template} />,
+    <MiniWelcome template={template} photo={photo} />,
+    <MiniPhotoGrid photo={photo} />,
+    <MiniScenic photo={photo} />,
+    <MiniFood template={template} photo={photo} />,
+    <MiniQuote template={template} />
+  ];
+  const minis = isMobile ? allMinis.slice(0, 4) : allMinis;
+
+  const coverHeight = isMobile ? 250 : 320;
+
+  return (
+    <div className={"wb-kit kit--" + template.id} style={{
+      background: '#FFFFFF',
+      borderRadius: 18,
+      padding: 12,
+      boxShadow: selected
+        ? '0 22px 44px rgba(0,0,0,0.20), 0 0 0 3px #C9913A inset'
+        : '0 18px 38px rgba(0,0,0,0.16)',
+      border: selected ? 'none' : '1px solid rgba(0,0,0,0.06)',
+      transition: 'box-shadow 0.25s ease'
+    }}>
+      <div style={{
+        background: '#EEE9DD',
+        borderRadius: 12,
+        padding: isMobile ? 10 : 14,
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 10 : 14
+      }}>
+        <div style={{
+          flex: isMobile ? 'none' : '0 0 44%',
+          width: '100%',
+          height: coverHeight,
+          borderRadius: 6,
+          overflow: 'hidden',
+          background: c.bg,
+          boxShadow: '0 12px 24px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.05)'
+        }}>
+          {renderTemplateCover(template, photo)}
+        </div>
+        <div style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : '1fr 1fr',
+          gridAutoRows: isMobile ? '70px' : '88px',
+          gap: isMobile ? 6 : 8
+        }}>
+          {minis.map((m, i) => (
+            <div key={i} style={{
+              borderRadius: 3,
+              overflow: 'hidden',
+              background: c.page,
+              boxShadow: '0 3px 8px rgba(0,0,0,0.14)'
+            }}>
+              {m}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: '12px 4px 4px' }}>
         <div style={{
           fontSize: 9,
           letterSpacing: 2.5,
           color: '#C9913A',
           fontWeight: 700
-        }}>MAGAZINE</div>
+        }}>MAGAZINE KIT</div>
         <div style={{
           fontFamily: "'Playfair Display', serif",
           fontWeight: 700,
@@ -976,91 +1199,188 @@ function TemplatePreviewCard({ template, destination, selected, onSelect, rotati
         <div style={{
           fontSize: 11,
           color: '#5a6678',
-          marginTop: 3,
+          marginTop: 4,
           lineHeight: 1.4
         }}>{template.description}</div>
-        <div style={{
-          marginTop: 10,
-          display: 'inline-block',
-          padding: '7px 14px',
-          borderRadius: 999,
-          background: selected ? '#C9913A' : '#0B2545',
-          color: '#fff',
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: 1.5
-        }}>
-          {selected ? 'SELECTED ✓' : 'SELECT TEMPLATE'}
-        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onSelect(template); }}
+          style={{
+            marginTop: 10,
+            padding: '8px 16px',
+            borderRadius: 999,
+            background: selected ? '#C9913A' : '#0B2545',
+            color: '#fff',
+            border: 'none',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 1.5
+          }}
+        >
+          {selected ? 'Selected ✓' : 'Select Template'}
+        </button>
       </div>
-    </button>
+    </div>
   );
 }
 
 function ScreenTemplate({ state, setState, onNext, onBack }) {
   const isMobile = useIsMobile();
-  const rotations = [-3, 2.5, -2, 3, -2.5, 2];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef(null);
+  const touchStartX = useRef(null);
+
+  useEffect(() => {
+    if (state.templateId) {
+      const i = TEMPLATES.findIndex((t) => t.id === state.templateId);
+      if (i >= 0) setActiveIndex(i);
+    }
+  }, []);
+
+  function scrollToIndex(i, smooth) {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const card = container.children[i];
+    if (!card) return;
+    const target = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
+    container.scrollTo({ left: target, behavior: smooth === false ? 'auto' : 'smooth' });
+  }
+
+  useEffect(() => {
+    const tid = setTimeout(() => scrollToIndex(activeIndex, false), 30);
+    return () => clearTimeout(tid);
+  }, []);
+
+  function prev() {
+    const ni = (activeIndex - 1 + TEMPLATES.length) % TEMPLATES.length;
+    setActiveIndex(ni);
+    scrollToIndex(ni, true);
+  }
+  function next() {
+    const ni = (activeIndex + 1) % TEMPLATES.length;
+    setActiveIndex(ni);
+    scrollToIndex(ni, true);
+  }
+
+  function handleScroll() {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const center = container.scrollLeft + container.offsetWidth / 2;
+    let bestI = 0;
+    let bestDist = Infinity;
+    Array.from(container.children).forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(center - cardCenter);
+      if (dist < bestDist) { bestDist = dist; bestI = i; }
+    });
+    if (bestI !== activeIndex) setActiveIndex(bestI);
+  }
+
+  function handleTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+  function handleTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (delta > 50) prev();
+    else if (delta < -50) next();
+  }
+
   return (
-    <div className="wb-fade" style={{ padding: '14px 16px 40px', maxWidth: 1100, margin: '0 auto' }}>
+    <div className="wb-fade" style={{ padding: '14px 12px 40px', maxWidth: 1100, margin: '0 auto' }}>
       <Stepper step={1} />
-      <div style={{ textAlign: 'center', margin: '14px 0 14px' }}>
+      <div style={{ textAlign: 'center', margin: '14px 0 12px' }}>
         <div style={{ fontSize: 11, letterSpacing: 3, color: '#C9913A', fontWeight: 700 }}>STEP 2 OF 4</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", margin: '6px 0 4px', fontSize: 'clamp(24px, 6vw, 34px)' }}>
           Choose your magazine style
         </h1>
         <p style={{ margin: 0, color: '#54607a', fontSize: 13 }}>
-          Pick a travel magazine resting on the beach.
+          Browse complete travel magazine kits — cover + spreads.
         </p>
       </div>
 
-      <div className="wb-beach" style={{
+      <div style={{
         position: 'relative',
-        padding: isMobile ? '60px 8px 36px' : '70px 24px 44px',
-        borderRadius: 28,
-        background: 'linear-gradient(180deg, #F6E6BD 0%, #EFD9A4 35%, #E5C68C 70%, #DBB97A 100%)',
-        boxShadow: 'inset 0 0 80px rgba(120,80,30,0.08)',
+        background: 'linear-gradient(180deg, #F2EEE4 0%, #E6DFCE 100%)',
+        borderRadius: 24,
+        padding: isMobile ? '14px 0 18px' : '20px 0 24px',
+        boxShadow: 'inset 0 0 60px rgba(120,80,30,0.06)',
         overflow: 'hidden'
       }}>
-        <div className="wb-beach-sea" style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: 48,
-          background: 'linear-gradient(180deg, #6FB8D6 0%, #A6D6E5 65%, rgba(166,214,229,0) 100%)',
-          pointerEvents: 'none'
-        }} />
-        <div className="wb-beach-waves" style={{
-          position: 'absolute',
-          top: 36,
-          left: 0,
-          right: 0,
-          height: 16,
-          background:
-            'repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 6px, rgba(255,255,255,0) 6px 18px)',
-          opacity: 0.6,
-          pointerEvents: 'none'
-        }} />
-        <div className="wb-beach-shine" style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.45), transparent 60%), radial-gradient(ellipse at 80% 95%, rgba(255,255,255,0.25), transparent 60%)',
-          pointerEvents: 'none'
-        }} />
         <div style={{
-          position: 'relative',
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: isMobile ? 26 : 32,
-          justifyItems: 'center'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px 12px',
+          maxWidth: 900,
+          margin: '0 auto'
         }}>
+          <button
+            onClick={prev}
+            aria-label="Previous template"
+            style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: '#0B2545', color: '#fff',
+              border: '2px solid #fff', fontSize: 16, fontWeight: 800,
+              boxShadow: '0 4px 10px rgba(0,0,0,0.25)'
+            }}
+          >‹</button>
+          <div style={{
+            fontSize: 11,
+            letterSpacing: 2,
+            color: '#5a6678',
+            fontWeight: 700,
+            fontFamily: "'Playfair Display', serif"
+          }}>
+            Template {activeIndex + 1} of {TEMPLATES.length} · {TEMPLATES[activeIndex].name}
+          </div>
+          <button
+            onClick={next}
+            aria-label="Next template"
+            style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: '#0B2545', color: '#fff',
+              border: '2px solid #fff', fontSize: 16, fontWeight: 800,
+              boxShadow: '0 4px 10px rgba(0,0,0,0.25)'
+            }}
+          >›</button>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="wb-kit-scroll"
+          style={{
+            display: 'flex',
+            gap: 14,
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollBehavior: 'smooth',
+            padding: isMobile ? '0 24px' : '0 80px',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
           {TEMPLATES.map((t, i) => (
-            <TemplatePreviewCard
+            <div
               key={t.id}
-              template={t}
-              destination={state.destination}
-              selected={state.templateId === t.id}
-              onSelect={(tpl) => setState({ ...state, templateId: tpl.id })}
-              rotation={rotations[i % rotations.length]}
-            />
+              style={{
+                flex: '0 0 ' + (isMobile ? 'calc(100% - 48px)' : 'min(900px, calc(100% - 160px))'),
+                maxWidth: isMobile ? 430 : 900,
+                scrollSnapAlign: 'center',
+                transform: i === activeIndex ? 'scale(1)' : 'scale(0.94)',
+                opacity: i === activeIndex ? 1 : 0.5,
+                transition: 'transform 0.3s ease, opacity 0.3s ease'
+              }}
+            >
+              <TemplateKitPreview
+                template={t}
+                destination={state.destination}
+                selected={state.templateId === t.id}
+                onSelect={(tpl) => setState({ ...state, templateId: tpl.id })}
+              />
+            </div>
           ))}
         </div>
       </div>
