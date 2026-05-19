@@ -4,10 +4,19 @@ import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 export default function RBStory({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/red-white/4.png" fallbackColor={palette.background}>
-      <CoverBlock color="#FFFFFF" top="8%" left="2%" width="50%" height="75%" zIndex={1} />
+      <PhotoZone
+        src={slots.story1Image}
+        palette={palette}
+        top="0"
+        left="0"
+        width="100%"
+        height="45%"
+      />
+
+      <CoverBlock color="#FFFFFF" top="45%" left="0" width="100%" height="55%" zIndex={1} />
 
       <TextZone
-        top="10%"
+        top="48%"
         left="4%"
         width="46%"
         zIndex={2}
@@ -24,7 +33,7 @@ export default function RBStory({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <TextZone
-        top="14%"
+        top="52%"
         left="4%"
         width="46%"
         zIndex={2}
@@ -41,10 +50,10 @@ export default function RBStory({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <TextZone
-        top="38%"
+        top="68%"
         left="4%"
         width="46%"
-        bottom="10%"
+        bottom="6%"
         zIndex={2}
         style={{
           fontFamily: fonts.body,
@@ -58,12 +67,13 @@ export default function RBStory({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <PhotoZone
-        src={slots.story1Image}
-        fallbackColor={palette.light}
-        top="8%"
+        src={slots.story1ImageSecondary}
+        palette={palette}
+        top="50%"
         left="52%"
         width="46%"
-        height="75%"
+        height="44%"
+        zIndex={2}
       />
     </CanvaPageRoot>
   );

@@ -6,7 +6,7 @@ export default function GBBackCover({ slots, palette, fonts }: LayoutProps) {
     <CanvaPageRoot bg="/templates/green-beige/20.png" fallbackColor={palette.primary}>
       <PhotoZone
         src={slots.backImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="0"
         left="0"
         width="100%"
@@ -17,7 +17,7 @@ export default function GBBackCover({ slots, palette, fonts }: LayoutProps) {
           position: 'absolute',
           inset: 0,
           background:
-            'linear-gradient(180deg, rgba(0,0,0,0.0) 50%, rgba(0,0,0,0.65) 100%)'
+            'linear-gradient(180deg, rgba(0,0,0,0.0) 60%, rgba(0,0,0,0.75) 100%)'
         }}
       />
       <TextZone

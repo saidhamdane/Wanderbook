@@ -6,17 +6,17 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
     <CanvaPageRoot bg="/templates/red-white/8.png" fallbackColor={palette.background}>
       <PhotoZone
         src={slots.story2Image1}
-        fallbackColor={palette.light}
-        top="0%"
-        left="2%"
-        width="96%"
-        height="42%"
+        palette={palette}
+        top="0"
+        left="0"
+        width="100%"
+        height="44%"
       />
 
       <TextZone
         top="48%"
-        left="6%"
-        right="48%"
+        left="4%"
+        right="50%"
         style={{
           fontFamily: fonts.heading,
           fontSize: '36px',
@@ -31,8 +31,8 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
 
       <TextZone
         top="62%"
-        left="6%"
-        right="48%"
+        left="4%"
+        right="50%"
         bottom="6%"
         style={{
           fontFamily: fonts.body,
@@ -47,11 +47,12 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
 
       <PhotoZone
         src={slots.story2Image2}
-        fallbackColor={palette.light}
-        top="48%"
-        left="58%"
-        width="40%"
-        height="35%"
+        palette={palette}
+        top="47%"
+        left="55%"
+        width="43%"
+        height="38%"
+        required={false}
       />
     </CanvaPageRoot>
   );

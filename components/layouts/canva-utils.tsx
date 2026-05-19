@@ -3,6 +3,14 @@ import React from 'react';
 export const PAGE_W = 794;
 export const PAGE_H = 1123;
 
+type Palette = {
+  primary: string;
+  accent: string;
+  background: string;
+  text: string;
+  light: string;
+};
+
 type CanvaPageRootProps = {
   bg: string;
   fallbackColor: string;
@@ -53,15 +61,19 @@ type ZonePos = {
 
 export function PhotoZone({
   src,
-  fallbackColor,
+  palette,
+  required = true,
   ...pos
-}: ZonePos & { src?: string; fallbackColor: string }) {
+}: ZonePos & { src?: string; palette: Palette; required?: boolean }) {
   if (!src) {
+    if (!required) return null;
     return (
       <div
         style={{
           position: 'absolute',
-          backgroundColor: fallbackColor,
+          background:
+            'linear-gradient(135deg, ' + palette.primary + ' 0%, ' + palette.accent + ' 100%)',
+          opacity: 0.15,
           ...pos
         }}
       />

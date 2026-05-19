@@ -1,18 +1,24 @@
 import { LayoutProps } from '@/lib/magazine/types';
 import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
 
-// Photo / text zone positions are first-pass estimates. Tune to the
-// real /public/templates/green-beige/1.png once the export lands.
 export default function GBCover({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/green-beige/cover.png" fallbackColor={palette.background}>
       <PhotoZone
         src={slots.coverHeroImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="0"
         left="0"
         width="100%"
         height="100%"
+      />
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.35)'
+        }}
       />
 
       <TextZone
@@ -34,7 +40,7 @@ export default function GBCover({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <TextZone
-        top="16%"
+        bottom="22%"
         left="6%"
         right="6%"
         style={{
@@ -43,14 +49,15 @@ export default function GBCover({ slots, palette, fonts }: LayoutProps) {
           fontWeight: 800,
           color: palette.accent,
           lineHeight: 0.95,
-          letterSpacing: '-1px'
+          letterSpacing: '-1px',
+          textShadow: '0 2px 12px rgba(0,0,0,0.4)'
         }}
       >
         {slots.coverMainName}
       </TextZone>
 
       <TextZone
-        top="30%"
+        bottom="14%"
         left="6%"
         right="6%"
         style={{
@@ -58,19 +65,26 @@ export default function GBCover({ slots, palette, fonts }: LayoutProps) {
           fontSize: '14px',
           color: '#FFFFFF',
           lineHeight: 1.4,
-          maxWidth: '60%'
+          maxWidth: '70%'
         }}
       >
         {slots.coverSubtitle}
       </TextZone>
 
       <TextZone
-        bottom="20%"
+        bottom="6%"
         left="6%"
         right="50%"
         style={{ fontFamily: fonts.body, color: '#FFFFFF' }}
       >
-        <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase' }}>
+        <div
+          style={{
+            fontSize: '12px',
+            fontWeight: 700,
+            letterSpacing: '2px',
+            textTransform: 'uppercase'
+          }}
+        >
           {slots.coverStory1Title}
         </div>
         <div style={{ fontSize: '11px', lineHeight: 1.5, marginTop: '4px', opacity: 0.9 }}>
@@ -80,15 +94,16 @@ export default function GBCover({ slots, palette, fonts }: LayoutProps) {
 
       <TextZone
         bottom="6%"
-        left="6%"
-        right="50%"
+        right="6%"
+        width="40%"
         style={{
           fontFamily: fonts.body,
           fontSize: '12px',
           fontWeight: 700,
           letterSpacing: '2px',
           textTransform: 'uppercase',
-          color: '#FFFFFF'
+          color: '#FFFFFF',
+          textAlign: 'right'
         }}
       >
         {slots.coverStory2Title}

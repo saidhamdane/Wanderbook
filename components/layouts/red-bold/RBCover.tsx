@@ -8,7 +8,7 @@ export default function RBCover({ slots, palette, fonts }: LayoutProps) {
     <CanvaPageRoot bg="/templates/red-white/1.png" fallbackColor={palette.primary}>
       <PhotoZone
         src={slots.coverHeroImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="30%"
         left="2%"
         width="96%"

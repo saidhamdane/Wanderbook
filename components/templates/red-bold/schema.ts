@@ -65,7 +65,8 @@ export const redBoldTemplate: MagazineTemplate = {
       name: 'Main Story',
       layout: 'rb-story',
       slots: [
-        { type: 'image', id: 'story1Image', aspect: 'portrait', required: true, preferredTags: ['destination', 'scenic', 'dramatic'] },
+        { type: 'image', id: 'story1Image', aspect: 'landscape', required: true, preferredTags: ['destination', 'scenic', 'dramatic'] },
+        { type: 'image', id: 'story1ImageSecondary', aspect: 'portrait', required: true, preferredTags: ['local', 'culture', 'people'] },
         { type: 'text', id: 'story1Headline', kind: 'headline', maxLength: 50, required: true },
         { type: 'text', id: 'story1Body', kind: 'body', maxLength: 500, required: false }
       ]

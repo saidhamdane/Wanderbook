@@ -1,44 +1,51 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function GBCollage({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/green-beige/14.png" fallbackColor={palette.background}>
+      <CoverBlock color={palette.background} top="0" left="0" width="100%" height="100%" zIndex={1} />
+
       <TextZone
-        top="5%"
-        left="6%"
-        right="6%"
+        top="1%"
+        left="2%"
+        right="2%"
+        zIndex={3}
         style={{
           fontFamily: fonts.heading,
-          fontSize: '34px',
-          fontWeight: 800,
+          fontSize: '20px',
+          fontWeight: 700,
           color: palette.primary,
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
           lineHeight: 1
         }}
       >
         {slots.collageTitle || 'A Visual Diary'}
       </TextZone>
 
-      <PhotoZone src={slots.col1} fallbackColor={palette.light} top="16%" left="3%" width="44%" height="44%" />
-      <PhotoZone src={slots.col2} fallbackColor={palette.light} top="16%" right="3%" width="50%" height="28%" />
-      <PhotoZone src={slots.col3} fallbackColor={palette.light} top="46%" right="3%" width="24%" height="22%" />
-      <PhotoZone src={slots.col4} fallbackColor={palette.light} top="46%" right="30%" width="23%" height="22%" />
+      <PhotoZone src={slots.col1} palette={palette} top="5%" left="2%" width="47%" height="45%" zIndex={2} />
+      <PhotoZone src={slots.col2} palette={palette} top="5%" left="51%" width="47%" height="45%" zIndex={2} required={false} />
+      <PhotoZone src={slots.col3} palette={palette} top="52%" left="2%" width="47%" height="43%" zIndex={2} required={false} />
+      <PhotoZone src={slots.col4} palette={palette} top="52%" left="51%" width="47%" height="43%" zIndex={2} required={false} />
 
-      <TextZone
-        top="70%"
-        left="6%"
-        right="6%"
-        bottom="6%"
-        style={{
-          fontFamily: fonts.body,
-          fontSize: '12px',
-          lineHeight: 1.8,
-          color: palette.text,
-          whiteSpace: 'pre-wrap'
-        }}
-      >
-        {slots.collageBody}
-      </TextZone>
+      {slots.collageBody && (
+        <TextZone
+          top="97%"
+          left="2%"
+          right="2%"
+          zIndex={3}
+          style={{
+            fontFamily: fonts.body,
+            fontSize: '9px',
+            color: palette.text,
+            lineHeight: 1.3,
+            transform: 'translateY(-100%)'
+          }}
+        >
+          {slots.collageBody}
+        </TextZone>
+      )}
     </CanvaPageRoot>
   );
 }

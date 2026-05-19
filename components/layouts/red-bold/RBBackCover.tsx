@@ -6,7 +6,7 @@ export default function RBBackCover({ slots, palette, fonts }: LayoutProps) {
     <CanvaPageRoot bg="/templates/red-white/19.png" fallbackColor={palette.primary}>
       <PhotoZone
         src={slots.backImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="0"
         left="0"
         width="100%"

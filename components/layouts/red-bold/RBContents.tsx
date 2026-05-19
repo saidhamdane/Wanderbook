@@ -15,11 +15,11 @@ export default function RBContents({ slots, palette, fonts }: LayoutProps) {
     <CanvaPageRoot bg="/templates/red-white/2.png" fallbackColor={palette.background}>
       <PhotoZone
         src={slots.contentsImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="2%"
         left="1%"
-        width="40%"
-        height="35%"
+        width="42%"
+        height="36%"
       />
 
       <TextZone

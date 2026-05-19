@@ -1,45 +1,77 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function GBMemories({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/green-beige/17.png" fallbackColor={palette.background}>
-      <TextZone
-        top="5%"
-        left="6%"
-        right="6%"
-        style={{
-          fontFamily: fonts.heading,
-          fontSize: '38px',
-          fontWeight: 800,
-          color: palette.primary,
-          lineHeight: 1
-        }}
-      >
-        {slots.memHeadline || 'Memories'}
-      </TextZone>
+      <CoverBlock color={palette.background} top="0" left="0" width="100%" height="100%" zIndex={1} />
 
-      <PhotoZone src={slots.mem1} fallbackColor={palette.light} top="16%" left="3%" width="64%" height="40%" />
-      <PhotoZone src={slots.mem2} fallbackColor={palette.light} top="16%" right="3%" width="30%" height="19%" />
-      <PhotoZone src={slots.mem3} fallbackColor={palette.light} top="37%" right="3%" width="30%" height="19%" />
-
-      <TextZone
+      <PhotoZone
+        src={slots.mem1}
+        palette={palette}
+        top="2%"
+        left="2%"
+        width="96%"
+        height="55%"
+        zIndex={2}
+      />
+      <PhotoZone
+        src={slots.mem2}
+        palette={palette}
         top="60%"
-        left="6%"
-        right="6%"
-        bottom="6%"
-        style={{
-          fontFamily: fonts.body,
-          fontSize: '12px',
-          lineHeight: 1.85,
-          color: palette.text,
-          whiteSpace: 'pre-wrap',
-          columnCount: 2,
-          columnGap: '20px'
-        }}
-      >
-        {slots.memBody}
-      </TextZone>
+        left="2%"
+        width="47%"
+        height="35%"
+        zIndex={2}
+        required={false}
+      />
+      <PhotoZone
+        src={slots.mem3}
+        palette={palette}
+        top="60%"
+        left="51%"
+        width="47%"
+        height="35%"
+        zIndex={2}
+        required={false}
+      />
+
+      {slots.memHeadline && (
+        <TextZone
+          top="2%"
+          left="4%"
+          right="4%"
+          zIndex={3}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: '28px',
+            fontWeight: 800,
+            color: '#FFFFFF',
+            lineHeight: 1,
+            textShadow: '0 2px 12px rgba(0,0,0,0.6)'
+          }}
+        >
+          {slots.memHeadline}
+        </TextZone>
+      )}
+
+      {slots.memBody && (
+        <TextZone
+          bottom="2%"
+          left="4%"
+          right="4%"
+          zIndex={3}
+          style={{
+            fontFamily: fonts.body,
+            fontSize: '10px',
+            color: '#FFFFFF',
+            lineHeight: 1.5,
+            textShadow: '0 1px 6px rgba(0,0,0,0.6)'
+          }}
+        >
+          {slots.memBody}
+        </TextZone>
+      )}
     </CanvaPageRoot>
   );
 }

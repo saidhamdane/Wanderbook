@@ -44,7 +44,7 @@ export default function RBMasthead({ slots, palette, fonts }: LayoutProps) {
 
       <PhotoZone
         src={slots.mastheadImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="50%"
         left="2%"
         width="96%"

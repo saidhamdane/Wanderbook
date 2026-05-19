@@ -1,22 +1,42 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function GBLetter({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/green-beige/3.png" fallbackColor={palette.background}>
+      <CoverBlock color={palette.background} top="0" left="0" width="50%" height="100%" zIndex={1} />
+
       <PhotoZone
         src={slots.letterImage}
-        fallbackColor={palette.light}
-        top="6%"
-        left="6%"
-        width="45%"
-        height="60%"
+        palette={palette}
+        top="0"
+        left="50%"
+        width="50%"
+        height="100%"
       />
 
       <TextZone
-        top="6%"
-        right="6%"
+        top="10%"
+        left="6%"
+        width="40%"
+        zIndex={2}
+        style={{
+          fontFamily: fonts.body,
+          fontSize: '11px',
+          color: palette.accent,
+          letterSpacing: '3px',
+          textTransform: 'uppercase',
+          fontWeight: 700
+        }}
+      >
+        Letter from the Editor
+      </TextZone>
+
+      <TextZone
+        top="14%"
+        left="6%"
         width="42%"
+        zIndex={2}
         style={{
           fontFamily: fonts.heading,
           fontSize: '40px',
@@ -29,14 +49,15 @@ export default function GBLetter({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <TextZone
-        top="38%"
-        right="6%"
+        top="42%"
+        left="6%"
         width="42%"
-        bottom="6%"
+        bottom="8%"
+        zIndex={2}
         style={{
           fontFamily: fonts.body,
           fontSize: '12px',
-          lineHeight: 1.8,
+          lineHeight: 1.85,
           color: palette.text,
           whiteSpace: 'pre-wrap'
         }}

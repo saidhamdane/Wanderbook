@@ -6,7 +6,7 @@ export default function RBQuote({ slots, palette, fonts }: LayoutProps) {
     <CanvaPageRoot bg="/templates/red-white/16.png" fallbackColor={palette.primary}>
       <PhotoZone
         src={slots.quoteImage}
-        fallbackColor={palette.light}
+        palette={palette}
         top="0"
         left="0"
         width="100%"

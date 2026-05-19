@@ -1,13 +1,26 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function GBArticle2({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/green-beige/10.png" fallbackColor={palette.background}>
+      <CoverBlock color={palette.background} top="0" left="0" width="100%" height="100%" zIndex={1} />
+
+      <PhotoZone
+        src={slots.art2Image}
+        palette={palette}
+        top="0"
+        left="0"
+        width="100%"
+        height="50%"
+        zIndex={2}
+      />
+
       <TextZone
-        top="6%"
-        left="6%"
-        right="6%"
+        top="54%"
+        left="4%"
+        right="4%"
+        zIndex={2}
         style={{
           fontFamily: fonts.heading,
           fontSize: '40px',
@@ -19,20 +32,12 @@ export default function GBArticle2({ slots, palette, fonts }: LayoutProps) {
         {slots.art2Headline}
       </TextZone>
 
-      <PhotoZone
-        src={slots.art2Image}
-        fallbackColor={palette.light}
-        top="22%"
-        left="6%"
-        width="88%"
-        height="42%"
-      />
-
       <TextZone
         top="68%"
-        left="6%"
-        right="6%"
+        left="4%"
+        right="4%"
         bottom="6%"
+        zIndex={2}
         style={{
           fontFamily: fonts.body,
           fontSize: '12px',

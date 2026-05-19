@@ -21,10 +21,10 @@ export default function RBGrid({ slots, palette, fonts }: LayoutProps) {
         {slots.gridHeadline || 'MEMORIES'}
       </TextZone>
 
-      <PhotoZone src={slots.grid1} fallbackColor={palette.light} top="18%" left="2%" width="47%" height="35%" />
-      <PhotoZone src={slots.grid2} fallbackColor={palette.light} top="18%" left="51%" width="47%" height="35%" />
-      <PhotoZone src={slots.grid3} fallbackColor={palette.light} top="55%" left="2%" width="47%" height="35%" />
-      <PhotoZone src={slots.grid4} fallbackColor={palette.light} top="55%" left="51%" width="47%" height="35%" />
+      <PhotoZone src={slots.grid1} palette={palette} top="18%" left="2%" width="47%" height="35%" />
+      <PhotoZone src={slots.grid2} palette={palette} top="18%" left="51%" width="47%" height="35%" required={false} />
+      <PhotoZone src={slots.grid3} palette={palette} top="55%" left="2%" width="47%" height="35%" required={false} />
+      <PhotoZone src={slots.grid4} palette={palette} top="55%" left="51%" width="47%" height="35%" required={false} />
     </CanvaPageRoot>
   );
 }
