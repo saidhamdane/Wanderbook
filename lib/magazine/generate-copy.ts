@@ -1,12 +1,28 @@
 import OpenAI from 'openai';
 import { getTemplateById } from './template-registry';
 
+export const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+  it: 'Italian'
+};
+
+export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_NAMES);
+
+export function normalizeLanguage(value: string | undefined | null): string {
+  if (!value) return 'en';
+  return SUPPORTED_LANGUAGES.includes(value) ? value : 'en';
+}
+
 type CopyInput = {
   destination: string;
   travelers: string;
   style: string;
   templateId: string;
   notes?: string;
+  language: string;
 };
 
 function slotIdsForTemplate(templateId: string): string[] {
@@ -169,6 +185,7 @@ function buildUserPrompt(input: CopyInput): string {
   const slotIds = slotIdsForTemplate(input.templateId);
   const slotList = slotIds.map((id) => '- ' + id).join('\n');
   const notes = input.notes ? '\n\nFamily notes: ' + input.notes : '';
+  const languageName = LANGUAGE_NAMES[input.language] ?? 'English';
   return [
     'Write the editorial copy for a personal family travel magazine.',
     'Destination: ' + input.destination + '.',
@@ -179,6 +196,7 @@ function buildUserPrompt(input: CopyInput): string {
     slotList,
     '',
     'Rules:',
+    '- Write every value in ' + languageName + '. Do not mix languages. Keep place names and proper nouns in their original spelling.',
     '- Be specific to ' + input.destination + '. Reference real local food, light, terrain.',
     '- Tone should feel like a polished magazine, warm and intimate, never generic.',
     '- Keep headlines short. Keep body copy under the implied magazine length.',
@@ -195,6 +213,7 @@ export async function generateEditorialCopy(
 
   try {
     const client = new OpenAI({ apiKey });
+    const languageName = LANGUAGE_NAMES[input.language] ?? 'English';
     const completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       temperature: 0.7,
@@ -204,7 +223,11 @@ export async function generateEditorialCopy(
         {
           role: 'system',
           content:
-            'You are a senior editorial writer for a luxury travel magazine. Respond ONLY with valid JSON, no markdown, no explanation.'
+            'You are a senior editorial writer for a luxury travel magazine writing in ' +
+            languageName +
+            '. Respond ONLY with valid JSON, no markdown, no explanation. Every string value must be in ' +
+            languageName +
+            '.'
         },
         { role: 'user', content: buildUserPrompt(input) }
       ]

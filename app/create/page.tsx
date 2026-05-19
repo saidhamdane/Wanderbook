@@ -11,6 +11,14 @@ type Step = 'template' | 'photos' | 'details' | 'generating';
 
 const STYLES = ['Warm & Personal', 'Epic & Bold', 'Calm & Minimal', 'Classic Editorial'];
 
+const LANGUAGES: Array<{ code: string; label: string }> = [
+  { code: 'en', label: '🇬🇧 English' },
+  { code: 'es', label: '🇪🇸 Español' },
+  { code: 'fr', label: '🇫🇷 Français' },
+  { code: 'de', label: '🇩🇪 Deutsch' },
+  { code: 'it', label: '🇮🇹 Italiano' }
+];
+
 export default function CreatePage() {
   const router = useRouter();
   const templates = getAllTemplates();
@@ -20,6 +28,7 @@ export default function CreatePage() {
   const [destination, setDestination] = useState('');
   const [travelers, setTravelers] = useState('');
   const [style, setStyle] = useState(STYLES[0]);
+  const [language, setLanguage] = useState('en');
   const [notes, setNotes] = useState('');
   const [useStockFallback, setUseStockFallback] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -32,6 +41,7 @@ export default function CreatePage() {
     fd.append('destination', destination);
     fd.append('travelers', travelers);
     fd.append('style', style);
+    fd.append('language', language);
     fd.append('notes', notes);
     fd.append('useStockFallback', String(useStockFallback));
     for (const f of files) fd.append('photos', f, f.name);
@@ -152,6 +162,19 @@ export default function CreatePage() {
                   {STYLES.map((s) => (
                     <option key={s} value={s}>
                       {s}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="LANGUAGE">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className={inputCls}
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.label}
                     </option>
                   ))}
                 </select>

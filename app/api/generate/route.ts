@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { saveUploadedFiles } from '@/lib/upload-handler';
 import { generateMagazine } from '@/lib/magazine/generate-magazine';
 import { saveMagazine } from '@/lib/magazine/store';
+import { normalizeLanguage } from '@/lib/magazine/generate-copy';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest) {
     const destination = String(form.get('destination') || '');
     const travelers = String(form.get('travelers') || '');
     const style = String(form.get('style') || 'Warm & Personal');
+    const language = normalizeLanguage(form.get('language') ? String(form.get('language')) : 'en');
     const notes = form.get('notes') ? String(form.get('notes')) : undefined;
     const useStockFallback = String(form.get('useStockFallback') || 'true') === 'true';
 
@@ -36,6 +38,7 @@ export async function POST(req: NextRequest) {
       destination,
       travelers,
       style,
+      language,
       notes,
       userPhotos: photos,
       useStockFallback,

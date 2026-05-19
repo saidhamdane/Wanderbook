@@ -7,7 +7,7 @@ import {
 import { getTemplateById } from './template-registry';
 import { analyzeUploadedPhotos } from './analyze-photos';
 import { assignImagesToTemplate } from './assign-images';
-import { generateEditorialCopy } from './generate-copy';
+import { generateEditorialCopy, normalizeLanguage } from './generate-copy';
 import { fetchPexelsPhotos } from './pexels';
 
 function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
@@ -39,7 +39,8 @@ export async function generateMagazine(
     travelers: input.travelers,
     style: input.style,
     templateId: input.templateId,
-    notes: input.notes
+    notes: input.notes,
+    language: normalizeLanguage(input.language)
   });
 
   const imageAssignments = assignImagesToTemplate(template, analyzed, stockPhotos);

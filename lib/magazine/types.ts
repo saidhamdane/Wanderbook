@@ -103,6 +103,7 @@ export type GenerateMagazineInput = {
   destination: string;
   travelers: string;
   style: string;
+  language: string;
   notes?: string;
   userPhotos: UploadedPhoto[];
   useStockFallback: boolean;
