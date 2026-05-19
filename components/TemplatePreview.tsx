@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { getTemplateById } from '@/lib/magazine/template-registry';
 
 type TemplateId = 'wander-together' | 'blue-bold' | 'explore-editorial' | 'travel-minimal';
 
@@ -23,6 +24,14 @@ export function TemplatePreview({ templateId, size = 'md' }: Props) {
   const containerW = Math.round(W * scale);
   const containerH = Math.round(H * scale);
 
+  let template;
+  try {
+    template = getTemplateById(templateId);
+  } catch {
+    template = undefined;
+  }
+  const isCanva = template?.source === 'canva';
+
   return (
     <div
       style={{
@@ -32,24 +41,86 @@ export function TemplatePreview({ templateId, size = 'md' }: Props) {
         borderRadius: '3px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15)',
         flexShrink: 0,
-        backgroundColor: '#000',
+        backgroundColor: template?.palette.primary ?? '#000',
         position: 'relative'
       }}
     >
+      {isCanva && template?.previewImage ? (
+        <CanvaCoverImage
+          src={template.previewImage}
+          fallback={template.palette.primary}
+          label={template.name}
+        />
+      ) : (
+        <div
+          style={{
+            width: W + 'px',
+            height: H + 'px',
+            transform: 'scale(' + scale + ')',
+            transformOrigin: 'top left',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+        >
+          {renderCover(templateId as TemplateId)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CanvaCoverImage({
+  src,
+  fallback,
+  label
+}: {
+  src: string;
+  fallback: string;
+  label: string;
+}) {
+  const [missing, setMissing] = React.useState(false);
+  if (missing) {
+    return (
       <div
         style={{
-          width: W + 'px',
-          height: H + 'px',
-          transform: 'scale(' + scale + ')',
-          transformOrigin: 'top left',
           position: 'absolute',
-          top: 0,
-          left: 0
+          inset: 0,
+          backgroundColor: fallback,
+          color: '#FFFFFF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '12px',
+          textAlign: 'center',
+          fontFamily: "'Inter', system-ui, sans-serif",
+          fontSize: '11px',
+          letterSpacing: '2px',
+          lineHeight: 1.4,
+          textTransform: 'uppercase'
         }}
       >
-        {renderCover(templateId as TemplateId)}
+        {label}
+        <br />
+        <span style={{ opacity: 0.7, fontSize: '9px', marginTop: '4px' }}>PNG pending</span>
       </div>
-    </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={label + ' cover'}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block'
+      }}
+      onError={() => setMissing(true)}
+    />
   );
 }
 

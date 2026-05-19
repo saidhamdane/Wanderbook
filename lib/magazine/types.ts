@@ -39,6 +39,8 @@ export type MagazineTemplate = {
   name: string;
   mood: string;
   description: string;
+  source?: 'css' | 'canva';
+  previewImage?: string;
   palette: {
     primary: string;
     accent: string;

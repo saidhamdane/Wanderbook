@@ -23,6 +23,11 @@ export function TemplateCard({ template, selected, onSelect }: Props) {
     >
       <div className="relative flex-shrink-0">
         <TemplatePreview templateId={template.id} size="md" />
+        {template.source === 'canva' && (
+          <div className="absolute -top-2 -left-2 px-2 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold tracking-widest shadow">
+            ✦ CANVA
+          </div>
+        )}
         {selected && (
           <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow">
             ✓

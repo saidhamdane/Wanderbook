@@ -93,7 +93,7 @@ export default function LandingPage() {
             className="text-3xl sm:text-4xl font-bold text-center"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            Four magazine templates
+            Six magazine templates
           </h2>
           <p className="mt-3 text-center text-sm text-slate-600 max-w-xl mx-auto">
             Each template controls cover layout, typography, color, and the way your photos are

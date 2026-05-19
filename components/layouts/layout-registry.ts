@@ -34,7 +34,23 @@ const registry: Record<string, ComponentType<LayoutProps>> = {
   'tm-photo-grid': dynamic(() => import('./travel-minimal/TMPhotoGrid')),
   'tm-manual': dynamic(() => import('./travel-minimal/TMManual')),
   'tm-services': dynamic(() => import('./travel-minimal/TMServices')),
-  'tm-back-cover': dynamic(() => import('./travel-minimal/TMBackCover'))
+  'tm-back-cover': dynamic(() => import('./travel-minimal/TMBackCover')),
+  'rb-cover': dynamic(() => import('./red-bold/RBCover')),
+  'rb-contents': dynamic(() => import('./red-bold/RBContents')),
+  'rb-masthead': dynamic(() => import('./red-bold/RBMasthead')),
+  'rb-story': dynamic(() => import('./red-bold/RBStory')),
+  'rb-feature': dynamic(() => import('./red-bold/RBFeature')),
+  'rb-grid': dynamic(() => import('./red-bold/RBGrid')),
+  'rb-quote': dynamic(() => import('./red-bold/RBQuote')),
+  'rb-back-cover': dynamic(() => import('./red-bold/RBBackCover')),
+  'gb-cover': dynamic(() => import('./green-beige/GBCover')),
+  'gb-contents': dynamic(() => import('./green-beige/GBContents')),
+  'gb-letter': dynamic(() => import('./green-beige/GBLetter')),
+  'gb-article': dynamic(() => import('./green-beige/GBArticle')),
+  'gb-article2': dynamic(() => import('./green-beige/GBArticle2')),
+  'gb-collage': dynamic(() => import('./green-beige/GBCollage')),
+  'gb-memories': dynamic(() => import('./green-beige/GBMemories')),
+  'gb-back-cover': dynamic(() => import('./green-beige/GBBackCover'))
 };
 
 export function getLayout(layoutKey: string): ComponentType<LayoutProps> | null {
