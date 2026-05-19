@@ -32,7 +32,8 @@ export function TemplatePreview({ templateId, size = 'md' }: Props) {
         borderRadius: '3px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15)',
         flexShrink: 0,
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        position: 'relative'
       }}
     >
       <div
@@ -40,7 +41,10 @@ export function TemplatePreview({ templateId, size = 'md' }: Props) {
           width: W + 'px',
           height: H + 'px',
           transform: 'scale(' + scale + ')',
-          transformOrigin: 'top left'
+          transformOrigin: 'top left',
+          position: 'absolute',
+          top: 0,
+          left: 0
         }}
       >
         {renderCover(templateId as TemplateId)}
@@ -74,7 +78,7 @@ function WanderTogetherCover() {
         overflow: 'hidden',
         background:
           'linear-gradient(160deg, #1a3a5c 0%, #2d6a8f 25%, #1B2A4A 55%, #0d1f33 100%)',
-        fontFamily: "'Playfair Display', serif"
+        fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif"
       }}
     >
       <div
@@ -270,7 +274,7 @@ function BlueBoldCover() {
         overflow: 'hidden',
         background:
           'linear-gradient(155deg, #1a6bb5 0%, #0047AB 35%, #003080 65%, #001650 100%)',
-        fontFamily: "'Oswald', sans-serif"
+        fontFamily: "'Oswald', Impact, 'Arial Narrow', Arial, sans-serif"
       }}
     >
       <div
@@ -438,7 +442,7 @@ function ExploreEditorialCover() {
         overflow: 'hidden',
         background:
           'linear-gradient(180deg, #6BA3BE 0%, #D4A853 22%, #C4622D 44%, #8B3A1A 66%, #3D1A0A 86%, #1a0a05 100%)',
-        fontFamily: "'Cormorant Garamond', Georgia, serif"
+        fontFamily: "'Cormorant Garamond', Georgia, 'Times New Roman', serif"
       }}
     >
       <div
@@ -601,7 +605,7 @@ function TravelMinimalCover() {
         position: 'relative',
         overflow: 'hidden',
         backgroundColor: '#FFFFFF',
-        fontFamily: "'DM Sans', Inter, sans-serif"
+        fontFamily: "'DM Sans', Inter, Arial, Helvetica, sans-serif"
       }}
     >
       <div
