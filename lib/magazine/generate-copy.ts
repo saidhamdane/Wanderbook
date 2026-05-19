@@ -177,7 +177,33 @@ function defaultsFor(input: CopyInput): Record<string, string> {
     servicesBody:
       'We move slowly. One town a day, two cafés, one walk, one nap. We bring fewer clothes than we think we need and more snacks than seems reasonable. This is what works for ' + input.travelers + '.',
     coverStatNumber2: '25+',
-    coverStatLabel2: 'HIDDEN PLACES'
+    coverStatLabel2: 'HIDDEN PLACES',
+    // Red Bold Retro template slot defaults — overlay-only template,
+    // these prevent any "Lorem ipsum" from showing through the Canva PNG.
+    coverDate: new Date()
+      .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      .toUpperCase(),
+    coverIssue: 'ISSUE NO. 01',
+    coverFeatureTitle:
+      'A JOURNEY THROUGH THE HEART OF ' + d.toUpperCase(),
+    item1Title: 'DISCOVERING ' + d.toUpperCase(),
+    item1Desc: 'A journey through the landscapes and culture of ' + d + '.',
+    item2Title: 'LOCAL FLAVORS',
+    item2Desc: 'The tastes and traditions that define this destination.',
+    item3Title: 'HIDDEN GEMS',
+    item3Desc: 'Places most visitors to ' + d + ' never find.',
+    item4Title: 'TRAVEL TIPS',
+    item5Title: 'MEMORIES',
+    item6Title: 'UNTIL NEXT TIME',
+    story1Headline: 'THE HEART OF ' + d.toUpperCase(),
+    story1Body:
+      'Every great journey begins with a single step. Our time in ' + d + ' was no different — each day brought new landscapes, new faces, and new stories to carry home. ' + input.travelers + ' walked slowly, ate well, and stopped often.',
+    story2Headline: 'WHERE THE ROAD LEADS',
+    story2Body:
+      'The roads of ' + d + ' have a way of surprising you. Around every corner a new vista opens up — a quiet beach, a stone village, a stranger waving from a doorway. We learned to keep the map folded and the windows down.',
+    gridHeadline: 'MEMORIES',
+    quoteBody:
+      'Our journey to ' + d + ' reminded us why we travel — not to escape life, but to keep life from escaping us.'
   };
 }
 

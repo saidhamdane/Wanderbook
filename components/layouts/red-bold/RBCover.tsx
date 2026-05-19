@@ -9,10 +9,10 @@ export default function RBCover({ slots, palette, fonts }: LayoutProps) {
       <PhotoZone
         src={slots.coverHeroImage}
         fallbackColor={palette.light}
-        top="22%"
-        left="3%"
-        width="94%"
-        height="47%"
+        top="30%"
+        left="2%"
+        width="96%"
+        height="43%"
       />
 
       <TextZone

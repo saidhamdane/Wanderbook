@@ -48,6 +48,7 @@ type ZonePos = {
   bottom?: string | number;
   width?: string | number;
   height?: string | number;
+  zIndex?: number;
 };
 
 export function PhotoZone({
@@ -90,5 +91,20 @@ export function TextZone({
 }: ZonePos & { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ position: 'absolute', ...pos, ...style }}>{children}</div>
+  );
+}
+
+export function CoverBlock({
+  color = '#FFFFFF',
+  ...pos
+}: ZonePos & { color?: string }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        backgroundColor: color,
+        ...pos
+      }}
+    />
   );
 }

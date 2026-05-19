@@ -1,13 +1,16 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function RBMasthead({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/red-white/3.png" fallbackColor={palette.background}>
+      <CoverBlock color="#FFFFFF" top="2%" left="2%" width="96%" height="46%" zIndex={1} />
+
       <TextZone
         top="6%"
         left="6%"
         right="6%"
+        zIndex={2}
         style={{
           fontFamily: fonts.heading,
           fontSize: '48px',
@@ -25,13 +28,14 @@ export default function RBMasthead({ slots, palette, fonts }: LayoutProps) {
         top="18%"
         left="6%"
         right="6%"
+        zIndex={2}
         style={{
           fontFamily: fonts.body,
           fontSize: '12px',
           lineHeight: 1.8,
           color: palette.text,
           whiteSpace: 'pre-wrap',
-          maxHeight: '24%',
+          maxHeight: '26%',
           overflow: 'hidden'
         }}
       >
@@ -41,10 +45,10 @@ export default function RBMasthead({ slots, palette, fonts }: LayoutProps) {
       <PhotoZone
         src={slots.mastheadImage}
         fallbackColor={palette.light}
-        top="45%"
-        left="3%"
-        width="94%"
-        height="38%"
+        top="50%"
+        left="2%"
+        width="96%"
+        height="32%"
       />
     </CanvaPageRoot>
   );

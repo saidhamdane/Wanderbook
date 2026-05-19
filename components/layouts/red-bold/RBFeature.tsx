@@ -7,16 +7,16 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
       <PhotoZone
         src={slots.story2Image1}
         fallbackColor={palette.light}
-        top="6%"
-        left="3%"
-        width="94%"
-        height="38%"
+        top="0%"
+        left="2%"
+        width="96%"
+        height="42%"
       />
 
       <TextZone
         top="48%"
         left="6%"
-        right="42%"
+        right="48%"
         style={{
           fontFamily: fonts.heading,
           fontSize: '36px',
@@ -32,7 +32,7 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
       <TextZone
         top="62%"
         left="6%"
-        right="42%"
+        right="48%"
         bottom="6%"
         style={{
           fontFamily: fonts.body,
@@ -48,10 +48,10 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
       <PhotoZone
         src={slots.story2Image2}
         fallbackColor={palette.light}
-        top="50%"
-        right="3%"
-        width="34%"
-        height="44%"
+        top="48%"
+        left="58%"
+        width="40%"
+        height="35%"
       />
     </CanvaPageRoot>
   );

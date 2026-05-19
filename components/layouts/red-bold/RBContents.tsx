@@ -16,10 +16,10 @@ export default function RBContents({ slots, palette, fonts }: LayoutProps) {
       <PhotoZone
         src={slots.contentsImage}
         fallbackColor={palette.light}
-        top="3%"
-        left="3%"
-        width="38%"
-        height="25%"
+        top="2%"
+        left="1%"
+        width="40%"
+        height="35%"
       />
 
       <TextZone
