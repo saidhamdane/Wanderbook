@@ -7,7 +7,7 @@ export const greenBeigeTemplate: MagazineTemplate = {
   description:
     'A modern editorial magazine with bold green typography on warm beige. Clean contemporary layouts.',
   source: 'canva',
-  previewImage: '/templates/green-beige/1.png',
+  previewImage: '/templates/green-beige/cover.png',
   palette: {
     primary: '#2D5016',
     accent: '#8DC63F',

@@ -5,7 +5,7 @@ import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
 // real /public/templates/green-beige/1.png once the export lands.
 export default function GBCover({ slots, palette, fonts }: LayoutProps) {
   return (
-    <CanvaPageRoot bg="/templates/green-beige/1.png" fallbackColor={palette.background}>
+    <CanvaPageRoot bg="/templates/green-beige/cover.png" fallbackColor={palette.background}>
       <PhotoZone
         src={slots.coverHeroImage}
         fallbackColor={palette.light}
