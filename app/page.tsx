@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getAllTemplates } from '@/lib/magazine/template-registry';
+import { TemplatePreview } from '@/components/TemplatePreview';
 
 export default function LandingPage() {
   const templates = getAllTemplates();
@@ -87,7 +88,7 @@ export default function LandingPage() {
       </section>
 
       <section id="templates" className="py-16">
-        <div className="max-w-5xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <h2
             className="text-3xl sm:text-4xl font-bold text-center"
             style={{ fontFamily: "'Playfair Display', serif" }}
@@ -98,33 +99,25 @@ export default function LandingPage() {
             Each template controls cover layout, typography, color, and the way your photos are
             placed across eight editorial spreads.
           </p>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="mt-10 flex gap-6 justify-center flex-wrap">
             {templates.map((t) => (
-              <div
-                key={t.id}
-                className="rounded-2xl overflow-hidden shadow flex"
-                style={{ backgroundColor: t.palette.background }}
-              >
+              <div key={t.id} className="flex flex-col items-center">
+                <TemplatePreview templateId={t.id} size="lg" />
                 <div
-                  className="w-2/5 p-6 flex flex-col justify-end"
-                  style={{ backgroundColor: t.palette.primary, color: '#FFF' }}
+                  className="mt-3 text-base font-bold"
+                  style={{ color: t.palette.primary, fontFamily: t.fonts.heading }}
                 >
-                  <div
-                    className="text-xs tracking-[3px] mb-2"
-                    style={{ color: t.palette.accent }}
-                  >
-                    {t.mood}
-                  </div>
-                  <div
-                    className="text-xl font-bold"
-                    style={{ fontFamily: t.fonts.heading }}
-                  >
-                    {t.name}
-                  </div>
+                  {t.name}
                 </div>
-                <div className="flex-1 p-6">
-                  <p className="text-sm text-slate-700 leading-relaxed">{t.description}</p>
+                <div
+                  className="text-[11px] tracking-[2px] mt-1 font-semibold"
+                  style={{ color: t.palette.accent }}
+                >
+                  {t.mood}
                 </div>
+                <p className="mt-2 max-w-[240px] text-center text-xs text-slate-500 leading-relaxed">
+                  {t.description}
+                </p>
               </div>
             ))}
           </div>
