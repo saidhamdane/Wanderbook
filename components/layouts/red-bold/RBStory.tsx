@@ -4,6 +4,7 @@ import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 export default function RBStory({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/red-white/4.png" fallbackColor={palette.background}>
+      <CoverBlock color={palette.light} top="0" left="0" width="100%" height="45%" zIndex={1} />
       <PhotoZone
         src={slots.story1Image}
         palette={palette}
@@ -11,6 +12,8 @@ export default function RBStory({ slots, palette, fonts }: LayoutProps) {
         left="0"
         width="100%"
         height="45%"
+        zIndex={2}
+        required={false}
       />
 
       <CoverBlock color="#FFFFFF" top="45%" left="0" width="100%" height="55%" zIndex={1} />
@@ -66,6 +69,7 @@ export default function RBStory({ slots, palette, fonts }: LayoutProps) {
         {slots.story1Body}
       </TextZone>
 
+      <CoverBlock color={palette.light} top="50%" left="52%" width="46%" height="44%" zIndex={1} />
       <PhotoZone
         src={slots.story1ImageSecondary}
         palette={palette}
@@ -74,6 +78,7 @@ export default function RBStory({ slots, palette, fonts }: LayoutProps) {
         width="46%"
         height="44%"
         zIndex={2}
+        required={false}
       />
     </CanvaPageRoot>
   );

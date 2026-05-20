@@ -1,5 +1,5 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
   return (
@@ -13,31 +13,52 @@ export default function RBFeature({ slots, palette, fonts }: LayoutProps) {
         height="44%"
       />
 
+      <CoverBlock color="#FFFFFF" top="44%" left={0} width="54%" height="56%" zIndex={2} />
+
       <TextZone
-        top="48%"
+        top="46%"
         left="4%"
-        right="50%"
+        width="50%"
+        zIndex={3}
+        style={{
+          fontFamily: fonts.body,
+          fontSize: '11px',
+          color: palette.primary,
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          fontWeight: 700
+        }}
+      >
+        FEATURED STORY
+      </TextZone>
+
+      <TextZone
+        top="50%"
+        left="4%"
+        width="50%"
+        zIndex={3}
         style={{
           fontFamily: fonts.heading,
-          fontSize: '36px',
+          fontSize: '32px',
           fontWeight: 900,
-          color: palette.primary,
+          color: palette.text,
           textTransform: 'uppercase',
-          lineHeight: 1
+          lineHeight: 1.05
         }}
       >
         {slots.story2Headline}
       </TextZone>
 
       <TextZone
-        top="62%"
+        top="68%"
         left="4%"
-        right="50%"
+        width="50%"
         bottom="6%"
+        zIndex={3}
         style={{
           fontFamily: fonts.body,
-          fontSize: '12px',
-          lineHeight: 1.8,
+          fontSize: '11px',
+          lineHeight: 1.7,
           color: palette.text,
           whiteSpace: 'pre-wrap'
         }}

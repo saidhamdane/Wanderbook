@@ -1,8 +1,6 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
-// Photo / text zone positions are first-pass estimates. Tune to the
-// real /public/templates/red-white/1.png once the export lands.
 export default function RBCover({ slots, palette, fonts }: LayoutProps) {
   return (
     <CanvaPageRoot bg="/templates/red-white/1.png" fallbackColor={palette.primary}>
@@ -15,10 +13,13 @@ export default function RBCover({ slots, palette, fonts }: LayoutProps) {
         height="43%"
       />
 
+      <CoverBlock color="#FFFFFF" top="18%" left={0} width="100%" height="16%" zIndex={2} />
+
       <TextZone
         top="6%"
         left={0}
         right={0}
+        zIndex={3}
         style={{
           textAlign: 'center',
           fontFamily: fonts.body,
@@ -32,53 +33,57 @@ export default function RBCover({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <TextZone
-        top="11%"
+        top="19%"
         left={0}
         right={0}
+        zIndex={3}
         style={{
           textAlign: 'center',
           fontFamily: fonts.heading,
-          fontSize: '96px',
+          fontSize: '76px',
           fontWeight: 900,
-          color: '#FFFFFF',
-          letterSpacing: '4px',
+          color: palette.primary,
+          letterSpacing: '2px',
           lineHeight: 1,
           textTransform: 'uppercase'
         }}
       >
-        {slots.coverDestination}
+        {slots.coverDestination || 'DESTINATION'}
       </TextZone>
 
+      <CoverBlock color="#FFFFFF" top="78%" left={0} width="100%" height="22%" zIndex={2} />
+
       <TextZone
-        top="73%"
+        bottom="14%"
         left="6%"
         right="6%"
+        zIndex={3}
         style={{
+          textAlign: 'center',
           fontFamily: fonts.body,
           fontSize: '11px',
           letterSpacing: '3px',
-          color: '#FFFFFF',
-          fontWeight: 600,
-          display: 'flex',
-          justifyContent: 'space-between'
+          color: palette.primary,
+          textTransform: 'uppercase',
+          fontWeight: 700
         }}
       >
-        <span>{slots.coverIssue}</span>
-        <span>{slots.coverDate}</span>
+        FEATURED ARTICLES
       </TextZone>
 
       <TextZone
-        bottom="6%"
+        bottom="3%"
         left="6%"
         right="6%"
+        zIndex={3}
         style={{
           textAlign: 'center',
           fontFamily: fonts.heading,
-          fontSize: '32px',
+          fontSize: '22px',
           color: palette.primary,
-          fontWeight: 700,
+          fontWeight: 900,
           textTransform: 'uppercase',
-          lineHeight: 1.1
+          lineHeight: 1.2
         }}
       >
         {slots.coverFeatureTitle}

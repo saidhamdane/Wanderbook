@@ -1,5 +1,5 @@
 import { LayoutProps } from '@/lib/magazine/types';
-import { CanvaPageRoot, PhotoZone, TextZone } from '../canva-utils';
+import { CanvaPageRoot, CoverBlock, PhotoZone, TextZone } from '../canva-utils';
 
 export default function RBContents({ slots, palette, fonts }: LayoutProps) {
   const items: Array<[string, string?]> = [
@@ -22,10 +22,13 @@ export default function RBContents({ slots, palette, fonts }: LayoutProps) {
         height="36%"
       />
 
+      <CoverBlock color="#FFFFFF" top="36%" left={0} width="100%" height="64%" zIndex={2} />
+
       <TextZone
         top="3%"
         left="45%"
         right="3%"
+        zIndex={3}
         style={{
           fontFamily: fonts.heading,
           fontSize: '56px',
@@ -40,10 +43,11 @@ export default function RBContents({ slots, palette, fonts }: LayoutProps) {
       </TextZone>
 
       <TextZone
-        top="34%"
+        top="40%"
         left="6%"
         right="6%"
         bottom="6%"
+        zIndex={3}
         style={{
           fontFamily: fonts.body,
           color: palette.text,
