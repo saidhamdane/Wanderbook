@@ -14,17 +14,23 @@ function flattenImageSlots(template: MagazineTemplate): FlatSlot[] {
   return flat;
 }
 
-function scorePhoto(slot: FlatSlot, photo: PhotoAnalysis): number {
+function scorePhoto(photo: PhotoAnalysis, slot: FlatSlot): number {
   let score = 0;
-  if (slot.aspect === photo.orientation) score += 30;
-  else if (slot.aspect === 'any') score += 20;
-  else score += 0;
 
-  const tags = slot.preferredTags ?? [];
-  for (const t of tags) {
-    if (photo.tags.includes(t)) score += 10;
+  if (slot.aspect === 'any' || photo.orientation === slot.aspect) {
+    score += 30;
+  } else {
+    score += 5;
   }
-  if (tags.includes('hero') && photo.isHero) score += 20;
+
+  const slotTags = slot.preferredTags ?? [];
+  const matchingTags = slotTags.filter((t) => photo.tags.includes(t));
+  score += matchingTags.length * 10;
+
+  if (photo.isHero && slotTags.includes('hero')) score += 20;
+
+  score += photo.qualityScore * 10;
+
   return score;
 }
 
@@ -50,7 +56,7 @@ export function assignImagesToTemplate(
     let bestScore = -Infinity;
     for (const photo of userPhotos) {
       if (usedUser.has(photo.id)) continue;
-      const score = scorePhoto(slot, photo);
+      const score = scorePhoto(photo, slot);
       if (score > bestScore) {
         bestScore = score;
         bestPhoto = photo;
