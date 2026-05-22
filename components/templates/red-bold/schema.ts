@@ -24,94 +24,94 @@ export const redBoldTemplate: MagazineTemplate = {
     {
       id: 'cover',
       name: 'Cover',
-      layout: 'rb-cover',
+      layout: 'rb-html-cover',
       slots: [
-        { type: 'image', id: 'coverHeroImage', aspect: 'landscape', required: true, preferredTags: ['hero', 'outdoor', 'adventure', 'travel'] },
-        { type: 'text', id: 'coverDestination', kind: 'destination-name', maxLength: 12, required: true },
-        { type: 'text', id: 'coverMagazineLabel', kind: 'kicker', maxLength: 20, required: false, defaultValue: 'TRAVEL MAGAZINE' },
-        { type: 'text', id: 'coverDate', kind: 'kicker', maxLength: 15, required: false },
-        { type: 'text', id: 'coverIssue', kind: 'kicker', maxLength: 15, required: false },
-        { type: 'text', id: 'coverFeatureTitle', kind: 'headline', maxLength: 50, required: false }
+        { type: 'image', id: 'coverPhoto',    aspect: 'landscape', required: true,  preferredTags: ['hero', 'outdoor', 'adventure', 'travel'] },
+        { type: 'text',  id: 'coverKicker',   kind: 'kicker',      maxLength: 30,   required: false, defaultValue: 'Travel Issue' },
+        { type: 'text',  id: 'coverTitle',    kind: 'headline',    maxLength: 40,   required: true },
+        { type: 'text',  id: 'coverSubtitle', kind: 'subheadline', maxLength: 90,   required: false }
       ]
     },
     {
       id: 'contents',
       name: 'Table of Contents',
-      layout: 'rb-contents',
+      layout: 'rb-html-contents',
       slots: [
-        { type: 'image', id: 'contentsImage', aspect: 'landscape', required: true, preferredTags: ['scenic', 'travel', 'outdoor'] },
-        { type: 'text', id: 'item1Title', kind: 'headline', maxLength: 40, required: false },
-        { type: 'text', id: 'item1Desc', kind: 'body', maxLength: 80, required: false },
-        { type: 'text', id: 'item2Title', kind: 'headline', maxLength: 40, required: false },
-        { type: 'text', id: 'item2Desc', kind: 'body', maxLength: 80, required: false },
-        { type: 'text', id: 'item3Title', kind: 'headline', maxLength: 40, required: false },
-        { type: 'text', id: 'item3Desc', kind: 'body', maxLength: 80, required: false },
-        { type: 'text', id: 'item4Title', kind: 'headline', maxLength: 40, required: false },
-        { type: 'text', id: 'item5Title', kind: 'headline', maxLength: 40, required: false },
-        { type: 'text', id: 'item6Title', kind: 'headline', maxLength: 40, required: false }
+        { type: 'image', id: 'sidePhoto', aspect: 'landscape', required: true,  preferredTags: ['scenic', 'travel', 'outdoor'] },
+        { type: 'text',  id: 'pageTitle', kind: 'headline',    maxLength: 20,   required: false, defaultValue: 'CONTENTS' },
+        { type: 'text',  id: 'item1',     kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'item2',     kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'item3',     kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'item4',     kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'item5',     kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'item6',     kind: 'kicker',      maxLength: 40,   required: false }
       ]
     },
     {
-      id: 'masthead',
-      name: 'Masthead',
-      layout: 'rb-masthead',
+      id: 'story',
+      name: 'Story',
+      layout: 'rb-html-story',
       slots: [
-        { type: 'image', id: 'mastheadImage', aspect: 'landscape', required: true, preferredTags: ['scenic', 'outdoor', 'nature'] },
-        { type: 'text', id: 'mastheadBody', kind: 'body', maxLength: 300, required: false }
+        { type: 'image', id: 'widePhoto', aspect: 'landscape', required: true,  preferredTags: ['destination', 'scenic', 'outdoor'] },
+        { type: 'text',  id: 'pageTitle', kind: 'headline',    maxLength: 50,   required: true },
+        { type: 'text',  id: 'body',      kind: 'body',        maxLength: 400,  required: false },
+        { type: 'text',  id: 'caption',   kind: 'caption',     maxLength: 80,   required: false }
       ]
     },
     {
-      id: 'story1',
-      name: 'Main Story',
-      layout: 'rb-story',
+      id: 'feature',
+      name: 'Feature',
+      layout: 'rb-html-feature',
       slots: [
-        { type: 'image', id: 'story1Image', aspect: 'landscape', required: true, preferredTags: ['destination', 'scenic', 'dramatic'] },
-        { type: 'image', id: 'story1ImageSecondary', aspect: 'portrait', required: true, preferredTags: ['local', 'culture', 'people'] },
-        { type: 'text', id: 'story1Headline', kind: 'headline', maxLength: 50, required: true },
-        { type: 'text', id: 'story1Body', kind: 'body', maxLength: 500, required: false }
+        { type: 'image', id: 'featurePhoto', aspect: 'landscape', required: true,  preferredTags: ['destination', 'dramatic', 'outdoor'] },
+        { type: 'image', id: 'detailPhoto',  aspect: 'portrait',  required: false, preferredTags: ['local', 'culture', 'detail'] },
+        { type: 'text',  id: 'featureTitle', kind: 'headline',    maxLength: 50,   required: true },
+        { type: 'text',  id: 'body',         kind: 'body',        maxLength: 400,  required: false }
       ]
     },
     {
-      id: 'story2',
-      name: 'Feature Story',
-      layout: 'rb-feature',
+      id: 'essay',
+      name: 'Photo Essay',
+      layout: 'rb-html-essay',
       slots: [
-        { type: 'image', id: 'story2Image1', aspect: 'landscape', required: true, preferredTags: ['outdoor', 'adventure'] },
-        { type: 'image', id: 'story2Image2', aspect: 'portrait', required: false, preferredTags: ['local', 'culture'] },
-        { type: 'text', id: 'story2Headline', kind: 'headline', maxLength: 40, required: true },
-        { type: 'text', id: 'story2Body', kind: 'body', maxLength: 400, required: false }
+        { type: 'image', id: 'widePhoto',   aspect: 'landscape', required: true,  preferredTags: ['food', 'outdoor', 'scenic'] },
+        { type: 'image', id: 'squarePhoto', aspect: 'square',    required: false, preferredTags: ['detail', 'local', 'food'] },
+        { type: 'text',  id: 'pageTitle',   kind: 'headline',    maxLength: 50,   required: true },
+        { type: 'text',  id: 'body',        kind: 'body',        maxLength: 350,  required: false }
       ]
     },
     {
-      id: 'memories',
-      name: 'Photo Grid',
-      layout: 'rb-grid',
+      id: 'gallery',
+      name: 'Photo Gallery',
+      layout: 'rb-html-gallery',
       slots: [
-        { type: 'image', id: 'grid1', aspect: 'any', required: true, preferredTags: ['group', 'activity'] },
-        { type: 'image', id: 'grid2', aspect: 'any', required: false, preferredTags: ['scenic'] },
-        { type: 'image', id: 'grid3', aspect: 'any', required: false, preferredTags: ['food', 'local'] },
-        { type: 'image', id: 'grid4', aspect: 'any', required: false, preferredTags: ['outdoor'] },
-        { type: 'text', id: 'gridHeadline', kind: 'headline', maxLength: 30, required: false }
+        { type: 'image', id: 'gridA',        aspect: 'any',    required: true,  preferredTags: ['group', 'activity', 'family'] },
+        { type: 'image', id: 'gridB',        aspect: 'any',    required: false, preferredTags: ['scenic', 'outdoor'] },
+        { type: 'image', id: 'gridC',        aspect: 'any',    required: false, preferredTags: ['food', 'detail'] },
+        { type: 'image', id: 'gridD',        aspect: 'any',    required: false, preferredTags: ['street', 'local'] },
+        { type: 'text',  id: 'collageTitle', kind: 'headline', maxLength: 30,   required: false, defaultValue: 'MEMORIES' },
+        { type: 'text',  id: 'caption',      kind: 'caption',  maxLength: 100,  required: false }
       ]
     },
     {
       id: 'quote',
-      name: 'Quote Page',
-      layout: 'rb-quote',
+      name: 'Quote Spread',
+      layout: 'rb-html-quote',
       slots: [
-        { type: 'image', id: 'quoteImage', aspect: 'landscape', required: true, preferredTags: ['scenic', 'calm', 'sunset'] },
-        { type: 'text', id: 'quoteText', kind: 'quote', maxLength: 120, required: true },
-        { type: 'text', id: 'quoteBody', kind: 'body', maxLength: 200, required: false }
+        { type: 'image', id: 'featurePhoto', aspect: 'landscape', required: true,  preferredTags: ['scenic', 'sunset', 'calm'] },
+        { type: 'text',  id: 'quote',        kind: 'quote',       maxLength: 140,  required: true },
+        { type: 'text',  id: 'caption',      kind: 'caption',     maxLength: 80,   required: false }
       ]
     },
     {
       id: 'back-cover',
       name: 'Back Cover',
-      layout: 'rb-back-cover',
+      layout: 'rb-html-back',
       slots: [
-        { type: 'image', id: 'backImage', aspect: 'portrait', required: true, preferredTags: ['scenic', 'outdoor', 'dramatic'] },
-        { type: 'text', id: 'backTagline', kind: 'tagline', maxLength: 60, required: false },
-        { type: 'text', id: 'backWebsite', kind: 'kicker', maxLength: 30, required: false, defaultValue: 'WWW.WANDERBOOK.COM' }
+        { type: 'image', id: 'coverPhoto', aspect: 'portrait', required: true,  preferredTags: ['scenic', 'outdoor', 'dramatic'] },
+        { type: 'text',  id: 'pageTitle',  kind: 'tagline',    maxLength: 60,   required: false },
+        { type: 'text',  id: 'body',       kind: 'body',       maxLength: 120,  required: false },
+        { type: 'text',  id: 'caption',    kind: 'caption',    maxLength: 30,   required: false, defaultValue: 'WWW.WANDERBOOK.COM' }
       ]
     }
   ]

@@ -50,7 +50,16 @@ const registry: Record<string, ComponentType<LayoutProps>> = {
   'gb-article2': dynamic(() => import('./green-beige/GBArticle2')),
   'gb-collage': dynamic(() => import('./green-beige/GBCollage')),
   'gb-memories': dynamic(() => import('./green-beige/GBMemories')),
-  'gb-back-cover': dynamic(() => import('./green-beige/GBBackCover'))
+  'gb-back-cover': dynamic(() => import('./green-beige/GBBackCover')),
+  // Red Bold — HTML-derived slot layout (from /tmp/red-edit.html)
+  'rb-html-cover':    dynamic(() => import('./red-bold-html/RBHCover')),
+  'rb-html-contents': dynamic(() => import('./red-bold-html/RBHContents')),
+  'rb-html-story':    dynamic(() => import('./red-bold-html/RBHStory')),
+  'rb-html-feature':  dynamic(() => import('./red-bold-html/RBHFeature')),
+  'rb-html-essay':    dynamic(() => import('./red-bold-html/RBHEssay')),
+  'rb-html-gallery':  dynamic(() => import('./red-bold-html/RBHGallery')),
+  'rb-html-quote':    dynamic(() => import('./red-bold-html/RBHQuote')),
+  'rb-html-back':     dynamic(() => import('./red-bold-html/RBHBack'))
 };
 
 export function getLayout(layoutKey: string): ComponentType<LayoutProps> | null {

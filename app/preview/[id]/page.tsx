@@ -21,6 +21,8 @@ export default async function PreviewPage({ params, searchParams }: Params) {
     );
   }
 
+  const isRedBold = doc.templateId === 'red-bold';
+
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-30 bg-slate-900 text-white px-5 py-4 flex items-center justify-between border-b-4 border-amber-500">
@@ -37,7 +39,16 @@ export default async function PreviewPage({ params, searchParams }: Params) {
           </Link>
         </div>
       </header>
-      <MagazineRenderer doc={doc} />
+      {isRedBold ? (
+        <iframe
+          src={`/api/inject-red-bold/${doc.id}`}
+          className="w-full border-0"
+          style={{ height: 'calc(100vh - 73px)', display: 'block' }}
+          title="Red Bold magazine preview"
+        />
+      ) : (
+        <MagazineRenderer doc={doc} />
+      )}
     </main>
   );
 }
