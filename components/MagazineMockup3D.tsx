@@ -60,34 +60,28 @@ export default function MagazineMockup3D({ template, isHovered, onClick, onMouse
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: template.palette.primary,
+          background: `linear-gradient(135deg, ${template.palette.primary}, ${template.palette.accent}88)`,
           borderRadius: '2px 6px 6px 2px',
           overflow: 'hidden',
-          backfaceVisibility: 'hidden',
         }}>
-          {/* Cover photo */}
+          {/* Cover photo — fills entire face */}
           <img
             src={`/templates/${template.id}-cover.jpg`}
-            onError={(e) => {
-              const img = e.currentTarget;
-              img.style.display = 'none';
-              if (img.parentElement) {
-                img.parentElement.style.background =
-                  `linear-gradient(135deg, ${template.palette.primary}, ${template.palette.accent}88)`;
-              }
-            }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
             style={{
-              position: 'absolute', inset: 0,
+              position: 'absolute',
+              top: 0, left: 0,
               width: '100%', height: '100%',
-              objectFit: 'cover', display: 'block',
+              objectFit: 'cover',
+              display: 'block',
             }}
             alt=""
           />
 
-          {/* Gradient overlay */}
+          {/* Dark vignette — keeps photo visible, darkens only bottom for text */}
           <div style={{
             position: 'absolute', inset: 0,
-            background: `linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 35%, ${template.palette.primary}cc 80%, ${template.palette.primary} 100%)`,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 45%, rgba(0,0,0,0.72) 100%)',
           }} />
 
           {/* Cover text */}
@@ -123,13 +117,6 @@ export default function MagazineMockup3D({ template, isHovered, onClick, onMouse
               background: template.palette.accent,
             }} />
           </div>
-
-          {/* Fallback gradient when no image */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: `linear-gradient(135deg, ${template.palette.primary} 0%, ${template.palette.accent}55 50%, ${template.palette.primary}dd 100%)`,
-            zIndex: -1,
-          }} />
 
           {/* Badge */}
           {template.badge && (

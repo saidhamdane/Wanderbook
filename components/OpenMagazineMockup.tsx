@@ -105,23 +105,17 @@ export function OpenMagazineMockup({ template, selected, onSelect }: Props) {
             src={`/templates/${template.id}-cover.jpg`}
             alt={template.name}
             style={{
-              position: 'absolute', inset: 0,
+              position: 'absolute',
+              top: 0, left: 0,
               width: '100%', height: '100%',
               objectFit: 'cover', display: 'block',
             }}
-            onError={(e) => {
-              const img = e.currentTarget;
-              img.style.display = 'none';
-              if (img.parentElement) {
-                img.parentElement.style.background =
-                  `linear-gradient(135deg, ${template.palette.primary}, ${template.palette.accent}88)`;
-              }
-            }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
           />
-          {/* Cover name overlay */}
+          {/* Cover name overlay — dark vignette only, keeps photo visible */}
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0,
-            background: `linear-gradient(transparent, ${template.palette.primary}dd)`,
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.78))',
             padding: '18px 8px 7px',
           }}>
             <div style={{
