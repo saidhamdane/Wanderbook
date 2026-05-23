@@ -66,7 +66,7 @@ async function generateRedBoldMagazine(
             slots[slot.id] = input.destination.toUpperCase();
             break;
           case 'coverKicker':
-            slots[slot.id] = year + ' EDITION';
+            slots[slot.id] = copy.coverKicker || year + ' EDITION';
             break;
           case 'coverSubtitle':
             slots[slot.id] =
@@ -79,13 +79,13 @@ async function generateRedBoldMagazine(
             slots[slot.id] = page.name.toUpperCase();
             break;
           case 'featureTitle':
-            slots[slot.id] = 'HIGHLIGHTS';
+            slots[slot.id] = copy.coverFeatureTitle || copy.featureTitle || 'HIGHLIGHTS';
             break;
           case 'collageTitle':
             slots[slot.id] = 'MEMORIES';
             break;
           case 'body':
-            slots[slot.id] = copy.body || bodyFallback;
+            slots[slot.id] = copy.body || copy.welcomeBody || bodyFallback;
             break;
           case 'quote':
             slots[slot.id] =
@@ -132,11 +132,39 @@ async function generateRedBoldMagazine(
   };
 }
 
+function generateHanoverMagazine(
+  input: GenerateMagazineInput,
+  template: MagazineTemplate,
+): MagazineDocument {
+  // Static template — pages are pre-designed PNGs served directly from disk.
+  // No copy generation, no photo injection (Phase 2 concern).
+  const pages = template.pages.map((page) => ({
+    pageId: page.id,
+    layout: page.layout,
+    slots: {} as Record<string, string>,
+  }));
+
+  return {
+    id: 'mag_' + Date.now(),
+    templateId: input.templateId,
+    destination: input.destination,
+    familyName: input.familyName || input.travelers || undefined,
+    generatedAt: new Date().toISOString(),
+    sessionId: input.sessionId,
+    pages,
+    template,
+  };
+}
+
 export async function generateMagazine(
   input: GenerateMagazineInput
 ): Promise<MagazineDocument> {
   const template = getTemplateById(input.templateId);
   const analyzed = analyzeUploadedPhotos(input.userPhotos);
+
+  if (input.templateId === 'hanover') {
+    return generateHanoverMagazine(input, template);
+  }
 
   if (input.templateId === 'red-bold') {
     return generateRedBoldMagazine(input, template, analyzed);

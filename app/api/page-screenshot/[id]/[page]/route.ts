@@ -18,6 +18,20 @@ export async function GET(
   if (!doc) return new Response('Magazine not found', { status: 404 });
 
   const pageNum = parseInt(page, 10);
+
+  // Hanover: static PNGs — bypass puppeteer entirely
+  if (doc.templateId === 'hanover') {
+    const res = await fetch(`${BASE}/api/inject-hanover/${id}?page=${pageNum}`);
+    if (!res.ok) return new Response('Page not found', { status: 404 });
+    const ab = await res.arrayBuffer();
+    return new Response(ab, {
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  }
+
   let url: string;
 
   if (doc.templateId === 'red-bold') {

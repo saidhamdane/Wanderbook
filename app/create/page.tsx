@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAllTemplates } from '@/lib/magazine/template-registry';
-import { TemplateCard } from '@/components/TemplateCard';
+import { OpenMagazineMockup } from '@/components/OpenMagazineMockup';
 import { UploadZone } from '@/components/UploadZone';
 import { CoverPreview } from './CoverPreview';
 import { CinematicOverlay } from './CinematicOverlay';
@@ -94,13 +94,46 @@ export default function CreatePage() {
           {step === 'template' && (
             <section>
               <Heading eyebrow="STEP 1 OF 3" title="Choose your magazine style"
-                subtitle="Each template controls cover layout, typography, colour, and photo placement." />
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-                {templates.map((t) => (
-                  <TemplateCard key={t.id} template={t}
-                    selected={templateId === t.id} onSelect={() => setTplId(t.id)} />
-                ))}
+                subtitle="Pick a template — scroll to see all six. Each controls cover, typography, and photo placement." />
+
+              {/* Physical magazine mockup picker */}
+              <div style={{ margin: '24px -20px 0', borderRadius: 12, overflow: 'hidden' }}>
+                <div
+                  className="template-scroll"
+                  style={{
+                    display: 'flex',
+                    gap: 8,
+                    overflowX: 'auto',
+                    padding: '40px 24px 32px',
+                    background: '#130f08',
+                    backgroundImage: `
+                      radial-gradient(ellipse at 20% 60%, #2a1a0a22 0%, transparent 55%),
+                      radial-gradient(ellipse at 80% 40%, #0a142233 0%, transparent 55%)
+                    `,
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                    msOverflowStyle: 'none',
+                    scrollbarWidth: 'none',
+                  }}
+                >
+                  <style>{`.template-scroll::-webkit-scrollbar{display:none}`}</style>
+                  {templates.map((t) => (
+                    <OpenMagazineMockup
+                      key={t.id}
+                      template={t}
+                      selected={templateId === t.id}
+                      onSelect={() => setTplId(t.id)}
+                    />
+                  ))}
+                </div>
               </div>
+
+              {templateId && (
+                <p className="mt-3 text-center text-xs text-amber-600 font-semibold tracking-widest">
+                  {templates.find(t => t.id === templateId)?.name?.toUpperCase()} SELECTED
+                </p>
+              )}
+
               <NavRow>
                 <button onClick={() => setStep('photos')} disabled={!canNextTemplate}
                   className={primaryBtn(canNextTemplate)}>Upload Photos →</button>
