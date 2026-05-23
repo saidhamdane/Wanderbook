@@ -16,6 +16,18 @@ export default function FlipBook({
   const [currentPage, setCurrentPage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [loadedCount, setLoadedCount] = useState(0)
+  const [copied, setCopied] = useState(false)
+
+  const shareUrl = typeof window !== 'undefined'
+    ? window.location.href
+    : ''
+
+  function handleShare() {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {/* ignore */})
+  }
 
   useEffect(() => {
     if (!bookRef.current) return
@@ -168,30 +180,46 @@ export default function FlipBook({
 
         {/* Controls */}
         {!loading && (
-          <div style={{
-            marginTop: 20, fontSize: 13,
-            display: 'flex', alignItems: 'center', gap: 20,
-          }}>
+          <>
+            <div style={{
+              marginTop: 20, fontSize: 13,
+              display: 'flex', alignItems: 'center', gap: 20,
+            }}>
+              <button
+                onClick={() => flipRef.current?.flipPrev()}
+                style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff', padding: '6px 18px', borderRadius: 20,
+                  cursor: 'pointer', fontSize: 20, lineHeight: 1,
+                }}
+              >&#8249;</button>
+              <span style={{ color: 'rgba(255,255,255,0.6)', letterSpacing: '0.12em' }}>
+                {currentPage + 1} / {pageCount}
+              </span>
+              <button
+                onClick={() => flipRef.current?.flipNext()}
+                style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff', padding: '6px 18px', borderRadius: 20,
+                  cursor: 'pointer', fontSize: 20, lineHeight: 1,
+                }}
+              >&#8250;</button>
+            </div>
+            {/* Share button */}
             <button
-              onClick={() => flipRef.current?.flipPrev()}
+              onClick={handleShare}
               style={{
-                background: 'none', border: '1px solid rgba(255,255,255,0.2)',
-                color: '#fff', padding: '6px 18px', borderRadius: 20,
-                cursor: 'pointer', fontSize: 20, lineHeight: 1,
+                marginTop: 16, display: 'flex', alignItems: 'center', gap: 8,
+                background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)',
+                border: `1px solid ${copied ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                color: copied ? '#86efac' : 'rgba(255,255,255,0.7)',
+                padding: '8px 20px', borderRadius: 20, cursor: 'pointer',
+                fontSize: 12, letterSpacing: '0.08em', transition: 'all 0.3s',
               }}
-            >&#8249;</button>
-            <span style={{ color: 'rgba(255,255,255,0.6)', letterSpacing: '0.12em' }}>
-              {currentPage + 1} / {pageCount}
-            </span>
-            <button
-              onClick={() => flipRef.current?.flipNext()}
-              style={{
-                background: 'none', border: '1px solid rgba(255,255,255,0.2)',
-                color: '#fff', padding: '6px 18px', borderRadius: 20,
-                cursor: 'pointer', fontSize: 20, lineHeight: 1,
-              }}
-            >&#8250;</button>
-          </div>
+            >
+              {copied ? '✓ Link copied!' : '📋 Share your magazine'}
+            </button>
+          </>
         )}
       </div>
     </div>

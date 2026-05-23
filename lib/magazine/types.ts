@@ -79,6 +79,7 @@ export type MagazineDocument = {
   id: string;
   templateId: string;
   destination: string;
+  familyName?: string;
   generatedAt: string;
   sessionId?: string;
   pages: Array<{

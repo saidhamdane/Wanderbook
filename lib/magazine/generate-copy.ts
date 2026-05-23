@@ -230,12 +230,60 @@ function buildUserPrompt(input: CopyInput): string {
   ].join('\n');
 }
 
+// Claude Haiku enrichment — generates poetic headline-level copy.
+// Runs only if ANTHROPIC_API_KEY is set; always falls back gracefully.
+async function enrichWithClaude(
+  copy: Record<string, string>,
+  input: CopyInput
+): Promise<Record<string, string>> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return copy;
+  try {
+    const { default: Anthropic } = await import('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey });
+    const msg = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 400,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            'You are an editor at Condé Nast Traveller.',
+            `Write editorial copy for a family travel magazine about a trip to ${input.destination}.`,
+            `Family: ${input.travelers}. Tone: ${input.style}.`,
+            'Return ONLY a JSON object with these keys (max 20 words each):',
+            '  coverKicker   — witty 3-word travel phrase (e.g. "Sun. Salt. Story.")',
+            '  storyIntro    — two evocative opening sentences about the destination',
+            '  pullQuote     — one beautiful sentence about family travel',
+            '  featureTitle  — four-word editorial section title',
+            '  quoteBody     — poetic one-liner about this specific place',
+            'JSON only. No markdown. No explanation.'
+          ].join('\n'),
+        }
+      ]
+    });
+    const text = msg.content[0]?.type === 'text' ? msg.content[0].text : '{}';
+    const match = text.match(/\{[\s\S]*\}/);
+    const parsed = match ? JSON.parse(match[0]) : {};
+    return {
+      ...copy,
+      ...(parsed.coverKicker   ? { coverKicker:   parsed.coverKicker }   : {}),
+      ...(parsed.storyIntro    ? { welcomeBody:   parsed.storyIntro }    : {}),
+      ...(parsed.pullQuote     ? { pullQuote:     parsed.pullQuote }      : {}),
+      ...(parsed.featureTitle  ? { coverFeatureTitle: parsed.featureTitle } : {}),
+      ...(parsed.quoteBody     ? { quoteBody:     parsed.quoteBody }      : {}),
+    };
+  } catch {
+    return copy;
+  }
+}
+
 export async function generateEditorialCopy(
   input: CopyInput
 ): Promise<Record<string, string>> {
   const defaults = defaultsFor(input);
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return defaults;
+  if (!apiKey) return enrichWithClaude(defaults, input);
 
   try {
     const client = new OpenAI({ apiKey });
@@ -260,11 +308,12 @@ export async function generateEditorialCopy(
     });
     const raw = completion.choices[0]?.message?.content || '{}';
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object') {
-      return { ...defaults, ...parsed };
-    }
-    return defaults;
+    const oaiCopy = parsed && typeof parsed === 'object'
+      ? { ...defaults, ...parsed }
+      : defaults;
+    // Overlay Claude's poetic fields on top of the GPT-4o-mini base
+    return enrichWithClaude(oaiCopy, input);
   } catch {
-    return defaults;
+    return enrichWithClaude(defaults, input);
   }
 }
