@@ -29,11 +29,24 @@ function injectText(article: string, slotClass: string, text: string): string {
   if (!text) return article;
   const idx = article.indexOf(slotClass);
   if (idx === -1) return article;
-  const tagEnd = article.indexOf('>', idx) + 1;
-  if (tagEnd === 0) return article;
-  const closeStart = article.indexOf('</', tagEnd);
+  const gtPos = article.indexOf('>', idx);
+  if (gtPos === -1) return article;
+  const closeStart = article.indexOf('</', gtPos + 1);
   if (closeStart === -1) return article;
-  return article.slice(0, tagEnd) + escapeHtml(text) + article.slice(closeStart);
+  if (slotClass.includes('cover-title')) {
+    const len = text.length;
+    const fontSize = len > 10 ? Math.max(28, 520 / len) + 'px' : '4rem';
+    return article.slice(0, gtPos) + ` style="font-size:${fontSize} !important">` + escapeHtml(text) + article.slice(closeStart);
+  }
+  const isTitle = slotClass.includes('title') ||
+                  slotClass.includes('essay') ||
+                  slotClass.includes('feature') ||
+                  slotClass.includes('story');
+  if (isTitle && text.length > 8) {
+    const fontSize = Math.max(24, 380 / text.length) + 'px';
+    return article.slice(0, gtPos) + ` style="font-size:${fontSize} !important">` + escapeHtml(text) + article.slice(closeStart);
+  }
+  return article.slice(0, gtPos + 1) + escapeHtml(text) + article.slice(closeStart);
 }
 
 function injectContentsList(article: string, items: string[]): string {
@@ -140,14 +153,14 @@ img.imported-overlay,
 }
 
 /* ── Cover title ──────────────────────────────────────────────────────── */
-.imported-slot-cover-title {
-  font-family: 'Playfair Display', 'Times New Roman', Georgia, serif;
-  font-size: 72px;
-  font-weight: 900;
-  line-height: 0.88;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #2a1f1a;
+.imported-slot-cover-title,
+[class*="imported-slot-cover-title"] {
+  font-size: clamp(1.8rem, 5.5vw, 4rem) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  display: block !important;
 }
 .imported-slot-cover-title-red { color: #ef321f; }
 
@@ -164,10 +177,12 @@ img.imported-overlay,
 /* ── Serif title (articles) ──────────────────────────────────────────── */
 .imported-slot-serif-title {
   font-family: 'Playfair Display', 'Times New Roman', Georgia, serif;
-  font-size: 36px;
+  font-size: clamp(1.5rem, 6vw, 3.5rem);
   font-weight: 700;
   line-height: 1.0;
   color: #2a1f1a;
+  overflow: visible;
+  white-space: normal;
 }
 .imported-title-overlap { color: #2a1f1a; }
 .imported-title-on-red  { color: #fff; }

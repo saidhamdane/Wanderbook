@@ -9,26 +9,53 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const form = await req.formData();
-    const templateId = String(form.get('templateId') || '');
-    const destination = String(form.get('destination') || '');
-    const travelers = String(form.get('travelers') || '');
-    const style = String(form.get('style') || 'Warm & Personal');
-    const language = normalizeLanguage(form.get('language') ? String(form.get('language')) : 'en');
-    const notes = form.get('notes') ? String(form.get('notes')) : undefined;
-    const useStockFallback = String(form.get('useStockFallback') || 'true') === 'true';
+    const ct = req.headers.get('content-type') ?? '';
+    let templateId = '';
+    let destination = '';
+    let travelers = '';
+    let style = 'Warm & Personal';
+    let language = 'en';
+    let notes: string | undefined;
+    let tagline: string | undefined;
+    let familyName: string | undefined;
+    let useStockFallback = true;
+    let photoFiles: File[] = [];
+
+    if (ct.includes('application/json')) {
+      const body = await req.json();
+      templateId = String(body.templateId || '');
+      destination = String(body.destination || '');
+      travelers = String(body.travelers || body.familyName || '');
+      style = String(body.style || 'Warm & Personal');
+      language = String(body.language || 'en');
+      notes = body.notes ? String(body.notes) : undefined;
+      tagline = body.tagline ? String(body.tagline) : undefined;
+      familyName = body.familyName ? String(body.familyName) : undefined;
+      useStockFallback = body.useStockFallback !== false;
+    } else {
+      const form = await req.formData();
+      templateId = String(form.get('templateId') || '');
+      destination = String(form.get('destination') || '');
+      travelers = String(form.get('travelers') || '');
+      style = String(form.get('style') || 'Warm & Personal');
+      language = String(form.get('language') || 'en');
+      notes = form.get('notes') ? String(form.get('notes')) : undefined;
+      tagline = form.get('tagline') ? String(form.get('tagline')) : undefined;
+      familyName = form.get('familyName') ? String(form.get('familyName')) : undefined;
+      useStockFallback = String(form.get('useStockFallback') || 'true') === 'true';
+      const fileEntries = form.getAll('photos');
+      for (const entry of fileEntries) {
+        if (entry instanceof File && entry.size > 0) photoFiles.push(entry);
+      }
+    }
+
+    language = normalizeLanguage(language);
 
     if (!templateId || !destination) {
       return NextResponse.json(
         { error: 'templateId and destination are required' },
         { status: 400 }
       );
-    }
-
-    const fileEntries = form.getAll('photos');
-    const photoFiles: File[] = [];
-    for (const entry of fileEntries) {
-      if (entry instanceof File && entry.size > 0) photoFiles.push(entry);
     }
 
     const { sessionId, photos } = await saveUploadedFiles(photoFiles);
@@ -40,6 +67,8 @@ export async function POST(req: NextRequest) {
       style,
       language,
       notes,
+      tagline,
+      familyName,
       userPhotos: photos,
       useStockFallback,
       sessionId

@@ -105,6 +105,8 @@ export type GenerateMagazineInput = {
   style: string;
   language: string;
   notes?: string;
+  tagline?: string;
+  familyName?: string;
   userPhotos: UploadedPhoto[];
   useStockFallback: boolean;
   sessionId?: string;

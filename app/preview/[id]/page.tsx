@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { loadMagazine } from '@/lib/magazine/store';
 import { MagazineRenderer } from '@/components/MagazineRenderer';
 import { DownloadPdfButton } from './DownloadPdfButton';
+import { RedBoldViewer } from './RedBoldViewer';
 
 type Params = { params: { id: string }; searchParams: { print?: string } };
 
@@ -21,7 +22,9 @@ export default async function PreviewPage({ params, searchParams }: Params) {
     );
   }
 
-  const isRedBold = doc.templateId === 'red-bold';
+  if (doc.templateId === 'red-bold') {
+    return <RedBoldViewer magazineId={doc.id} />;
+  }
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -39,16 +42,7 @@ export default async function PreviewPage({ params, searchParams }: Params) {
           </Link>
         </div>
       </header>
-      {isRedBold ? (
-        <iframe
-          src={`/api/inject-red-bold/${doc.id}`}
-          className="w-full border-0"
-          style={{ height: 'calc(100vh - 73px)', display: 'block' }}
-          title="Red Bold magazine preview"
-        />
-      ) : (
-        <MagazineRenderer doc={doc} />
-      )}
+      <MagazineRenderer doc={doc} />
     </main>
   );
 }

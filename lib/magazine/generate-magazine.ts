@@ -70,6 +70,8 @@ async function generateRedBoldMagazine(
             break;
           case 'coverSubtitle':
             slots[slot.id] =
+              input.tagline ||
+              (input.familyName ? input.familyName + ' Family' : '') ||
               copy.coverSubtitle ||
               `A journey through ${input.destination} by ${input.travelers}`;
             break;

@@ -1,10 +1,36 @@
 import { MagazineDocument } from './types';
 import { getSupabaseAdmin } from '../supabase';
+import fs from 'fs';
+import path from 'path';
 
-const memoryStore: Map<string, MagazineDocument> = new Map();
+const DATA_FILE = path.join(process.cwd(), 'data', 'magazines.json');
+
+function loadFromDisk(): Map<string, MagazineDocument> {
+  try {
+    if (!fs.existsSync(DATA_FILE)) return new Map();
+    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+    const entries: [string, MagazineDocument][] = Object.entries(JSON.parse(raw));
+    return new Map(entries);
+  } catch {
+    return new Map();
+  }
+}
+
+function saveToDisk(store: Map<string, MagazineDocument>): void {
+  try {
+    const obj = Object.fromEntries(store);
+    fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
+    fs.writeFileSync(DATA_FILE, JSON.stringify(obj, null, 2), 'utf-8');
+  } catch {
+    // disk write failed — in-memory store still holds the document
+  }
+}
+
+const memoryStore: Map<string, MagazineDocument> = loadFromDisk();
 
 export async function saveMagazine(doc: MagazineDocument): Promise<void> {
   memoryStore.set(doc.id, doc);
+  saveToDisk(memoryStore);
   const supabase = getSupabaseAdmin();
   if (!supabase) return;
   try {
@@ -16,7 +42,7 @@ export async function saveMagazine(doc: MagazineDocument): Promise<void> {
       created_at: doc.generatedAt
     });
   } catch {
-    // Supabase unavailable — memory store still holds the document
+    // Supabase unavailable — disk + memory store still holds the document
   }
 }
 
