@@ -135,14 +135,37 @@ async function generateRedBoldMagazine(
 function generateHanoverMagazine(
   input: GenerateMagazineInput,
   template: MagazineTemplate,
+  analyzed: PhotoAnalysis[],
 ): MagazineDocument {
-  // Static template — pages are pre-designed PNGs served directly from disk.
-  // No copy generation, no photo injection (Phase 2 concern).
-  const pages = template.pages.map((page) => ({
-    pageId: page.id,
-    layout: page.layout,
-    slots: {} as Record<string, string>,
-  }));
+  const year = String(new Date().getFullYear());
+  const photos = analyzed.map((p) => p.url);
+  const getPhoto = (idx: number) =>
+    photos.length > 0 ? photos[idx % photos.length] : '';
+
+  // Photo slot assignments for the 7 pages that have HTML overlays
+  const photoMap: Record<number, Record<string, string>> = {
+    1:  { photo1: getPhoto(0) },
+    4:  { photo1: getPhoto(1) },
+    5:  { photo1: getPhoto(2) },
+    9:  { photo1: getPhoto(3) },
+    10: { photo1: getPhoto(4) },
+    11: { photo1: getPhoto(5) },
+    12: { photo1: getPhoto(6), photo2: getPhoto(7), photo3: getPhoto(8), photo4: getPhoto(9) },
+  };
+
+  const pages = template.pages.map((page, i) => {
+    const pageNum = i + 1;
+    return {
+      pageId: page.id,
+      layout: page.layout,
+      slots: {
+        destination: input.destination,
+        familyName: input.familyName || input.travelers || '',
+        year,
+        ...(photoMap[pageNum] ?? {}),
+      } as Record<string, string>,
+    };
+  });
 
   return {
     id: 'mag_' + Date.now(),
@@ -163,7 +186,7 @@ export async function generateMagazine(
   const analyzed = analyzeUploadedPhotos(input.userPhotos);
 
   if (input.templateId === 'hanover') {
-    return generateHanoverMagazine(input, template);
+    return generateHanoverMagazine(input, template, analyzed);
   }
 
   if (input.templateId === 'red-bold') {

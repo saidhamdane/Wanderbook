@@ -19,22 +19,26 @@ export async function GET(
 
   const pageNum = parseInt(page, 10);
 
-  // Hanover: static PNGs — bypass puppeteer entirely
+  // Hanover: non-injected pages return PNG directly; injected pages use puppeteer on the HTML overlay
   if (doc.templateId === 'hanover') {
-    const res = await fetch(`${BASE}/api/inject-hanover/${id}?page=${pageNum}`);
-    if (!res.ok) return new Response('Page not found', { status: 404 });
-    const ab = await res.arrayBuffer();
-    return new Response(ab, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
+    const INJECTED_PAGES = new Set([1, 4, 5, 9, 10, 11, 12]);
+    if (!INJECTED_PAGES.has(pageNum)) {
+      // Static PNG — skip puppeteer for speed
+      const res = await fetch(`${BASE}/api/inject-hanover/${id}?page=${pageNum}`);
+      if (!res.ok) return new Response('Page not found', { status: 404 });
+      const ab = await res.arrayBuffer();
+      return new Response(ab, {
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' },
+      });
+    }
+    // Injected page falls through to puppeteer below
   }
 
   let url: string;
 
-  if (doc.templateId === 'red-bold') {
+  if (doc.templateId === 'hanover') {
+    url = `${BASE}/api/inject-hanover/${id}?page=${pageNum}`;
+  } else if (doc.templateId === 'red-bold') {
     // Page 1 = dedication; pages 2-N = inject-red-bold pages 1-(N-1)
     if (pageNum === 1) {
       url = `${BASE}/api/dedication/${id}`;
