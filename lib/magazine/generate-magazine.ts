@@ -142,15 +142,24 @@ function generateHanoverMagazine(
   const getPhoto = (idx: number) =>
     photos.length > 0 ? photos[idx % photos.length] : '';
 
-  // Photo slot assignments for the 7 pages that have HTML overlays
+  // Photo slot assignments for all 16 injected pages
   const photoMap: Record<number, Record<string, string>> = {
     1:  { photo1: getPhoto(0) },
-    4:  { photo1: getPhoto(1) },
-    5:  { photo1: getPhoto(2) },
-    9:  { photo1: getPhoto(3) },
-    10: { photo1: getPhoto(4) },
-    11: { photo1: getPhoto(5) },
-    12: { photo1: getPhoto(6), photo2: getPhoto(7), photo3: getPhoto(8), photo4: getPhoto(9) },
+    2:  { photo1: getPhoto(1) },
+    4:  { photo1: getPhoto(2) },
+    5:  { photo1: getPhoto(3) },
+    6:  { photo1: getPhoto(4), photo2: getPhoto(5) },
+    7:  { photo1: getPhoto(6) },
+    8:  { photo1: getPhoto(7) },
+    9:  { photo1: getPhoto(8) },
+    10: { photo1: getPhoto(9) },
+    11: { photo1: getPhoto(10) },
+    12: { photo1: getPhoto(11), photo2: getPhoto(12), photo3: getPhoto(13), photo4: getPhoto(14) },
+    13: { photo1: getPhoto(15) },
+    14: { photo1: getPhoto(16) },
+    17: { photo1: getPhoto(17) },
+    18: { photo1: getPhoto(18), photo2: getPhoto(19), photo3: getPhoto(20), photo4: getPhoto(21) },
+    19: { photo1: getPhoto(22) },
   };
 
   const pages = template.pages.map((page, i) => {
