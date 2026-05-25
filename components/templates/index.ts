@@ -6,3 +6,4 @@ export { redBoldTemplate } from './red-bold/schema';
 export { greenBeigeTemplate } from './green-beige/schema';
 export { hanoverTemplate } from './hanover/schema';
 export { luxuryTemplate } from './luxury/schema';
+export { canvaTravelTemplate } from './canva-travel/schema';

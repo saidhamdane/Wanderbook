@@ -6,6 +6,8 @@ type TemplateLike = {
   mood: string;
   palette: { primary: string; accent: string; background: string; text: string };
   pages: unknown[];
+  external?: boolean;
+  canvaUrl?: string;
 };
 
 type Props = {
@@ -23,6 +25,7 @@ const TILT: Record<string, number> = {
   'green-beige':         5,
   'hanover':            -5,
   'wanderbook-luxury':   4,
+  'canva-travel':       -2,
 };
 
 export function OpenMagazineMockup({ template, selected, onSelect }: Props) {
@@ -205,6 +208,28 @@ export function OpenMagazineMockup({ template, selected, onSelect }: Props) {
         }}>
           {selected ? '✓ Selected' : 'Select'}
         </div>
+
+        {/* External / Canva badge */}
+        {template.external && (
+          <div style={{
+            marginTop: 6,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '3px 10px',
+            borderRadius: 20,
+            background: 'rgba(233,69,96,0.15)',
+            border: '1px solid rgba(233,69,96,0.4)',
+            color: '#e94560',
+            fontSize: '0.6rem',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            fontFamily: 'system-ui',
+          }}>
+            ↗ Opens in Canva
+          </div>
+        )}
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ export default function CreatePage() {
   const [magId, setMagId]                = useState<string | null>(null);
 
   const selectedTemplate = templates.find((t) => t.id === templateId);
+  const isExternal = selectedTemplate?.external === true;
 
   async function handleGenerate() {
     setErrorMsg(null);
@@ -135,8 +136,20 @@ export default function CreatePage() {
               )}
 
               <NavRow>
-                <button onClick={() => setStep('photos')} disabled={!canNextTemplate}
-                  className={primaryBtn(canNextTemplate)}>Upload Photos →</button>
+                {isExternal ? (
+                  <a
+                    href={selectedTemplate?.canvaUrl ?? '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={primaryBtn(canNextTemplate)}
+                    style={canNextTemplate ? {} : { pointerEvents: 'none' }}
+                  >
+                    Open in Canva ↗
+                  </a>
+                ) : (
+                  <button onClick={() => setStep('photos')} disabled={!canNextTemplate}
+                    className={primaryBtn(canNextTemplate)}>Upload Photos →</button>
+                )}
               </NavRow>
             </section>
           )}

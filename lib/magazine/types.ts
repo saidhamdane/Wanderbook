@@ -41,6 +41,9 @@ export type MagazineTemplate = {
   description: string;
   source?: 'css' | 'canva';
   previewImage?: string;
+  /** If true, selecting this template opens canvaUrl instead of the create flow */
+  external?: boolean;
+  canvaUrl?: string;
   palette: {
     primary: string;
     accent: string;

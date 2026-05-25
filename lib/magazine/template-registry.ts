@@ -8,6 +8,7 @@ import {
   greenBeigeTemplate,
   hanoverTemplate,
   luxuryTemplate,
+  canvaTravelTemplate,
 } from '@/components/templates';
 
 const TEMPLATES: MagazineTemplate[] = [
@@ -19,6 +20,7 @@ const TEMPLATES: MagazineTemplate[] = [
   greenBeigeTemplate,
   hanoverTemplate,
   luxuryTemplate,
+  canvaTravelTemplate,
 ];
 
 export function getAllTemplates(): MagazineTemplate[] {
