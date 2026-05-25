@@ -15,13 +15,14 @@ type Props = {
 };
 
 const TILT: Record<string, number> = {
-  'red-bold':          -4,
-  'wander-together':    3,
-  'travel-minimal':    -6,
-  'blue-bold':          2,
-  'explore-editorial': -3,
-  'green-beige':        5,
-  'hanover':           -5,
+  'red-bold':           -4,
+  'wander-together':     3,
+  'travel-minimal':     -6,
+  'blue-bold':           2,
+  'explore-editorial':  -3,
+  'green-beige':         5,
+  'hanover':            -5,
+  'wanderbook-luxury':   4,
 };
 
 export function OpenMagazineMockup({ template, selected, onSelect }: Props) {

@@ -94,7 +94,7 @@ export default function CreatePage() {
           {step === 'template' && (
             <section>
               <Heading eyebrow="STEP 1 OF 3" title="Choose your magazine style"
-                subtitle="Pick a template — scroll to see all six. Each controls cover, typography, and photo placement." />
+                subtitle="Pick a template — scroll to see all styles. Each controls cover, typography, and photo placement." />
 
               {/* Physical magazine mockup picker */}
               <div style={{ margin: '24px -20px 0', borderRadius: 12, overflow: 'hidden' }}>
