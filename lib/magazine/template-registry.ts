@@ -7,6 +7,7 @@ import {
   redBoldTemplate,
   greenBeigeTemplate,
   hanoverTemplate,
+  luxuryTemplate,
 } from '@/components/templates';
 
 const TEMPLATES: MagazineTemplate[] = [
@@ -17,6 +18,7 @@ const TEMPLATES: MagazineTemplate[] = [
   redBoldTemplate,
   greenBeigeTemplate,
   hanoverTemplate,
+  luxuryTemplate,
 ];
 
 export function getAllTemplates(): MagazineTemplate[] {

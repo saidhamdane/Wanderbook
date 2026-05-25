@@ -45,6 +45,8 @@ export async function GET(
     } else {
       url = `${BASE}/api/inject-red-bold/${id}?page=${pageNum - 1}`;
     }
+  } else if (doc.templateId === 'wanderbook-luxury') {
+    url = `${BASE}/api/inject-luxury/${id}?page=${pageNum}`;
   } else {
     url = `${BASE}/magazine-page/${id}/${pageNum}`;
   }

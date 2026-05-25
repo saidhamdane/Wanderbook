@@ -188,6 +188,94 @@ function generateHanoverMagazine(
   };
 }
 
+async function generateLuxuryMagazine(
+  input: GenerateMagazineInput,
+  template: MagazineTemplate,
+  analyzed: PhotoAnalysis[]
+): Promise<MagazineDocument> {
+  const year = String(new Date().getFullYear());
+  const lang = normalizeLanguage(input.language);
+
+  const copy = await generateEditorialCopy({
+    destination: input.destination,
+    travelers: input.travelers,
+    style: input.style,
+    templateId: input.templateId,
+    notes: input.notes,
+    language: lang,
+  });
+
+  const userUrls = analyzed.map((p) => p.url);
+  if (userUrls.length === 0) userUrls.push('');
+
+  let photoIdx = 0;
+  const nextPhoto = () => {
+    const url = userUrls[photoIdx % userUrls.length];
+    photoIdx++;
+    return url;
+  };
+
+  const dest = input.destination;
+  const family = input.familyName || input.travelers || '';
+  const bodyFallback =
+    copy.destBody ||
+    copy.story1Body ||
+    `A journey through ${dest} — light, landscape, and the quiet moments that make a trip worth keeping.`;
+
+  const pages = template.pages.map((page) => {
+    const slots: Record<string, string> = {};
+    for (const slot of page.slots) {
+      if (slot.type === 'image') {
+        slots[slot.id] = nextPhoto();
+        continue;
+      }
+      switch (slot.id) {
+        // Cover
+        case 'coverTitle':    slots[slot.id] = dest.toUpperCase(); break;
+        case 'coverKicker':   slots[slot.id] = copy.coverKicker || year + ' EDITION'; break;
+        case 'coverSubtitle': slots[slot.id] = family ? `${family} · ${year}` : copy.coverSubtitle || dest; break;
+        // TOC
+        case 'pageTitle':     slots[slot.id] = page.id === 'toc' ? 'Contents' : copy.featureTitle || page.name; break;
+        case 'item1':         slots[slot.id] = 'A Journey Begins'; break;
+        case 'item2':         slots[slot.id] = copy.destTitle || `Discovering ${dest}`; break;
+        case 'item3':         slots[slot.id] = 'Captured Moments'; break;
+        case 'item4':         slots[slot.id] = 'Memories That Last'; break;
+        case 'item5':         slots[slot.id] = 'The Highlights'; break;
+        case 'item6':         slots[slot.id] = copy.quote ? 'A Thought to Keep' : 'Until We Return'; break;
+        // Destination
+        case 'featureTitle':  slots[slot.id] = copy.featureTitle || `A Place That Changed Us`; break;
+        // Grid / Memories
+        case 'collageTitle':  slots[slot.id] = 'Our Favourite Frames'; break;
+        // Quote
+        case 'quote':
+          slots[slot.id] = copy.quote || copy.quoteText || `Our journey to ${dest} reminded us why we travel.`;
+          break;
+        case 'caption':
+          slots[slot.id] = slot.defaultValue || (family ? `${family} · ${year}` : `${dest.toUpperCase()} · ${year}`);
+          break;
+        // Body text
+        case 'body':          slots[slot.id] = copy.body || copy.welcomeBody || bodyFallback; break;
+        default:
+          slots[slot.id] = copy[slot.id] !== undefined && copy[slot.id] !== ''
+            ? copy[slot.id]
+            : slot.defaultValue ?? dest;
+      }
+    }
+    return { pageId: page.id, layout: page.layout, slots };
+  });
+
+  return {
+    id: 'mag_' + Date.now(),
+    templateId: input.templateId,
+    destination: dest,
+    familyName: family || undefined,
+    generatedAt: new Date().toISOString(),
+    sessionId: input.sessionId,
+    pages,
+    template,
+  };
+}
+
 export async function generateMagazine(
   input: GenerateMagazineInput
 ): Promise<MagazineDocument> {
@@ -200,6 +288,10 @@ export async function generateMagazine(
 
   if (input.templateId === 'red-bold') {
     return generateRedBoldMagazine(input, template, analyzed);
+  }
+
+  if (input.templateId === 'wanderbook-luxury') {
+    return generateLuxuryMagazine(input, template, analyzed);
   }
 
   let stockPhotos: StockPhoto[] = [];
