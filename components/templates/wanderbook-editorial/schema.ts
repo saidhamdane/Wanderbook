@@ -1,0 +1,128 @@
+import { MagazineTemplate } from '@/lib/magazine/types';
+
+export const wanderbookEditorialTemplate: MagazineTemplate = {
+  id: 'wanderbook-editorial',
+  name: 'Wanderbook Editorial',
+  mood: 'Premium · A4 · Cinematic',
+  description:
+    'A premium 8-page A4 editorial travel magazine. Bold Playfair Display headlines, full-bleed photography, and a classic ink-and-cream palette.',
+  source: 'css',
+  previewImage: '/templates/wanderbook-editorial-cover.jpg',
+  palette: {
+    primary: '#1C1C1E',
+    accent: '#C8973A',
+    background: '#F8F4EC',
+    text: '#1C1C1E',
+    light: '#EDE9DF',
+  },
+  fonts: {
+    heading: "'Playfair Display', Georgia, serif",
+    subheading: "'Montserrat', system-ui, sans-serif",
+    body: "'Montserrat', system-ui, sans-serif",
+  },
+  pages: [
+    {
+      id: 'we-cover',
+      name: 'Cover',
+      layout: 'we-cover',
+      slots: [
+        { type: 'image', id: 'cover-photo',   aspect: 'portrait',  required: true,  preferredTags: ['hero', 'landscape', 'travel', 'outdoor'] },
+        { type: 'text',  id: 'edition',        kind: 'kicker',      maxLength: 30,   required: false, defaultValue: 'Travel Edition' },
+        { type: 'text',  id: 'cover-title',    kind: 'headline',    maxLength: 40,   required: true },
+        { type: 'text',  id: 'cover-kicker',   kind: 'subheadline', maxLength: 80,   required: false },
+        { type: 'text',  id: 'cover-line-1',   kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'cover-line-2',   kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'cover-year',     kind: 'year',        maxLength: 10,   required: false },
+        { type: 'text',  id: 'cover-stat',     kind: 'tagline',     maxLength: 30,   required: false },
+      ],
+    },
+    {
+      id: 'we-toc',
+      name: 'Contents',
+      layout: 'we-toc',
+      slots: [
+        { type: 'image', id: 'toc-photo',     aspect: 'portrait',  required: true,  preferredTags: ['scenic', 'travel', 'outdoor'] },
+        { type: 'text',  id: 'toc-item-1',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-2',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-3',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-4',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-5',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-6',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-caption',   kind: 'caption',     maxLength: 80,   required: false },
+      ],
+    },
+    {
+      id: 'we-intro',
+      name: 'Introduction',
+      layout: 'we-intro',
+      slots: [
+        { type: 'image', id: 'intro-photo',   aspect: 'landscape', required: true,  preferredTags: ['destination', 'scenic', 'outdoor'] },
+        { type: 'text',  id: 'intro-title',   kind: 'headline',    maxLength: 60,   required: true },
+        { type: 'text',  id: 'intro-body',    kind: 'body',        maxLength: 350,  required: false },
+        { type: 'text',  id: 'intro-byline',  kind: 'caption',     maxLength: 60,   required: false },
+      ],
+    },
+    {
+      id: 'we-feature',
+      name: 'Feature Story',
+      layout: 'we-feature',
+      slots: [
+        { type: 'image', id: 'feature-photo',  aspect: 'portrait',  required: true,  preferredTags: ['destination', 'dramatic', 'landscape'] },
+        { type: 'text',  id: 'feature-title',  kind: 'headline',    maxLength: 60,   required: true },
+        { type: 'text',  id: 'feature-body',   kind: 'body',        maxLength: 400,  required: false },
+        { type: 'text',  id: 'feature-stat-1', kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'feature-stat-2', kind: 'kicker',      maxLength: 40,   required: false },
+        { type: 'text',  id: 'feature-stat-3', kind: 'kicker',      maxLength: 40,   required: false },
+      ],
+    },
+    {
+      id: 'we-gallery',
+      name: 'Gallery',
+      layout: 'we-gallery',
+      slots: [
+        { type: 'image', id: 'gallery-photo-1', aspect: 'any',      required: true,  preferredTags: ['scenic', 'travel', 'landscape'] },
+        { type: 'image', id: 'gallery-photo-2', aspect: 'any',      required: false, preferredTags: ['activity', 'outdoor'] },
+        { type: 'image', id: 'gallery-photo-3', aspect: 'any',      required: false, preferredTags: ['local', 'detail', 'food'] },
+        { type: 'image', id: 'gallery-photo-4', aspect: 'any',      required: false, preferredTags: ['people', 'street'] },
+        { type: 'image', id: 'gallery-photo-5', aspect: 'any',      required: false, preferredTags: ['architecture', 'nature'] },
+        { type: 'text',  id: 'gallery-caption-1', kind: 'caption',  maxLength: 50,   required: false },
+        { type: 'text',  id: 'gallery-caption-2', kind: 'caption',  maxLength: 50,   required: false },
+        { type: 'text',  id: 'gallery-caption-3', kind: 'caption',  maxLength: 50,   required: false },
+        { type: 'text',  id: 'gallery-caption-4', kind: 'caption',  maxLength: 50,   required: false },
+        { type: 'text',  id: 'gallery-caption-5', kind: 'caption',  maxLength: 50,   required: false },
+      ],
+    },
+    {
+      id: 'we-story',
+      name: 'The Story',
+      layout: 'we-story',
+      slots: [
+        { type: 'image', id: 'story-photo-1', aspect: 'landscape',  required: true,  preferredTags: ['scenic', 'travel', 'outdoor'] },
+        { type: 'image', id: 'story-photo-2', aspect: 'any',        required: false, preferredTags: ['activity', 'people'] },
+        { type: 'image', id: 'story-photo-3', aspect: 'any',        required: false, preferredTags: ['detail', 'local'] },
+        { type: 'text',  id: 'story-title',   kind: 'headline',     maxLength: 60,   required: true },
+        { type: 'text',  id: 'story-lead',    kind: 'subheadline',  maxLength: 120,  required: false },
+        { type: 'text',  id: 'story-body',    kind: 'body',         maxLength: 400,  required: false },
+      ],
+    },
+    {
+      id: 'we-quote',
+      name: 'Quote',
+      layout: 'we-quote',
+      slots: [
+        { type: 'text',  id: 'quote-text',   kind: 'quote',        maxLength: 200,  required: true },
+        { type: 'text',  id: 'quote-attr',   kind: 'caption',      maxLength: 60,   required: false },
+      ],
+    },
+    {
+      id: 'we-back',
+      name: 'Back Cover',
+      layout: 'we-back',
+      slots: [
+        { type: 'image', id: 'back-photo',   aspect: 'portrait',   required: true,  preferredTags: ['scenic', 'outdoor', 'dramatic'] },
+        { type: 'text',  id: 'back-title',   kind: 'tagline',      maxLength: 60,   required: false },
+        { type: 'text',  id: 'back-contact', kind: 'caption',      maxLength: 80,   required: false },
+      ],
+    },
+  ],
+};

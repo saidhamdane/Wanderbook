@@ -1,0 +1,131 @@
+import { MagazineTemplate } from '@/lib/magazine/types';
+import { DEFAULT_TEMPLATE_COVER_IMAGE, TEMPLATE_COVER_IMAGES } from '@/lib/magazine/template-covers';
+
+export const auroraEditorialTemplate: MagazineTemplate = {
+  id: 'aurora-editorial',
+  name: 'Aurora Editorial',
+  mood: 'Warm · Editorial · Family',
+  description:
+    'A warm off-white editorial magazine with petrol teal accents, sand highlights, and Fraunces serif headlines. 8 A4 portrait pages.',
+  source: 'css',
+  previewImage: TEMPLATE_COVER_IMAGES['aurora-editorial'],
+  coverImage: TEMPLATE_COVER_IMAGES['aurora-editorial'],
+  fallbackCoverImage: DEFAULT_TEMPLATE_COVER_IMAGE,
+  palette: {
+    primary: '#17191d',
+    accent: '#0e6e66',
+    background: '#f6f3ec',
+    text: '#17191d',
+    light: '#fffdf8',
+  },
+  fonts: {
+    heading: "'Fraunces', Georgia, serif",
+    subheading: "'Archivo Black', system-ui, sans-serif",
+    body: "'Archivo', system-ui, sans-serif",
+  },
+  pages: [
+    {
+      id: 'are-cover',
+      name: 'Cover',
+      layout: 'are-cover',
+      slots: [
+        { type: 'image', id: 'cover-photo',   aspect: 'portrait',  required: true,  preferredTags: ['hero', 'landscape', 'travel', 'dramatic'] },
+        { type: 'text',  id: 'edition',        kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'cover-title',    kind: 'headline',    maxLength: 40,   required: true },
+        { type: 'text',  id: 'cover-kicker',   kind: 'kicker',      maxLength: 80,   required: false },
+        { type: 'text',  id: 'cover-line-1',   kind: 'tagline',     maxLength: 60,   required: false },
+        { type: 'text',  id: 'cover-line-2',   kind: 'tagline',     maxLength: 60,   required: false },
+        { type: 'text',  id: 'cover-year',     kind: 'kicker',      maxLength: 10,   required: false },
+        { type: 'text',  id: 'cover-stat',     kind: 'caption',     maxLength: 40,   required: false },
+      ],
+    },
+    {
+      id: 'are-contents',
+      name: 'Contents',
+      layout: 'are-contents',
+      slots: [
+        { type: 'image', id: 'toc-photo',     aspect: 'portrait',  required: true,  preferredTags: ['scenic', 'travel', 'landscape'] },
+        { type: 'text',  id: 'toc-item-1',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-2',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-3',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-4',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-5',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-item-6',    kind: 'kicker',      maxLength: 50,   required: false },
+        { type: 'text',  id: 'toc-caption',   kind: 'caption',     maxLength: 80,   required: false },
+      ],
+    },
+    {
+      id: 'are-intro',
+      name: 'Introduction',
+      layout: 'are-intro',
+      slots: [
+        { type: 'image', id: 'intro-photo',   aspect: 'landscape', required: true,  preferredTags: ['scenic', 'travel', 'outdoor'] },
+        { type: 'text',  id: 'intro-title',   kind: 'headline',    maxLength: 80,   required: true },
+        { type: 'text',  id: 'intro-body',    kind: 'body',        maxLength: 500,  required: false },
+        { type: 'text',  id: 'intro-byline',  kind: 'caption',     maxLength: 60,   required: false },
+      ],
+    },
+    {
+      id: 'are-feature',
+      name: 'Feature',
+      layout: 'are-feature',
+      slots: [
+        { type: 'image', id: 'feature-photo',   aspect: 'landscape', required: true,  preferredTags: ['hero', 'landscape', 'dramatic'] },
+        { type: 'text',  id: 'feature-title',   kind: 'headline',    maxLength: 60,   required: true },
+        { type: 'text',  id: 'feature-body',    kind: 'body',        maxLength: 420,  required: false },
+        { type: 'text',  id: 'feature-stat-1',  kind: 'caption',     maxLength: 40,   required: false },
+        { type: 'text',  id: 'feature-stat-2',  kind: 'caption',     maxLength: 40,   required: false },
+        { type: 'text',  id: 'feature-stat-3',  kind: 'caption',     maxLength: 40,   required: false },
+      ],
+    },
+    {
+      id: 'are-gallery',
+      name: 'Gallery',
+      layout: 'are-gallery',
+      slots: [
+        { type: 'image', id: 'gallery-photo-1',   aspect: 'any', required: true,  preferredTags: ['scenic', 'travel', 'landscape'] },
+        { type: 'image', id: 'gallery-photo-2',   aspect: 'any', required: false, preferredTags: ['outdoor', 'activity'] },
+        { type: 'image', id: 'gallery-photo-3',   aspect: 'any', required: false, preferredTags: ['local', 'food', 'detail'] },
+        { type: 'image', id: 'gallery-photo-4',   aspect: 'any', required: false, preferredTags: ['street', 'architecture'] },
+        { type: 'image', id: 'gallery-photo-5',   aspect: 'any', required: false, preferredTags: ['landscape', 'scenic'] },
+        { type: 'text',  id: 'gallery-caption-1', kind: 'caption', maxLength: 40, required: false },
+        { type: 'text',  id: 'gallery-caption-2', kind: 'caption', maxLength: 40, required: false },
+        { type: 'text',  id: 'gallery-caption-3', kind: 'caption', maxLength: 40, required: false },
+        { type: 'text',  id: 'gallery-caption-4', kind: 'caption', maxLength: 40, required: false },
+        { type: 'text',  id: 'gallery-caption-5', kind: 'caption', maxLength: 40, required: false },
+      ],
+    },
+    {
+      id: 'are-story',
+      name: 'Story',
+      layout: 'are-story',
+      slots: [
+        { type: 'image', id: 'story-photo-1', aspect: 'portrait',  required: true,  preferredTags: ['scenic', 'outdoor', 'landscape'] },
+        { type: 'image', id: 'story-photo-2', aspect: 'any',       required: false, preferredTags: ['activity', 'travel'] },
+        { type: 'image', id: 'story-photo-3', aspect: 'any',       required: false, preferredTags: ['detail', 'local'] },
+        { type: 'text',  id: 'story-title',   kind: 'headline',    maxLength: 60,   required: true },
+        { type: 'text',  id: 'story-lead',    kind: 'subheadline', maxLength: 120,  required: false },
+        { type: 'text',  id: 'story-body',    kind: 'body',        maxLength: 400,  required: false },
+      ],
+    },
+    {
+      id: 'are-quote',
+      name: 'Quote',
+      layout: 'are-quote',
+      slots: [
+        { type: 'text',  id: 'quote-text',  kind: 'quote',   maxLength: 160,  required: true },
+        { type: 'text',  id: 'quote-attr',  kind: 'caption', maxLength: 60,   required: false },
+      ],
+    },
+    {
+      id: 'are-back',
+      name: 'Back Cover',
+      layout: 'are-back',
+      slots: [
+        { type: 'image', id: 'back-photo',   aspect: 'portrait',  required: true,  preferredTags: ['dramatic', 'landscape', 'scenic'] },
+        { type: 'text',  id: 'back-title',   kind: 'headline',    maxLength: 60,   required: false },
+        { type: 'text',  id: 'back-contact', kind: 'caption',     maxLength: 120,  required: false },
+      ],
+    },
+  ],
+};
