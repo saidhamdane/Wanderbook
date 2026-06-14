@@ -41,6 +41,9 @@ export type MagazineTemplate = {
   description: string;
   source?: 'css' | 'canva';
   previewImage?: string;
+  coverImage?: string;
+  fallbackCoverImage?: string;
+  bestFor?: string;
   /** If true, selecting this template opens canvaUrl instead of the create flow */
   external?: boolean;
   canvaUrl?: string;
@@ -85,6 +88,11 @@ export type MagazineDocument = {
   familyName?: string;
   generatedAt: string;
   sessionId?: string;
+  language?: string;
+  style?: string;
+  partner?: LayoutPartner;
+  copyProvider?: unknown;
+  [key: string]: unknown;
   pages: Array<{
     pageId: string;
     layout: string;
@@ -93,11 +101,24 @@ export type MagazineDocument = {
   template: MagazineTemplate;
 };
 
+export type LayoutPartner = {
+  enabled?: boolean;
+  businessName?: string;
+  whatsapp?: string;
+  website?: string;
+  businessType?: string;
+  [key: string]: unknown;
+};
+
 export type LayoutProps = {
   slots: Record<string, string>;
   palette: MagazineTemplate['palette'];
   fonts: MagazineTemplate['fonts'];
   pageIndex: number;
+  partner?: LayoutPartner;
+  language?: string;
+  style?: string;
+  copyProvider?: unknown;
 };
 
 import type { UploadedPhoto } from '@/lib/upload-handler';
