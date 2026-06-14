@@ -15,6 +15,7 @@ export default function PartnerLoginPage() {
 function LoginForm() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') || '/partner/dashboard';
+  const resetSuccess = searchParams.get('reset') === 'success';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -57,6 +58,11 @@ function LoginForm() {
           <h1 className="mt-3 text-3xl text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
             Wanderbook Canarias Partner Login
           </h1>
+          {resetSuccess && (
+            <p className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+              Password updated successfully. Please log in.
+            </p>
+          )}
           <label className="mt-6 block">
             <span className="mb-2 block text-xs font-semibold tracking-widest text-slate-600">EMAIL</span>
             <input
@@ -79,6 +85,11 @@ function LoginForm() {
               className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
           </label>
+          <div className="mt-2 text-right">
+            <Link href="/partner/forgot-password" className="text-xs text-amber-700 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           {error && (
             <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>
           )}

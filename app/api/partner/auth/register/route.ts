@@ -36,6 +36,7 @@ export async function POST(req: Request) {
   const businessName = String(body.businessName || '').trim();
   const email = String(body.email || '').trim().toLowerCase();
   const password = String(body.password || '');
+  const confirmPassword = String(body.confirmPassword || '');
   const phone = String(body.phone || '').trim() || null;
   const website = String(body.website || '').trim() || null;
   const businessType = String(body.businessType || '').trim() || null;
@@ -43,6 +44,8 @@ export async function POST(req: Request) {
   if (!businessName) return NextResponse.json({ error: 'Business name is required.' }, { status: 400 });
   if (!email || !email.includes('@')) return NextResponse.json({ error: 'A valid email is required.' }, { status: 400 });
   if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 });
+  if (!confirmPassword) return NextResponse.json({ error: 'Please confirm your password.' }, { status: 400 });
+  if (password !== confirmPassword) return NextResponse.json({ error: 'Passwords do not match.' }, { status: 400 });
 
   if (isSupabaseConfigured()) {
     const emailTaken = await isEmailTakenInSupabase(email);

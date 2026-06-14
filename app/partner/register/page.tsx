@@ -10,6 +10,7 @@ export default function PartnerRegisterPage() {
     businessName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
     website: '',
     businessType: '',
@@ -25,6 +26,14 @@ export default function PartnerRegisterPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch('/api/partner/auth/register', {
@@ -92,6 +101,17 @@ export default function PartnerRegisterPage() {
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
               <span className="mt-1 block text-xs text-slate-400">Minimum 8 characters</span>
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-xs font-semibold tracking-widest text-slate-600">CONFIRM PASSWORD *</span>
+              <input
+                type="password"
+                value={form.confirmPassword}
+                onChange={set('confirmPassword')}
+                required
+                autoComplete="new-password"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
             </label>
             <label className="block">
               <span className="mb-2 block text-xs font-semibold tracking-widest text-slate-600">BUSINESS TYPE</span>

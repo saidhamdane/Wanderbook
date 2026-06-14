@@ -38,8 +38,9 @@ export default async function DigitalMagazinePage({ params }: Params) {
   const doc = await loadMagazine(params.id);
   if (!doc) notFound();
 
-  const source = doc.source || (doc.partner?.enabled ? 'business_owner' : 'personal');
-  const businessName = doc.partner?.businessName || doc.partnerName;
+  const anyDoc = doc as any;
+  const source = anyDoc.source || (anyDoc.partner?.enabled ? 'business_owner' : 'personal');
+  const businessName = anyDoc.partner?.businessName || anyDoc.partnerName;
 
   return (
     <main style={{
@@ -82,7 +83,7 @@ export default async function DigitalMagazinePage({ params }: Params) {
           flexWrap: 'wrap',
           justifyContent: 'flex-end',
         }}>
-          <DownloadPdfButton magazineId={doc.id} label="Download PDF" />
+          <DownloadPdfButton magazineId={doc.id} />
           <ShareMagazineButton
             magazineId={doc.id}
             destination={doc.destination}
@@ -101,7 +102,7 @@ export default async function DigitalMagazinePage({ params }: Params) {
           textAlign: 'center',
           textTransform: 'uppercase',
         }}>
-          {localizedCreatedWith(doc.language, businessName)}
+          {localizedCreatedWith(anyDoc.language, businessName)}
         </p>
       )}
 
