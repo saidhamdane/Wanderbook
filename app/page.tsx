@@ -2,13 +2,27 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { getAllTemplates } from '@/lib/magazine/template-registry';
 import MagazineMockup3D from '@/components/MagazineMockup3D';
+import {
+  photographerExperienceTemplate,
+  tourGuideExperienceTemplate,
+  boatTripExperienceTemplate,
+  buggyAdventureExperienceTemplate,
+  holidayRentalMemoryTemplate,
+} from '@/components/templates/experience/schema';
+import { auroraEditorialTemplate } from '@/components/templates/aurora-editorial/schema';
 
-const TEMPLATES_WITH_META = getAllTemplates().map((t) => ({
+const TEMPLATES_WITH_META = [
+  photographerExperienceTemplate,
+  tourGuideExperienceTemplate,
+  boatTripExperienceTemplate,
+  buggyAdventureExperienceTemplate,
+  holidayRentalMemoryTemplate,
+  auroraEditorialTemplate,
+].map((t) => ({
   ...t,
   tagline: (t as { tagline?: string }).tagline || t.mood,
-  pages: (t.pages ?? []).length,
+  pages: 8,
   badge: ({
     'aurora-editorial':         'NEW',
     'atlas-nocturne-editorial': 'LUXURY',
@@ -217,7 +231,7 @@ export default function LandingPage() {
             marginBottom: 12,
             fontFamily: 'system-ui',
           }}>
-            AURORA EDITORIAL · ATLAS NOCTURNE
+            PHOTOGRAPHER · TOUR GUIDE · BOAT · BUGGY · RENTAL
           </div>
           <h2 style={{
             fontFamily: "'Playfair Display', Georgia, serif",
@@ -226,7 +240,7 @@ export default function LandingPage() {
             color: '#fff',
             margin: 0,
           }}>
-            Two premium magazine styles
+            Partner experience templates
           </h2>
           <p style={{
             marginTop: 12,
@@ -236,8 +250,7 @@ export default function LandingPage() {
             margin: '12px auto 0',
             fontFamily: 'system-ui',
           }}>
-            Aurora Editorial and Atlas Nocturne are designed for luxury Canary Islands travel
-            magazines.
+            Choose the magazine style that fits your service. Your clients create their own magazine — with your brand on every page.
           </p>
         </div>
 
