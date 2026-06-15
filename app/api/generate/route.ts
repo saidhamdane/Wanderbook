@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     let familyName: string | undefined;
     let useStockFallback = true;
     let photoFiles: File[] = [];
+    let partnerSlug: string | undefined;
 
     if (ct.includes('application/json')) {
       const body = await req.json();
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
       tagline = body.tagline ? String(body.tagline) : undefined;
       familyName = body.familyName ? String(body.familyName) : undefined;
       useStockFallback = body.useStockFallback !== false;
+      partnerSlug = body.partnerSlug ? String(body.partnerSlug) : undefined;
     } else {
       const form = await req.formData();
       templateId = String(form.get('templateId') || '');
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
       tagline = form.get('tagline') ? String(form.get('tagline')) : undefined;
       familyName = form.get('familyName') ? String(form.get('familyName')) : undefined;
       useStockFallback = String(form.get('useStockFallback') || 'true') === 'true';
+      partnerSlug = form.get('partnerSlug') ? String(form.get('partnerSlug')) : undefined;
       const fileEntries = form.getAll('photos');
       for (const entry of fileEntries) {
         if (entry instanceof File && entry.size > 0) photoFiles.push(entry);
@@ -73,6 +76,10 @@ export async function POST(req: NextRequest) {
       useStockFallback,
       sessionId
     });
+
+    if (partnerSlug) {
+      doc.partner = { ...(doc.partner ?? {}), slug: partnerSlug };
+    }
 
     await saveMagazine(doc);
 

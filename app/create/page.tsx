@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useCallback, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getAllTemplates } from '@/lib/magazine/template-registry';
 import { OpenMagazineMockup } from '@/components/OpenMagazineMockup';
 import { UploadZone } from '@/components/UploadZone';
@@ -20,12 +20,19 @@ const LANGUAGES: Array<{ code: string; label: string }> = [
   { code: 'it', label: '🇮🇹 Italiano' },
 ];
 
-export default function CreatePage() {
-  const router   = useRouter();
+function CreatePageInner() {
+  const router    = useRouter();
+  const searchParams = useSearchParams();
   const templates = getAllTemplates();
 
-  const [step, setStep]         = useState<Step>('template');
-  const [templateId, setTplId]  = useState('');
+  // Resolve locked template + partner from URL params (partner flow)
+  const templateParam    = searchParams.get('template') ?? '';
+  const partnerParam     = searchParams.get('partner')  ?? '';
+  const lockedTemplateId = templates.find(t => t.id === templateParam)?.id ?? null;
+  const isPartnerFlow    = !!lockedTemplateId && !!partnerParam;
+
+  const [step, setStep]         = useState<Step>(() => lockedTemplateId ? 'photos' : 'template');
+  const [templateId, setTplId]  = useState<string>(() => lockedTemplateId ?? '');
   const [files, setFiles]       = useState<File[]>([]);
   const [destination, setDest]  = useState('');
   const [travelers, setTrav]    = useState('');
@@ -55,6 +62,7 @@ export default function CreatePage() {
     fd.append('language', language);
     fd.append('notes', notes);
     fd.append('useStockFallback', String(useStock));
+    if (partnerParam) fd.append('partnerSlug', partnerParam);
     for (const f of files) fd.append('photos', f, f.name);
 
     try {
@@ -164,7 +172,9 @@ export default function CreatePage() {
                 <FilmStrip files={files} />
               </div>
               <NavRow>
-                <button onClick={() => setStep('template')} className={secondaryBtn}>← Back</button>
+                {!isPartnerFlow && (
+                  <button onClick={() => setStep('template')} className={secondaryBtn}>← Back</button>
+                )}
                 <button onClick={() => setStep('details')} disabled={!canNextPhotos}
                   className={primaryBtn(canNextPhotos)}>Continue →</button>
               </NavRow>
@@ -239,6 +249,14 @@ export default function CreatePage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function CreatePage() {
+  return (
+    <Suspense>
+      <CreatePageInner />
+    </Suspense>
   );
 }
 
