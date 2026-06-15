@@ -3,6 +3,24 @@ import { ComponentType } from 'react';
 import { LayoutProps } from '@/lib/magazine/types';
 
 const registry: Record<string, ComponentType<LayoutProps>> = {
+  // ── Aurora Editorial (are-*) ─────────────────────────────────────────────
+  'are-cover':    dynamic(() => import('./aurora-editorial/AuroraCover')),
+  'are-contents': dynamic(() => import('./aurora-editorial/AuroraContents')),
+  'are-intro':    dynamic(() => import('./aurora-editorial/AuroraIntro')),
+  'are-feature':  dynamic(() => import('./aurora-editorial/AuroraFeature')),
+  'are-gallery':  dynamic(() => import('./aurora-editorial/AuroraGallery')),
+  'are-story':    dynamic(() => import('./aurora-editorial/AuroraStory')),
+  'are-quote':    dynamic(() => import('./aurora-editorial/AuroraQuote')),
+  'are-back':     dynamic(() => import('./aurora-editorial/AuroraBack')),
+  // ── Atlas Nocturne Editorial (ane-*) ─────────────────────────────────────
+  'ane-cover':    dynamic(() => import('./atlas-nocturne/ANECover')),
+  'ane-contents': dynamic(() => import('./atlas-nocturne/ANEContents')),
+  'ane-letter':   dynamic(() => import('./atlas-nocturne/ANELetter')),
+  'ane-hero':     dynamic(() => import('./atlas-nocturne/ANEHero')),
+  'ane-route':    dynamic(() => import('./atlas-nocturne/ANERoute')),
+  'ane-gallery':  dynamic(() => import('./atlas-nocturne/ANEGallery')),
+  'ane-quote':    dynamic(() => import('./atlas-nocturne/ANEQuote')),
+  'ane-back':     dynamic(() => import('./atlas-nocturne/ANEBack')),
   'wt-cover': dynamic(() => import('./wander-together/WTCover')),
   'wt-contents': dynamic(() => import('./wander-together/WTContents')),
   'wt-welcome': dynamic(() => import('./wander-together/WTWelcome')),
@@ -59,9 +77,19 @@ const registry: Record<string, ComponentType<LayoutProps>> = {
   'rb-html-essay':    dynamic(() => import('./red-bold-html/RBHEssay')),
   'rb-html-gallery':  dynamic(() => import('./red-bold-html/RBHGallery')),
   'rb-html-quote':    dynamic(() => import('./red-bold-html/RBHQuote')),
-  'rb-html-back':     dynamic(() => import('./red-bold-html/RBHBack'))
+  'rb-html-back':     dynamic(() => import('./red-bold-html/RBHBack')),
 };
 
-export function getLayout(layoutKey: string): ComponentType<LayoutProps> | null {
-  return registry[layoutKey] ?? null;
+const FallbackLayout = dynamic(() => import('./FallbackLayout'));
+
+export function getLayout(layoutKey: string): ComponentType<LayoutProps> {
+  const found = registry[layoutKey];
+  if (!found) {
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line no-console
+      console.warn(`[layout-registry] Unknown layout id: "${layoutKey}" — rendering fallback`);
+    }
+    return FallbackLayout;
+  }
+  return found;
 }

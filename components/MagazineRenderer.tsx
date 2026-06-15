@@ -23,16 +23,6 @@ export function MagazineRenderer({ doc, printMode }: Props) {
     >
       {doc.pages.map((page, index) => {
         const Layout = getLayout(page.layout);
-        if (!Layout) {
-          return (
-            <div
-              key={page.pageId}
-              style={{ padding: '24px', color: '#900' }}
-            >
-              Layout not found: {page.layout}
-            </div>
-          );
-        }
         return (
           <div
             key={page.pageId}
