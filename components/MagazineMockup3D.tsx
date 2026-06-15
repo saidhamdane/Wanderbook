@@ -1,5 +1,7 @@
 'use client';
 
+import { getTemplateCoverImage } from '@/lib/magazine/template-covers';
+
 type TemplateLike = {
   id: string;
   name: string;
@@ -63,7 +65,7 @@ export default function MagazineMockup3D({ template, isHovered, onClick, onMouse
 
         {/* Cover photo — fills the entire face */}
         <img
-          src={`/templates/${template.id}-cover.jpg`}
+          src={getTemplateCoverImage(template)}
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
           style={{
             position: 'absolute',
