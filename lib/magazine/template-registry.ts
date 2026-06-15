@@ -9,6 +9,13 @@ import {
   hanoverTemplate,
   luxuryTemplate,
   canvaTravelTemplate,
+  auroraEditorialTemplate,
+  atlasNocturneEditorialTemplate,
+  photographerExperienceTemplate,
+  tourGuideExperienceTemplate,
+  boatTripExperienceTemplate,
+  buggyAdventureExperienceTemplate,
+  holidayRentalMemoryTemplate,
 } from '@/components/templates';
 
 const TEMPLATES: MagazineTemplate[] = [
@@ -21,6 +28,13 @@ const TEMPLATES: MagazineTemplate[] = [
   hanoverTemplate,
   luxuryTemplate,
   canvaTravelTemplate,
+  auroraEditorialTemplate,
+  atlasNocturneEditorialTemplate,
+  photographerExperienceTemplate,
+  tourGuideExperienceTemplate,
+  boatTripExperienceTemplate,
+  buggyAdventureExperienceTemplate,
+  holidayRentalMemoryTemplate,
 ];
 
 export function getAllTemplates(): MagazineTemplate[] {
@@ -30,7 +44,7 @@ export function getAllTemplates(): MagazineTemplate[] {
 export function getTemplateById(id: string): MagazineTemplate {
   const found = TEMPLATES.find((t) => t.id === id);
   if (!found) {
-    throw new Error('Template not found: ' + id);
+    return auroraEditorialTemplate;
   }
   return found;
 }

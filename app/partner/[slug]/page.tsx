@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getPublicPartnerBySlug } from '@/lib/partner-store';
+import { getPublicPartnerBySlugFromDb } from '@/lib/db/partners';
 import { defaultTemplateIdForPartnerClient } from '@/lib/magazine/template-recommendations';
 import { getTemplateById } from '@/lib/magazine/template-registry';
 import { getTemplateCoverImage } from '@/lib/magazine/template-covers';
@@ -21,8 +21,8 @@ function absolutePublicUrl(pathOrUrl?: string): string {
   return `${PUBLIC_SITE_ORIGIN}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
 }
 
-export function generateMetadata({ params }: PartnerPageParams): Metadata {
-  const partner = getPublicPartnerBySlug(params.slug);
+export async function generateMetadata({ params }: PartnerPageParams): Promise<Metadata> {
+  const partner = await getPublicPartnerBySlugFromDb(params.slug);
   if (!partner) return {};
 
   const businessName = getPartnerDisplayName(partner);
@@ -62,8 +62,8 @@ export function generateMetadata({ params }: PartnerPageParams): Metadata {
   };
 }
 
-export default function PartnerLandingPage({ params }: { params: { slug: string } }) {
-  const partner = getPublicPartnerBySlug(params.slug);
+export default async function PartnerLandingPage({ params }: { params: { slug: string } }) {
+  const partner = await getPublicPartnerBySlugFromDb(params.slug);
   if (!partner) notFound();
 
   const businessName = getPartnerDisplayName(partner);

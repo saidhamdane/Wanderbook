@@ -1,9 +1,11 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import {
   type PartnerAccount,
+  type PublicPartner,
   getPartnerAccountBySlug,
   listPartnerAccounts,
 } from '@/lib/partner-store';
+import { isValidLogoSrc } from '@/lib/partner-utils';
 
 type SupabasePartnerRow = {
   id: string;
@@ -254,6 +256,52 @@ export async function isEmailTakenInSupabase(email: string): Promise<boolean> {
   if (!supabase) return false;
   const { data } = await supabase.from('partners').select('id').ilike('email', email.trim()).maybeSingle();
   return Boolean(data);
+}
+
+/** Fetch a partner's public profile from Supabase by slug. Falls back to local JSON store. */
+export async function getPublicPartnerBySlugFromDb(slug: string): Promise<PublicPartner | null> {
+  const supabase = getSupabaseServer();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('id, slug, business_name, business_type, main_island, whatsapp, website, logo_url, branding_note, preferred_template_id')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (!error && data) {
+        const row = data as SupabasePartnerRow;
+        return {
+          id: row.id,
+          slug: row.slug,
+          businessName: row.business_name,
+          businessType: row.business_type || '',
+          whatsapp: row.whatsapp || '',
+          website: row.website || '',
+          logoUrl: isValidLogoSrc(row.logo_url ?? undefined) ? (row.logo_url ?? '') : '',
+          mainIsland: row.main_island || '',
+          brandingNote: row.branding_note || `Created for you by ${row.business_name}`,
+          preferredTemplateId: row.preferred_template_id || undefined,
+        };
+      }
+    } catch (err) {
+      console.warn('[db/partners] getPublicPartnerBySlugFromDb error:', err);
+    }
+  }
+  // Fallback: local JSON store
+  const account = getPartnerAccountBySlug(slug);
+  if (!account) return null;
+  return {
+    id: account.id,
+    slug: account.slug,
+    businessName: account.businessName,
+    businessType: account.businessType,
+    whatsapp: account.whatsapp,
+    website: account.website || '',
+    logoUrl: isValidLogoSrc(account.logoUrl) ? (account.logoUrl ?? '') : '',
+    mainIsland: account.mainIsland,
+    brandingNote: account.brandingNote || `Created for you by ${account.businessName}`,
+    preferredTemplateId: account.preferredTemplateId,
+  };
 }
 
 /** Sync a partner's auth data (email + bcrypt hash) to Supabase without overwriting the existing bcrypt hash. */
