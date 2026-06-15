@@ -26,6 +26,8 @@ export default async function MagazinePageRender({
       palette={doc.template.palette}
       fonts={doc.template.fonts}
       pageIndex={pageIndex}
+      partner={doc.partner}
+      language={doc.language as string | undefined}
     />
   );
 }

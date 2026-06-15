@@ -3,6 +3,7 @@ import { saveUploadedFiles } from '@/lib/upload-handler';
 import { generateMagazine } from '@/lib/magazine/generate-magazine';
 import { saveMagazine } from '@/lib/magazine/store';
 import { normalizeLanguage } from '@/lib/magazine/generate-copy';
+import { getPublicPartnerBySlugFromDb } from '@/lib/db/partners';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -77,8 +78,19 @@ export async function POST(req: NextRequest) {
       sessionId
     });
 
+    doc.language = language;
+
     if (partnerSlug) {
-      doc.partner = { ...(doc.partner ?? {}), slug: partnerSlug };
+      const partnerRecord = await getPublicPartnerBySlugFromDb(partnerSlug);
+      doc.partner = {
+        enabled: true,
+        slug: partnerSlug,
+        businessName: partnerRecord?.businessName ?? partnerSlug,
+        whatsapp: partnerRecord?.whatsapp ?? '',
+        website: partnerRecord?.website ?? '',
+        businessType: partnerRecord?.businessType ?? '',
+      };
+      doc.source = 'partner_client';
     }
 
     await saveMagazine(doc);

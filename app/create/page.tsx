@@ -31,13 +31,15 @@ function CreatePageInner() {
   const lockedTemplateId = templates.find(t => t.id === templateParam)?.id ?? null;
   const isPartnerFlow    = !!lockedTemplateId && !!partnerParam;
 
+  const langParam = searchParams.get('lang') ?? 'en';
+
   const [step, setStep]         = useState<Step>(() => lockedTemplateId ? 'photos' : 'template');
   const [templateId, setTplId]  = useState<string>(() => lockedTemplateId ?? '');
   const [files, setFiles]       = useState<File[]>([]);
   const [destination, setDest]  = useState('');
   const [travelers, setTrav]    = useState('');
   const [style, setStyle]       = useState(STYLES[0]);
-  const [language, setLang]     = useState('en');
+  const [language, setLang]     = useState<string>(() => langParam);
   const [notes, setNotes]       = useState('');
   const [useStock, setUseStock] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -77,8 +79,8 @@ function CreatePageInner() {
   }
 
   const handleReady = useCallback((id: string) => {
-    router.push('/preview/' + id);
-  }, [router]);
+    router.push(isPartnerFlow ? '/magazine/' + id : '/preview/' + id);
+  }, [router, isPartnerFlow]);
 
   const canNextTemplate = templateId.length > 0;
   const canNextPhotos   = files.length >= 1;

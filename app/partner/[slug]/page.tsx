@@ -80,6 +80,7 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
       partnerMode: 'true',
       clientFlow: 'true',
       template: selectedTemplateId,
+      lang: 'es',
     }).toString();
 
   return (
