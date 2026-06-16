@@ -17,3 +17,20 @@ public/uploads/
 .env.local
 .env.local.bak
 .env.local.save
+
+# Local environment
+.env.local
+.env.local.*
+.env*.bak
+.env*.save
+
+# Runtime/local data
+data/
+backups/
+public/uploads/
+
+# Logs and cache
+*.log
+.DS_Store
+.next/cache/
+node_modules/
