@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import MagazineMockup3D from '@/components/MagazineMockup3D';
+import { Logo } from '@/components/Logo';
 import {
   photographerExperienceTemplate,
   tourGuideExperienceTemplate,
@@ -111,9 +112,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white text-slate-900 overflow-x-hidden">
       {/* ── Nav ── */}
       <nav className="px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-3 max-w-6xl mx-auto">
-        <div className="font-bold text-[18px] sm:text-xl leading-[1.1] max-w-[48vw] sm:max-w-none whitespace-normal sm:whitespace-nowrap" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
-        </div>
+        <Logo size="lg" />
         <div className="flex items-center gap-3">
           <a href="#how-it-works" className="text-sm text-slate-600 hover:text-slate-900 hidden md:inline">
             How it works
@@ -142,6 +141,11 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="px-6 pt-14 pb-20 max-w-5xl mx-auto text-center">
+        {/* Brand mark */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+          <Logo size="display" withDivider href={false} />
+        </div>
+
         <div className="text-xs tracking-[4px] font-semibold text-amber-600 uppercase">
           For Canary Islands tourism businesses
         </div>
@@ -427,8 +431,8 @@ export default function LandingPage() {
 
       {/* ── Footer ── */}
       <footer className="px-6 py-10 border-t border-slate-200 text-center text-sm text-slate-500">
-        <div className="font-bold text-slate-900" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
+        <div className="flex justify-center">
+          <Logo size="sm" href={false} />
         </div>
         <div className="mt-1">
           Digital travel magazines for tourism businesses in the Canary Islands.

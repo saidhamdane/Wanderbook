@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 
 export const PUBLIC_SITE_URL = 'https://wanderbookcanarias.com';
 export const DEFAULT_CONTACT_EMAIL = 'info@wanderbookcanarias.com';
@@ -22,9 +23,7 @@ export function PublicPageShell({
     <main className="min-h-screen overflow-x-hidden bg-white text-slate-950">
       <header className="border-b border-slate-200 bg-white">
         <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <Link href="/" className="text-lg font-bold text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Wanderbook Canarias
-          </Link>
+          <Logo size="md" />
           <div className="flex flex-wrap items-center justify-end gap-3 text-sm font-semibold">
             <Link href="/pricing" className="text-slate-600 hover:text-slate-950">
               Pricing
@@ -73,9 +72,7 @@ export function PublicFooter() {
     <footer className="border-t border-slate-200 bg-slate-50 px-5 py-10 text-sm text-slate-600">
       <div className="mx-auto flex max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="font-bold text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Wanderbook Canarias
-          </div>
+          <Logo size="sm" href={false} />
           <p className="mt-1">Digital travel magazines for tourism businesses in the Canary Islands.</p>
         </div>
         <nav className="flex flex-wrap gap-x-4 gap-y-2 font-semibold">

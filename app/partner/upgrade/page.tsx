@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { PARTNER_SESSION_COOKIE, getPartnerIdForSession } from '@/lib/partner-store';
@@ -24,9 +25,7 @@ export default function PartnerUpgradePage() {
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
-        <Link href="/" className="font-bold text-lg text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
-        </Link>
+        <Logo size="md" />
       </header>
       <section className="mx-auto max-w-2xl px-5 py-12">
         <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">

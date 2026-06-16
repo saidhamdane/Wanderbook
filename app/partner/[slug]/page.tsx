@@ -8,6 +8,7 @@ import { getTemplateById, getSafeTemplateId } from '@/lib/magazine/template-regi
 import { getTemplateCoverImage } from '@/lib/magazine/template-covers';
 import { DEFAULT_PARTNER_OG_IMAGE, PUBLIC_SITE_ORIGIN, getCanonicalPartnerUrl, getPartnerDisplayName } from '@/lib/partner-utils';
 import { PartnerLogoBadge } from './PartnerLogoBadge';
+import { Logo } from '@/components/Logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,9 +88,7 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
     <main className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
       <style>{'html,body{overflow-x:hidden}'}</style>
       <header className="flex items-center justify-between gap-4 border-b border-amber-400/30 px-5 py-4">
-        <Link href="/" className="font-bold text-lg" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
-        </Link>
+        <Logo size="md" variant="dark" />
         <Link href="/partner/login" className="shrink-0 text-right text-sm font-semibold text-amber-200 hover:text-amber-100">
           Business owner? Log in
         </Link>

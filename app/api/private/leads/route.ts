@@ -13,7 +13,24 @@ const VALID_STATUSES: LeadStatus[] = [
   'Not interested',
 ];
 
+async function isAdminAuthorized(req: NextRequest): Promise<boolean> {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) return false;
+  const provided = req.headers.get('x-admin-secret');
+  if (!provided || provided.length !== adminSecret.length) return false;
+  try {
+    const { timingSafeEqual } = await import('crypto').then(m => m);
+    return timingSafeEqual(Buffer.from(provided), Buffer.from(adminSecret));
+  } catch {
+    return provided === adminSecret;
+  }
+}
+
 export async function PATCH(req: NextRequest) {
+  if (!await isAdminAuthorized(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   let body: { id?: string; status?: string; notes?: string };
   try {
     body = await req.json();

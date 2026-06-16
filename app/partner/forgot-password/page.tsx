@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -26,9 +27,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
-        <Link href="/" className="font-bold text-lg text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
-        </Link>
+        <Logo size="md" />
       </header>
       <section className="mx-auto max-w-md px-5 py-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
