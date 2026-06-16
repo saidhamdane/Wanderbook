@@ -9,3 +9,11 @@ dist
 next-env.d.ts
 tmp/
 /data/magazines.json
+
+# Local runtime data and backups
+backups/
+data/
+public/uploads/
+.env.local
+.env.local.bak
+.env.local.save
