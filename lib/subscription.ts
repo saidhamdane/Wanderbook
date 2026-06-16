@@ -1,6 +1,46 @@
 import { getSupabaseAdmin } from './supabase';
+import { countMagazinesByPartner } from './db/magazines';
 
 export const PAID_SUBSCRIPTION_STATUSES = ['active', 'trialing'] as const;
+
+// ── Partner plan limit helpers ───────────────────────────────────────────────
+
+export const FREE_MONTHLY_MAGAZINE_LIMIT = 3;
+
+export function isUnlimitedPlan(partner: {
+  plan?: string;
+  subscriptionStatus?: string;
+}): boolean {
+  return (
+    partner.plan === 'unlimited_monthly' ||
+    partner.subscriptionStatus === 'active' ||
+    partner.subscriptionStatus === 'trialing'
+  );
+}
+
+export async function getPartnerMagazineUsage(
+  partnerSlug: string,
+  partnerId: string | undefined
+): Promise<{ total: number; month: number }> {
+  const result = await countMagazinesByPartner(partnerSlug, partnerId);
+  return result ?? { total: 0, month: 0 };
+}
+
+export async function canPartnerCreateMagazine(partner: {
+  plan?: string;
+  subscriptionStatus?: string;
+  slug: string;
+  id?: string;
+}): Promise<{ allowed: boolean; usage: { current: number; limit: number } }> {
+  if (isUnlimitedPlan(partner)) {
+    return { allowed: true, usage: { current: 0, limit: -1 } };
+  }
+  const usage = await getPartnerMagazineUsage(partner.slug, partner.id);
+  return {
+    allowed: usage.month < FREE_MONTHLY_MAGAZINE_LIMIT,
+    usage: { current: usage.month, limit: FREE_MONTHLY_MAGAZINE_LIMIT },
+  };
+}
 
 export type SubscriptionStatus =
   | 'active'

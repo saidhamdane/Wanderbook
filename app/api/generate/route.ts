@@ -3,7 +3,8 @@ import { saveUploadedFiles } from '@/lib/upload-handler';
 import { generateMagazine } from '@/lib/magazine/generate-magazine';
 import { saveMagazine } from '@/lib/magazine/store';
 import { normalizeLanguage } from '@/lib/magazine/generate-copy';
-import { getPublicPartnerBySlugFromDb } from '@/lib/db/partners';
+import { getPublicPartnerBySlugFromDb, getPartnerBySlug } from '@/lib/db/partners';
+import { canPartnerCreateMagazine, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/subscription';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -62,6 +63,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Enforce Free plan magazine limit before any expensive work
+    if (partnerSlug) {
+      const partnerFull = await getPartnerBySlug(partnerSlug);
+      if (partnerFull) {
+        const check = await canPartnerCreateMagazine(partnerFull);
+        if (!check.allowed) {
+          return NextResponse.json(
+            {
+              ok: false,
+              code: 'FREE_LIMIT_REACHED',
+              error: 'Free plan limit reached. Upgrade to Unlimited to create more magazines.',
+              usage: { current: check.usage.current, limit: FREE_MONTHLY_MAGAZINE_LIMIT },
+              upgradeUrl: '/partner/upgrade',
+            },
+            { status: 402 }
+          );
+        }
+      }
+    }
+
     const { sessionId, photos } = await saveUploadedFiles(photoFiles);
 
     const doc = await generateMagazine({
@@ -85,6 +106,7 @@ export async function POST(req: NextRequest) {
       doc.partner = {
         enabled: true,
         slug: partnerSlug,
+        partnerId: partnerRecord?.id ?? undefined,
         businessName: partnerRecord?.businessName ?? partnerSlug,
         whatsapp: partnerRecord?.whatsapp ?? '',
         website: partnerRecord?.website ?? '',

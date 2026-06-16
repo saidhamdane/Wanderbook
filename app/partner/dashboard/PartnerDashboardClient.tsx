@@ -39,6 +39,8 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
     brandingNote: account.brandingNote || '',
   });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [copied, setCopied] = useState(false);
   const [qrError, setQrError] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -81,13 +83,20 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaved(false);
-    const res = await fetch('/api/partner/profile', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
+    setSaveError('');
+    setSaving(true);
+    try {
+      const res = await fetch('/api/partner/profile', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
       const data = await res.json();
+      if (!res.ok) {
+        setSaveError(data.error || 'Failed to save profile. Please try again.');
+        return;
+      }
       if (data.partner) {
         setAccount((current) => ({
           ...current,
@@ -102,6 +111,10 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
         }));
       }
       setSaved(true);
+    } catch {
+      setSaveError('Network error. Please check your connection and try again.');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -226,7 +239,7 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
         <section className="mt-6 grid gap-4 sm:grid-cols-3">
           <Stat label="Client magazines" value={String(stats.total)} />
           <Stat label="This month" value={String(stats.month)} />
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className={`rounded-2xl border bg-white p-5 shadow-sm ${!paidActive && stats.month >= account.monthlyMagazineLimit ? 'border-red-300' : 'border-slate-200'}`}>
             <p className="text-xs font-semibold tracking-[0.18em] text-slate-500">CURRENT PLAN</p>
             <p className="mt-2 text-2xl font-bold text-slate-950">{planLabel}</p>
             <p className="mt-2 text-sm text-slate-600">
@@ -234,9 +247,17 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
                 ? 'Usage: unlimited client magazines while your subscription is active'
                 : `Usage: ${stats.month} / ${account.monthlyMagazineLimit} client magazines this month`}
             </p>
+            {!paidActive && stats.month >= account.monthlyMagazineLimit && (
+              <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                Free limit reached. Upgrade to continue creating magazines.
+              </p>
+            )}
             {!paidActive ? (
-              <Link href="/partner/upgrade" className="mt-3 inline-block rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
-                Empezar con Unlimited
+              <Link
+                href="/partner/upgrade"
+                className={`mt-3 inline-block rounded-xl px-4 py-2 text-sm font-semibold ${stats.month >= account.monthlyMagazineLimit ? 'bg-amber-500 text-white hover:bg-amber-600' : 'border border-slate-300 text-slate-700 hover:bg-slate-50'}`}
+              >
+                {stats.month >= account.monthlyMagazineLimit ? 'Upgrade to Unlimited' : 'Empezar con Unlimited'}
               </Link>
             ) : (
               <p className="mt-3 text-sm font-semibold text-green-700">Status: {statusLabel}</p>
@@ -298,10 +319,15 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
               <Input label="Branding note" value={form.brandingNote} onChange={(v) => setForm({ ...form, brandingNote: v })} />
             </div>
           </div>
-          <button className="mt-5 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-white hover:bg-amber-600">
-            Save changes
+          <button
+            type="submit"
+            disabled={saving}
+            className="mt-5 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-60"
+          >
+            {saving ? 'Saving...' : 'Save changes'}
           </button>
-          {saved && <span className="ml-3 text-sm font-semibold text-green-700">Business profile saved</span>}
+          {saved && !saving && <span className="ml-3 text-sm font-semibold text-green-700">Profile saved successfully.</span>}
+          {saveError && <p className="mt-3 text-sm font-semibold text-red-700">{saveError}</p>}
         </form>
       </div>
     </main>

@@ -11,6 +11,13 @@ import { FilmStrip } from './FilmStrip';
 
 type Step = 'template' | 'photos' | 'details';
 
+type LimitError = {
+  code: 'FREE_LIMIT_REACHED';
+  error: string;
+  usage: { current: number; limit: number };
+  upgradeUrl: string;
+};
+
 const STYLES = ['Warm & Personal', 'Epic & Bold', 'Calm & Minimal', 'Classic Editorial'];
 const LANGUAGES: Array<{ code: string; label: string }> = [
   { code: 'en', label: '🇬🇧 English' },
@@ -43,6 +50,7 @@ function CreatePageInner() {
   const [notes, setNotes]       = useState('');
   const [useStock, setUseStock] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [limitError, setLimitError] = useState<LimitError | null>(null);
 
   // Cinematic generation
   const [showCinematic, setShowCinematic] = useState(false);
@@ -53,6 +61,7 @@ function CreatePageInner() {
 
   async function handleGenerate() {
     setErrorMsg(null);
+    setLimitError(null);
     setMagId(null);
     setShowCinematic(true);          // show overlay immediately
 
@@ -69,7 +78,16 @@ function CreatePageInner() {
 
     try {
       const res = await fetch('/api/generate', { method: 'POST', body: fd });
-      if (!res.ok) throw new Error((await res.text()) || 'Generation failed');
+      if (!res.ok) {
+        let errData: Record<string, unknown> | null = null;
+        try { errData = await res.json(); } catch { /* ignore parse error */ }
+        if (errData?.code === 'FREE_LIMIT_REACHED') {
+          setShowCinematic(false);
+          setLimitError(errData as LimitError);
+          return;
+        }
+        throw new Error((errData as Record<string, string> | null)?.error || 'Generation failed');
+      }
       const doc = await res.json();
       setMagId(doc.id);              // signals overlay: confetti + redirect
     } catch (err) {
@@ -220,6 +238,21 @@ function CreatePageInner() {
                       className="w-4 h-4 accent-amber-500" />
                     Use stock photos for missing slots (recommended)
                   </label>
+                  {limitError && (
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm">
+                      <p className="font-bold text-amber-900">Free plan limit reached</p>
+                      <p className="mt-1 text-amber-800">
+                        This partner has reached the {limitError.usage.limit} magazine free monthly limit ({limitError.usage.current}/{limitError.usage.limit} used).
+                      </p>
+                      <p className="mt-1 text-amber-800">Upgrade to Unlimited to create more magazines.</p>
+                      <a
+                        href={limitError.upgradeUrl}
+                        className="mt-3 inline-block rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-white hover:bg-amber-600"
+                      >
+                        Upgrade to Unlimited
+                      </a>
+                    </div>
+                  )}
                   {errorMsg && (
                     <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">
                       {errorMsg}
