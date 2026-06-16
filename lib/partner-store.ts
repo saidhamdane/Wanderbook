@@ -13,12 +13,16 @@ export type PartnerAccount = {
   businessName: string;
   slug: string;
   businessType: string;
+  activityType?: string;
   mainIsland: string;
   whatsapp: string;
   website?: string;
   logoUrl?: string;
   brandingNote?: string;
   preferredTemplateId?: string;
+  googleReviewUrl?: string;
+  instagramUrl?: string;
+  bookingUrl?: string;
   plan: 'free' | 'unlimited_monthly' | 'pro';
   subscriptionStatus: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired';
   stripeCustomerId?: string;
@@ -34,12 +38,16 @@ export type PublicPartner = {
   slug: string;
   businessName: string;
   businessType: string;
+  activityType?: string;
   whatsapp: string;
   website: string;
   logoUrl: string;
   mainIsland: string;
   brandingNote: string;
   preferredTemplateId?: string;
+  googleReviewUrl?: string;
+  instagramUrl?: string;
+  bookingUrl?: string;
 };
 
 type SessionRecord = {

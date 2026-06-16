@@ -11,17 +11,29 @@ export default function AuroraBack({ slots, fonts, partner, language }: LayoutPr
   const partnerEnabled = slots['partner-enabled'] === 'true' || partner?.enabled === true;
   const cta = slots['partner-cta'];
 
+  // Background priority: page photo > cover photo > safe dark fallback
+  // Never use partner.logoUrl as background — it is rendered only inside PartnerBackBusinessCard
+  const partnerLogoUrl = partner?.logoUrl as string | undefined;
+  const backPhoto = slots['back-photo'] && slots['back-photo'] !== partnerLogoUrl
+    ? slots['back-photo']
+    : slots['cover-photo'] && slots['cover-photo'] !== partnerLogoUrl
+      ? slots['cover-photo']
+      : '';
+
   return (
     <div style={{ width: 794, height: 1123, position: 'relative', overflow: 'hidden', background: INK }}>
-      {/* Full-bleed back photo */}
-      {slots['back-photo'] ? (
+      {/* Full-bleed travel photo — never the partner logo */}
+      {backPhoto ? (
         <img
-          src={slots['back-photo']}
+          src={backPhoto}
           alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
-        <div style={{ position: 'absolute', inset: 0, background: `${TEAL}40` }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: `linear-gradient(160deg, ${INK} 0%, #1e2d3a 50%, ${INK} 100%)`,
+        }} />
       )}
 
       {/* Dark gradient overlay — bottom-heavy */}

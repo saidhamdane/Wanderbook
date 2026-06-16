@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { formatSpanishWhatsapp, getCanonicalPartnerUrl, getPartnerDisplayName, isValidHttpUrl, isValidLogoSrc } from '@/lib/partner-utils';
+import { formatSpanishWhatsapp, getCanonicalPartnerUrl, getPartnerDisplayName, isValidHttpUrl, isValidLogoSrc, normalizeExternalUrl } from '@/lib/partner-utils';
+import { ACTIVITY_TYPES } from '@/lib/partner-activity';
+import type { PartnerAnalytics } from '@/lib/db/partner-events';
 
 const BUSINESS_TYPES = ['Photographer', 'Tour Guide', 'Holiday Rental', 'Hotel', 'Excursion Company', 'Surf School', 'Other'];
 const ISLANDS = ['Tenerife', 'Fuerteventura', 'Lanzarote', 'Gran Canaria', 'La Palma', 'La Gomera', 'El Hierro'];
@@ -13,11 +15,15 @@ type DashboardPartner = {
   name?: string;
   slug: string;
   businessType: string;
+  activityType: string;
   mainIsland: string;
   whatsapp: string;
   website: string;
   logoUrl: string;
   brandingNote: string;
+  googleReviewUrl: string;
+  instagramUrl: string;
+  bookingUrl: string;
   plan: 'free' | 'unlimited_monthly' | 'pro';
   subscriptionStatus: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired';
   monthlyMagazineLimit: number;
@@ -27,16 +33,28 @@ function qrCardDownloadFilename(partnerSlug: string): string {
   return `wanderbook-${partnerSlug}-qr-card.png`;
 }
 
-export default function PartnerDashboardClient({ partner, stats }: { partner: DashboardPartner; stats: { total: number; month: number } }) {
+export default function PartnerDashboardClient({
+  partner,
+  stats,
+  analytics,
+}: {
+  partner: DashboardPartner;
+  stats: { total: number; month: number };
+  analytics: PartnerAnalytics;
+}) {
   const [account, setAccount] = useState(partner);
   const [form, setForm] = useState({
     businessName: account.businessName,
     businessType: account.businessType,
+    activityType: account.activityType || '',
     mainIsland: account.mainIsland,
     whatsapp: account.whatsapp,
     website: account.website || '',
     logoUrl: account.logoUrl || '',
     brandingNote: account.brandingNote || '',
+    googleReviewUrl: account.googleReviewUrl || '',
+    instagramUrl: account.instagramUrl || '',
+    bookingUrl: account.bookingUrl || '',
   });
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -86,11 +104,19 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
     setSaveError('');
     setSaving(true);
     try {
+      // Normalize URLs before saving
+      const normalized = {
+        ...form,
+        googleReviewUrl: form.googleReviewUrl ? normalizeExternalUrl(form.googleReviewUrl) : '',
+        instagramUrl: form.instagramUrl ? normalizeExternalUrl(form.instagramUrl) : '',
+        bookingUrl: form.bookingUrl ? normalizeExternalUrl(form.bookingUrl) : '',
+        website: form.website ? normalizeExternalUrl(form.website) : '',
+      };
       const res = await fetch('/api/partner/profile', {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(normalized),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -103,12 +129,17 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
           businessName: data.partner.businessName,
           slug: data.partner.slug,
           businessType: data.partner.businessType,
+          activityType: data.partner.activityType || '',
           mainIsland: data.partner.mainIsland,
           whatsapp: data.partner.whatsapp,
           website: data.partner.website || '',
           logoUrl: data.partner.logoUrl || '',
           brandingNote: data.partner.brandingNote || '',
+          googleReviewUrl: data.partner.googleReviewUrl || '',
+          instagramUrl: data.partner.instagramUrl || '',
+          bookingUrl: data.partner.bookingUrl || '',
         }));
+        setForm((current) => ({ ...current, ...normalized }));
       }
       setSaved(true);
     } catch {
@@ -236,6 +267,7 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
           </div>
         </section>
 
+        {/* Magazine stats */}
         <section className="mt-6 grid gap-4 sm:grid-cols-3">
           <Stat label="Client magazines" value={String(stats.total)} />
           <Stat label="This month" value={String(stats.month)} />
@@ -265,14 +297,39 @@ export default function PartnerDashboardClient({ partner, stats }: { partner: Da
           </div>
         </section>
 
+        {/* Engagement analytics */}
+        <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <AnalyticStat label="Magazine views" value={String(analytics.viewsTotal)} />
+          <AnalyticStat label="WhatsApp shares" value={String(analytics.whatsappShares)} />
+          <AnalyticStat label="Review clicks" value={String(analytics.reviewClicks)} />
+          <AnalyticStat label="Booking clicks" value={String(analytics.bookingClicks)} />
+        </section>
+
         <form onSubmit={saveProfile} className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-2xl text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>Business profile</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Input label="Business name" value={form.businessName} onChange={(v) => setForm({ ...form, businessName: v })} />
             <Select label="Business type" value={form.businessType} options={BUSINESS_TYPES} onChange={(v) => setForm({ ...form, businessType: v })} />
+            <Select
+              label="Activity type"
+              value={form.activityType}
+              options={['', ...ACTIVITY_TYPES]}
+              onChange={(v) => setForm({ ...form, activityType: v })}
+              helper="Determines the CTA on the magazine final page"
+            />
             <Select label="Main island" value={form.mainIsland} options={ISLANDS} onChange={(v) => setForm({ ...form, mainIsland: v })} />
             <Input label="WhatsApp" value={form.whatsapp} helper={`Display: ${formattedWhatsapp || 'Add your WhatsApp number'}`} onChange={(v) => setForm({ ...form, whatsapp: v })} />
             <Input label="Website" value={form.website} helper="Example: https://www.turfuerte.es" onChange={(v) => setForm({ ...form, website: v })} />
+            <Input label="Booking link" value={form.bookingUrl} helper="Direct booking URL (shown as button on magazine final page)" onChange={(v) => setForm({ ...form, bookingUrl: v })} />
+            <Input label="Instagram" value={form.instagramUrl} helper="Example: https://instagram.com/yourbusiness" onChange={(v) => setForm({ ...form, instagramUrl: v })} />
+            <div className="sm:col-span-2">
+              <Input
+                label="Google Review link"
+                value={form.googleReviewUrl}
+                helper='Paste your Google Maps review URL — shown as "Leave us a review" on the magazine final page'
+                onChange={(v) => setForm({ ...form, googleReviewUrl: v })}
+              />
+            </div>
             <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <h3 className="text-sm font-bold text-slate-950">Business logo or image</h3>
               <p className="mt-1 text-sm text-slate-600">
@@ -343,6 +400,15 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function AnalyticStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 shadow-sm">
+      <p className="text-xs font-semibold tracking-[0.16em] text-slate-400">{label.toUpperCase()}</p>
+      <p className="mt-1 text-2xl font-bold text-slate-800">{value}</p>
+    </div>
+  );
+}
+
 function Input({ label, value, onChange, helper, error = false }: { label: string; value: string; onChange: (v: string) => void; helper?: string; error?: boolean }) {
   return (
     <label className="block">
@@ -353,13 +419,14 @@ function Input({ label, value, onChange, helper, error = false }: { label: strin
   );
 }
 
-function Select({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
+function Select({ label, value, options, onChange, helper }: { label: string; value: string; options: string[]; onChange: (v: string) => void; helper?: string }) {
   return (
     <label className="block">
       <span className="mb-2 block text-xs font-semibold tracking-widest text-slate-600">{label.toUpperCase()}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 focus:ring-amber-400">
-        {options.map((option) => <option key={option} value={option}>{option}</option>)}
+        {options.map((option) => <option key={option} value={option}>{option || '— Select activity type —'}</option>)}
       </select>
+      {helper && <span className="mt-2 block text-xs text-slate-500">{helper}</span>}
     </label>
   );
 }

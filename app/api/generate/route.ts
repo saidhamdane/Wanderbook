@@ -5,6 +5,7 @@ import { saveMagazine } from '@/lib/magazine/store';
 import { normalizeLanguage } from '@/lib/magazine/generate-copy';
 import { getPublicPartnerBySlugFromDb, getPartnerBySlug } from '@/lib/db/partners';
 import { canPartnerCreateMagazine, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/subscription';
+import { trackPartnerEvent } from '@/lib/db/partner-events';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -109,16 +110,32 @@ export async function POST(req: NextRequest) {
         partnerId: partnerRecord?.id ?? undefined,
         businessName: partnerRecord?.businessName ?? partnerSlug,
         businessType: partnerRecord?.businessType ?? '',
+        activityType: partnerRecord?.activityType ?? '',
         mainIsland: partnerRecord?.mainIsland ?? '',
         whatsapp: partnerRecord?.whatsapp ?? '',
         website: partnerRecord?.website ?? '',
         logoUrl: partnerRecord?.logoUrl ?? '',
         brandingNote: partnerRecord?.brandingNote ?? '',
+        googleReviewUrl: partnerRecord?.googleReviewUrl ?? '',
+        instagramUrl: partnerRecord?.instagramUrl ?? '',
+        bookingUrl: partnerRecord?.bookingUrl ?? '',
+        magazineId: doc.id,
       };
       doc.source = 'partner_client';
     }
 
     await saveMagazine(doc);
+
+    // Track magazine creation event (fire-and-forget)
+    if (partnerSlug && doc.partner) {
+      trackPartnerEvent({
+        partnerId: (doc.partner.partnerId as string | undefined) ?? undefined,
+        partnerSlug,
+        magazineId: doc.id,
+        eventType: 'magazine_created',
+        metadata: { templateId: doc.templateId, destination, language },
+      }).catch(() => {});
+    }
 
     return NextResponse.json(doc);
   } catch (err: unknown) {

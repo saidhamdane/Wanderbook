@@ -15,12 +15,16 @@ type SupabasePartnerRow = {
   slug: string;
   business_name: string;
   business_type: string | null;
+  activity_type: string | null;
   main_island: string | null;
   whatsapp: string | null;
   website: string | null;
   logo_url: string | null;
   branding_note: string | null;
   preferred_template_id: string | null;
+  google_review_url: string | null;
+  instagram_url: string | null;
+  booking_url: string | null;
   plan: string;
   subscription_status: string;
   stripe_customer_id: string | null;
@@ -39,12 +43,16 @@ function rowToPartialAccount(row: SupabasePartnerRow): Partial<PartnerAccount> {
     email: row.email || '',
     businessName: row.business_name,
     businessType: row.business_type || '',
+    activityType: row.activity_type || undefined,
     mainIsland: row.main_island || '',
     whatsapp: row.whatsapp || '',
     website: row.website || undefined,
     logoUrl: row.logo_url || undefined,
     brandingNote: row.branding_note || undefined,
     preferredTemplateId: row.preferred_template_id || undefined,
+    googleReviewUrl: row.google_review_url || undefined,
+    instagramUrl: row.instagram_url || undefined,
+    bookingUrl: row.booking_url || undefined,
     plan: (row.plan as PartnerAccount['plan']) || 'free',
     subscriptionStatus: (row.subscription_status as PartnerAccount['subscriptionStatus']) || 'none',
     stripeCustomerId: row.stripe_customer_id || undefined,
@@ -60,12 +68,16 @@ function accountToRow(partner: PartnerAccount): Record<string, unknown> {
     slug: partner.slug,
     business_name: partner.businessName,
     business_type: partner.businessType || null,
+    activity_type: partner.activityType || null,
     main_island: partner.mainIsland || null,
     whatsapp: partner.whatsapp || null,
     website: partner.website || null,
     logo_url: partner.logoUrl || null,
     branding_note: partner.brandingNote || null,
     preferred_template_id: partner.preferredTemplateId || null,
+    google_review_url: partner.googleReviewUrl || null,
+    instagram_url: partner.instagramUrl || null,
+    booking_url: partner.bookingUrl || null,
     plan: partner.plan,
     subscription_status: partner.subscriptionStatus,
     stripe_customer_id: partner.stripeCustomerId || null,
@@ -177,12 +189,16 @@ export async function updatePartnerProfile(
   data: {
     business_name?: string;
     business_type?: string | null;
+    activity_type?: string | null;
     main_island?: string | null;
     whatsapp?: string | null;
     website?: string | null;
     logo_url?: string | null;
     branding_note?: string | null;
     preferred_template_id?: string | null;
+    google_review_url?: string | null;
+    instagram_url?: string | null;
+    booking_url?: string | null;
   }
 ): Promise<{ error?: string }> {
   const supabase = getSupabaseServer();
@@ -206,12 +222,16 @@ export async function updatePartnerProfile(
 type ProfileFields = {
   businessName: string;
   businessType?: string;
+  activityType?: string;
   mainIsland?: string;
   whatsapp?: string;
   website?: string;
   logoUrl?: string;
   brandingNote?: string;
   preferredTemplateId?: string;
+  googleReviewUrl?: string;
+  instagramUrl?: string;
+  bookingUrl?: string;
 };
 
 /**
@@ -225,34 +245,53 @@ export async function updatePartnerProfileFromSession(
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = getSupabaseServer();
 
-  const row: Record<string, unknown> = {
+  // Core fields: always present in schema
+  const coreRow: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
-  if (fields.businessName !== undefined) row.business_name = fields.businessName;
-  if (fields.businessType !== undefined) row.business_type = fields.businessType || null;
-  if (fields.mainIsland !== undefined) row.main_island = fields.mainIsland || null;
-  if (fields.whatsapp !== undefined) row.whatsapp = fields.whatsapp || null;
-  if (fields.website !== undefined) row.website = fields.website || null;
-  if (fields.logoUrl !== undefined) row.logo_url = fields.logoUrl || null;
-  if (fields.brandingNote !== undefined) row.branding_note = fields.brandingNote || null;
-  if (fields.preferredTemplateId !== undefined) row.preferred_template_id = fields.preferredTemplateId || null;
+  if (fields.businessName !== undefined) coreRow.business_name = fields.businessName;
+  if (fields.businessType !== undefined) coreRow.business_type = fields.businessType || null;
+  if (fields.mainIsland !== undefined) coreRow.main_island = fields.mainIsland || null;
+  if (fields.whatsapp !== undefined) coreRow.whatsapp = fields.whatsapp || null;
+  if (fields.website !== undefined) coreRow.website = fields.website || null;
+  if (fields.logoUrl !== undefined) coreRow.logo_url = fields.logoUrl || null;
+  if (fields.brandingNote !== undefined) coreRow.branding_note = fields.brandingNote || null;
+  if (fields.preferredTemplateId !== undefined) coreRow.preferred_template_id = fields.preferredTemplateId || null;
+
+  // Marketing fields: added by 20260616 migration — applied separately to avoid failures
+  const hasMarketing = fields.activityType !== undefined || fields.googleReviewUrl !== undefined ||
+    fields.instagramUrl !== undefined || fields.bookingUrl !== undefined;
+  const marketingRow: Record<string, unknown> = {};
+  if (fields.activityType !== undefined) marketingRow.activity_type = fields.activityType || null;
+  if (fields.googleReviewUrl !== undefined) marketingRow.google_review_url = fields.googleReviewUrl || null;
+  if (fields.instagramUrl !== undefined) marketingRow.instagram_url = fields.instagramUrl || null;
+  if (fields.bookingUrl !== undefined) marketingRow.booking_url = fields.bookingUrl || null;
+
+  async function doUpdate(filter: { col: string; val: string }): Promise<boolean> {
+    if (!supabase) return false;
+    const { error } = await supabase.from('partners').update(coreRow).eq(filter.col, filter.val);
+    if (error) {
+      console.error(`[db/partners] updatePartnerProfileFromSession (${filter.col}) error:`, error.message);
+      return false;
+    }
+    // Marketing fields — fail silently if migration not yet applied
+    if (hasMarketing) {
+      try {
+        await supabase.from('partners').update(marketingRow).eq(filter.col, filter.val);
+      } catch {
+        // migration pending — core save still succeeded
+      }
+    }
+    updatePartnerAccount(session.partnerId, fields);
+    return true;
+  }
 
   if (supabase) {
     // Try by slug first (most reliable unique key)
     if (session.partnerSlug) {
       try {
-        const { error } = await supabase
-          .from('partners')
-          .update(row)
-          .eq('slug', session.partnerSlug);
-        if (error) {
-          console.error('[db/partners] updatePartnerProfileFromSession (slug) error:', error.message);
-          // Fall through to id-based attempt
-        } else {
-          // Supabase updated OK; also sync local JSON if partner lives there
-          updatePartnerAccount(session.partnerId, fields);
-          return { ok: true };
-        }
+        const ok = await doUpdate({ col: 'slug', val: session.partnerSlug });
+        if (ok) return { ok: true };
       } catch (err) {
         console.error('[db/partners] updatePartnerProfileFromSession (slug) exception:', err);
       }
@@ -261,16 +300,8 @@ export async function updatePartnerProfileFromSession(
     // Fallback: try by id
     if (session.partnerId) {
       try {
-        const { error } = await supabase
-          .from('partners')
-          .update(row)
-          .eq('id', session.partnerId);
-        if (error) {
-          console.error('[db/partners] updatePartnerProfileFromSession (id) error:', error.message);
-        } else {
-          updatePartnerAccount(session.partnerId, fields);
-          return { ok: true };
-        }
+        const ok = await doUpdate({ col: 'id', val: session.partnerId });
+        if (ok) return { ok: true };
       } catch (err) {
         console.error('[db/partners] updatePartnerProfileFromSession (id) exception:', err);
       }
@@ -279,13 +310,13 @@ export async function updatePartnerProfileFromSession(
     // Fallback: try by email
     if (session.email) {
       try {
-        const { error } = await supabase
-          .from('partners')
-          .update(row)
-          .ilike('email', session.email);
+        const { error } = await supabase.from('partners').update(coreRow).ilike('email', session.email);
         if (error) {
           console.error('[db/partners] updatePartnerProfileFromSession (email) error:', error.message);
           return { ok: false, error: error.message };
+        }
+        if (hasMarketing) {
+          try { await supabase.from('partners').update(marketingRow).ilike('email', session.email); } catch { /* migration pending */ }
         }
         updatePartnerAccount(session.partnerId, fields);
         return { ok: true };
@@ -424,7 +455,7 @@ export async function getPublicPartnerBySlugFromDb(slug: string): Promise<Public
     try {
       const { data, error } = await supabase
         .from('partners')
-        .select('id, slug, business_name, business_type, main_island, whatsapp, website, logo_url, branding_note, preferred_template_id')
+        .select('*')
         .eq('slug', slug)
         .maybeSingle();
       if (!error && data) {
@@ -434,12 +465,16 @@ export async function getPublicPartnerBySlugFromDb(slug: string): Promise<Public
           slug: row.slug,
           businessName: row.business_name,
           businessType: row.business_type || '',
+          activityType: row.activity_type || undefined,
           whatsapp: row.whatsapp || '',
           website: row.website || '',
           logoUrl: isValidLogoSrc(row.logo_url ?? undefined) ? (row.logo_url ?? '') : '',
           mainIsland: row.main_island || '',
           brandingNote: row.branding_note || `Created for you by ${row.business_name}`,
           preferredTemplateId: row.preferred_template_id || undefined,
+          googleReviewUrl: row.google_review_url || undefined,
+          instagramUrl: row.instagram_url || undefined,
+          bookingUrl: row.booking_url || undefined,
         };
       }
     } catch (err) {
@@ -454,12 +489,16 @@ export async function getPublicPartnerBySlugFromDb(slug: string): Promise<Public
     slug: account.slug,
     businessName: account.businessName,
     businessType: account.businessType,
+    activityType: account.activityType,
     whatsapp: account.whatsapp,
     website: account.website || '',
     logoUrl: isValidLogoSrc(account.logoUrl) ? (account.logoUrl ?? '') : '',
     mainIsland: account.mainIsland,
     brandingNote: account.brandingNote || `Created for you by ${account.businessName}`,
     preferredTemplateId: account.preferredTemplateId,
+    googleReviewUrl: account.googleReviewUrl,
+    instagramUrl: account.instagramUrl,
+    bookingUrl: account.bookingUrl,
   };
 }
 

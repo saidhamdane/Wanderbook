@@ -21,15 +21,33 @@ export default async function MagazinePageRender({
 
   const { layout, slots } = doc.pages[pageIndex];
 
-  // Merge live partner branding so existing magazines also show the current logo.
+  // Always merge live partner branding so existing magazines show the current logo,
+  // googleReviewUrl, instagramUrl, bookingUrl, activityType, and other marketing fields.
   let partner = doc.partner as LayoutPartner | undefined;
   if (partner?.enabled) {
     const partnerSlug = partner.slug || (doc as Record<string, unknown>).partnerSlug as string | undefined;
-    if (partnerSlug && !partner.logoUrl) {
-      const live = await getPublicPartnerBySlugFromDb(partnerSlug);
-      if (live) {
-        partner = { ...partner, ...live, enabled: true };
+    if (partnerSlug) {
+      try {
+        const live = await getPublicPartnerBySlugFromDb(partnerSlug);
+        if (live) {
+          partner = {
+            ...partner,
+            ...live,
+            enabled: true,
+            // Always set magazineId from URL params so WhatsApp share link is correct
+            magazineId: (partner.magazineId as string | undefined) ?? params.id,
+            partnerId: (partner.partnerId as string | undefined) ?? live.id,
+          };
+        }
+      } catch {
+        // Supabase unavailable — use saved partner data but still fix magazineId
+        if (partner && !partner.magazineId) {
+          partner = { ...partner, magazineId: params.id };
+        }
       }
+    } else if (partner && !partner.magazineId) {
+      // No slug but partner enabled — still set the magazineId for share links
+      partner = { ...partner, magazineId: params.id };
     }
   }
 

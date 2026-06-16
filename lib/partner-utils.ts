@@ -105,6 +105,13 @@ export function isValidLogoSrc(value?: string): boolean {
   return isValidHttpUrl(value);
 }
 
+export function normalizeExternalUrl(value?: string): string {
+  const raw = (value || '').trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `https://${raw}`;
+}
+
 export function publicOriginFromEnvOrHost(host?: string): string {
   const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || '';
   if (appUrl && !/localhost|127\.0\.0\.1/i.test(appUrl)) return appUrl.replace(/\/$/, '');

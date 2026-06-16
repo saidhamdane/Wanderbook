@@ -5,7 +5,7 @@ const champagne = '#c9a25d';
 const ivory = '#fffaf0';
 const black = '#070707';
 
-export default function ANEBack({ slots, fonts, partner }: LayoutProps) {
+export default function ANEBack({ slots, fonts, partner, language }: LayoutProps) {
   const title = slots['back-title'] || 'Until the next departure.';
   const line = slots['back-line'] || '';
   const contact = slots['back-contact'] || '';
@@ -13,17 +13,29 @@ export default function ANEBack({ slots, fonts, partner }: LayoutProps) {
   const businessName = slots['partner-business-name'];
   const cta = slots['partner-cta'];
 
+  // Background priority: page photo > magazine cover photo > safe dark fallback
+  // Never use partner.logoUrl as background — it is rendered only inside PartnerBackBusinessCard
+  const partnerLogoUrl = partner?.logoUrl as string | undefined;
+  const backPhoto = slots['back-photo'] && slots['back-photo'] !== partnerLogoUrl
+    ? slots['back-photo']
+    : slots['cover-photo'] && slots['cover-photo'] !== partnerLogoUrl
+      ? slots['cover-photo']
+      : '';
+
   return (
     <div style={{ width: 794, height: 1123, position: 'relative', overflow: 'hidden', background: black, color: ivory }}>
-      {/* Full-bleed photo */}
-      {slots['back-photo'] ? (
+      {/* Full-bleed travel photo — never the partner logo */}
+      {backPhoto ? (
         <img
-          src={slots['back-photo']}
+          src={backPhoto}
           alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
-        <div style={{ position: 'absolute', inset: 0, background: '#1a1a1a' }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(160deg, #0d1117 0%, #1a2236 50%, #0d1117 100%)',
+        }} />
       )}
 
       {/* Overlays */}

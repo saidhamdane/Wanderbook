@@ -107,11 +107,16 @@ export type LayoutPartner = {
   partnerId?: string;
   businessName?: string;
   businessType?: string;
+  activityType?: string;
   mainIsland?: string;
   whatsapp?: string;
   website?: string;
   logoUrl?: string;
   brandingNote?: string;
+  googleReviewUrl?: string;
+  instagramUrl?: string;
+  bookingUrl?: string;
+  magazineId?: string;
   [key: string]: unknown;
 };
 

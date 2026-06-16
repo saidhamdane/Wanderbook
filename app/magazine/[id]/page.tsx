@@ -5,6 +5,7 @@ import { DownloadPdfButton } from '@/app/preview/[id]/DownloadPdfButton';
 import { InteractiveFlipbookViewer } from '@/components/magazine/InteractiveFlipbookViewer';
 import { ShareMagazineButton } from '@/components/magazine/ShareMagazineButton';
 import { localizedCreatedWith } from '@/lib/magazine/localize-magazine';
+import { MagazineViewTracker } from '@/components/magazine/MagazineViewTracker';
 
 type Params = {
   params: { id: string };
@@ -106,6 +107,12 @@ export default async function DigitalMagazinePage({ params }: Params) {
         </p>
       )}
 
+      {anyDoc.source === 'partner_client' && anyDoc.partner?.slug && (
+        <MagazineViewTracker
+          magazineId={doc.id}
+          partnerSlug={String(anyDoc.partner.slug)}
+        />
+      )}
       <InteractiveFlipbookViewer magazine={doc} />
     </main>
   );
