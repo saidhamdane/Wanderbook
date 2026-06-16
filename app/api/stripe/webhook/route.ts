@@ -74,25 +74,34 @@ async function handlePartnerSubscription(sub: Stripe.Subscription): Promise<bool
     (resolveCustomerId(sub) ? getPartnerAccountByStripeCustomerId(resolveCustomerId(sub)!)?.id : undefined) ||
     getPartnerAccountByStripeSubscriptionId(sub.id)?.id;
 
-  if (!partnerId) return false;
+  // partnerSlug from metadata is the Supabase-safe fallback for slug resolution
+  const metadataSlug = sub.metadata?.partnerSlug || undefined;
+
+  if (!partnerId && !metadataSlug) return false;
 
   const access = partnerAccessForStatus(sub.status);
-  const updated = updatePartnerBilling(partnerId, {
-    ...access,
-    stripeCustomerId: resolveCustomerId(sub),
-    stripeSubscriptionId: sub.id,
-    currentPeriodEnd: subscriptionPeriodEnd(sub),
-  });
-  if (updated?.slug) {
-    await updatePartnerBillingInSupabase(updated.slug, {
+  let resolvedSlug = metadataSlug;
+
+  if (partnerId) {
+    const updated = updatePartnerBilling(partnerId, {
+      ...access,
+      stripeCustomerId: resolveCustomerId(sub),
+      stripeSubscriptionId: sub.id,
+      currentPeriodEnd: subscriptionPeriodEnd(sub),
+    });
+    resolvedSlug = updated?.slug || metadataSlug;
+  }
+
+  if (resolvedSlug) {
+    await updatePartnerBillingInSupabase(resolvedSlug, {
       plan: access.plan,
       subscriptionStatus: access.subscriptionStatus,
       stripeCustomerId: resolveCustomerId(sub),
       stripeSubscriptionId: sub.id,
     });
   }
-  console.log(`[webhook] Subscription updated: partner=${partnerId} status=${sub.status}`);
-  return true;
+  console.log(`[webhook] Subscription updated: partner=${partnerId || metadataSlug} status=${sub.status}`);
+  return Boolean(partnerId || metadataSlug);
 }
 
 // ---------- user path ----------
@@ -186,15 +195,17 @@ export async function POST(req: NextRequest) {
           currentPeriodEnd: sub ? subscriptionPeriodEnd(sub) : undefined,
         });
         const partnerAccount = getPartnerAccountById(resolvedPartnerId);
-        if (partnerAccount?.slug) {
-          await updatePartnerBillingInSupabase(partnerAccount.slug, {
+        // For Supabase-only partners, use partnerSlug from metadata directly
+        const resolvedSlug = partnerAccount?.slug || partnerSlug;
+        if (resolvedSlug) {
+          await updatePartnerBillingInSupabase(resolvedSlug, {
             plan: access.plan,
             subscriptionStatus: access.subscriptionStatus,
             stripeCustomerId,
             stripeSubscriptionId,
           });
         }
-        console.log(`[webhook] Checkout completed: partner=${resolvedPartnerId}`);
+        console.log(`[webhook] Checkout completed: partner=${resolvedPartnerId} slug=${resolvedSlug}`);
       } else if (userId) {
         const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
         const sub =

@@ -41,12 +41,17 @@ export async function GET(req: NextRequest) {
 
   // Resolve partner from metadata or client_reference_id
   const partnerId = session.metadata?.partnerId || undefined;
-  const partnerSlug = session.metadata?.partnerSlug || session.client_reference_id || undefined;
+  const partnerSlug =
+    session.metadata?.partnerSlug || session.client_reference_id || undefined;
+
   const partner =
     (partnerId ? getPartnerAccountById(partnerId) : null) ??
     (partnerSlug ? getPartnerAccountBySlug(partnerSlug) : null);
 
-  if (partner && active && subscription) {
+  // For Supabase-only partners, partner may be null but partnerSlug is still valid
+  const resolvedSlug = partner?.slug || partnerSlug;
+
+  if (resolvedSlug && active && subscription) {
     const stripeCustomerId =
       typeof session.customer === 'string' ? session.customer : session.customer?.id;
     const stripeSubscriptionId = subscription.id;
@@ -54,16 +59,18 @@ export async function GET(req: NextRequest) {
       (subscription as unknown as { current_period_end?: number }).current_period_end,
     );
 
-    updatePartnerBilling(partner.id, {
-      plan: 'unlimited_monthly',
-      subscriptionStatus: status,
-      stripeCustomerId,
-      stripeSubscriptionId,
-      currentPeriodEnd: periodEnd,
-      monthlyMagazineLimit: UNLIMITED_MONTHLY_MAGAZINE_LIMIT,
-    });
+    if (partner) {
+      updatePartnerBilling(partner.id, {
+        plan: 'unlimited_monthly',
+        subscriptionStatus: status,
+        stripeCustomerId,
+        stripeSubscriptionId,
+        currentPeriodEnd: periodEnd,
+        monthlyMagazineLimit: UNLIMITED_MONTHLY_MAGAZINE_LIMIT,
+      });
+    }
 
-    await updatePartnerBillingInSupabase(partner.slug, {
+    await updatePartnerBillingInSupabase(resolvedSlug, {
       plan: 'unlimited_monthly',
       subscriptionStatus: status,
       stripeCustomerId,

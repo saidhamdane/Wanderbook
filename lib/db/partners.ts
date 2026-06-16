@@ -2,6 +2,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import {
   type PartnerAccount,
   type PublicPartner,
+  getPartnerAccountById,
   getPartnerAccountBySlug,
   listPartnerAccounts,
   updatePartnerAccount,
@@ -35,6 +36,7 @@ function rowToPartialAccount(row: SupabasePartnerRow): Partial<PartnerAccount> {
   return {
     id: row.id,
     slug: row.slug,
+    email: row.email || '',
     businessName: row.business_name,
     businessType: row.business_type || '',
     mainIsland: row.main_island || '',
@@ -71,6 +73,29 @@ function accountToRow(partner: PartnerAccount): Record<string, unknown> {
     email: partner.email ? partner.email.toLowerCase() : null,
     updated_at: new Date().toISOString(),
   };
+}
+
+export async function getPartnerById(id: string): Promise<PartnerAccount | null> {
+  const supabase = getSupabaseServer();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (!error && data) {
+        const jsonPartner = getPartnerAccountBySlug((data as SupabasePartnerRow).slug);
+        if (jsonPartner) {
+          return { ...jsonPartner, ...rowToPartialAccount(data as SupabasePartnerRow) } as PartnerAccount;
+        }
+        return rowToPartialAccount(data as SupabasePartnerRow) as PartnerAccount;
+      }
+    } catch (err) {
+      console.warn('[db/partners] getPartnerById error:', err);
+    }
+  }
+  return getPartnerAccountById(id);
 }
 
 export async function getPartnerBySlug(slug: string): Promise<PartnerAccount | null> {

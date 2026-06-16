@@ -10,19 +10,26 @@ export default function UpgradeCheckoutButton() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/stripe/checkout', { method: 'POST' });
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        credentials: 'include',
+      });
       const data = await res.json();
-      if (!res.ok || !data.url) {
-        if (res.status === 401) {
-          window.location.href = '/partner/login';
-          return;
-        }
-        setError(data.error || 'Could not start Stripe Checkout.');
+
+      if (res.status === 401) {
+        const dest = data?.redirect || '/partner/login?next=/partner/upgrade';
+        window.location.href = dest;
         return;
       }
+
+      if (!res.ok || !data.url) {
+        setError(data?.error || 'Could not start Stripe Checkout.');
+        return;
+      }
+
       window.location.href = data.url;
     } catch {
-      setError('Could not start Stripe Checkout.');
+      setError('Could not start Stripe Checkout. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -38,7 +45,11 @@ export default function UpgradeCheckoutButton() {
       >
         {loading ? 'Opening Checkout...' : 'Empezar con Unlimited'}
       </button>
-      {error && <p className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {error && (
+        <p className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
     </>
   );
 }
