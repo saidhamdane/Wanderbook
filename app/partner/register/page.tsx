@@ -16,22 +16,26 @@ export default function PartnerRegisterPage() {
     businessType: '',
   });
   const [error, setError] = useState('');
+  const [confirmError, setConfirmError] = useState('');
   const [loading, setLoading] = useState(false);
 
   function set(field: keyof typeof form) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      if (field === 'password' || field === 'confirmPassword') setConfirmError('');
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    };
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setConfirmError('');
     if (form.password.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
     }
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match.');
+      setConfirmError('Passwords do not match.');
       return;
     }
     setLoading(true);
@@ -112,6 +116,9 @@ export default function PartnerRegisterPage() {
                 autoComplete="new-password"
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-950 focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
+              {confirmError && (
+                <span className="mt-1 block text-xs text-red-600">{confirmError}</span>
+              )}
             </label>
             <label className="block">
               <span className="mb-2 block text-xs font-semibold tracking-widest text-slate-600">BUSINESS TYPE</span>

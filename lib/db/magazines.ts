@@ -65,27 +65,46 @@ export async function listMagazinesByPartner(partnerSlug: string): Promise<Magaz
 export async function countMagazinesByPartnerSlug(
   partnerSlug: string
 ): Promise<{ total: number; month: number } | null> {
+  return countMagazinesByPartner(partnerSlug, undefined);
+}
+
+/**
+ * Count magazines for a partner matching by slug OR id (whichever column is set).
+ * Old rows only have partner_slug; new rows have both.
+ */
+export async function countMagazinesByPartner(
+  partnerSlug: string,
+  partnerId: string | undefined
+): Promise<{ total: number; month: number } | null> {
   const supabase = getSupabaseServer();
   if (!supabase) return null;
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  // Build OR filter: always match by slug; add id match when available
+  const orFilter = partnerId
+    ? `partner_slug.eq.${partnerSlug},partner_id.eq.${partnerId}`
+    : `partner_slug.eq.${partnerSlug}`;
+
   try {
     const { count: total, error: e1 } = await supabase
       .from('magazines')
       .select('*', { count: 'exact', head: true })
-      .eq('partner_slug', partnerSlug);
-
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+      .or(orFilter);
 
     const { count: month, error: e2 } = await supabase
       .from('magazines')
       .select('*', { count: 'exact', head: true })
-      .eq('partner_slug', partnerSlug)
+      .or(orFilter)
       .gte('created_at', startOfMonth.toISOString());
 
-    if (e1 || e2) return null;
+    if (e1) { console.warn('[db/magazines] countMagazinesByPartner total error:', e1.message); return null; }
+    if (e2) { console.warn('[db/magazines] countMagazinesByPartner month error:', e2.message); return null; }
     return { total: total ?? 0, month: month ?? 0 };
-  } catch {
+  } catch (err) {
+    console.warn('[db/magazines] countMagazinesByPartner exception:', err);
     return null;
   }
 }

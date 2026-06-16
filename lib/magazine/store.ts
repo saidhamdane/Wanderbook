@@ -33,16 +33,22 @@ export async function saveMagazine(doc: MagazineDocument): Promise<void> {
   saveToDisk(memoryStore);
   const supabase = getSupabaseAdmin();
   if (!supabase) return;
+  const partnerData = doc.partner as Record<string, unknown> | undefined;
   try {
-    await supabase.from('magazines').upsert({
-      id: doc.id,
+    const { error } = await supabase.from('magazines').upsert({
+      magazine_id: doc.id,
       template_id: doc.templateId,
       destination: doc.destination,
+      language: doc.language || null,
+      style: doc.style || null,
+      partner_slug: (partnerData?.slug as string) || null,
+      partner_id: (partnerData?.partnerId as string) || null,
       data: doc,
-      created_at: doc.generatedAt
-    });
-  } catch {
-    // Supabase unavailable — disk + memory store still holds the document
+      created_at: doc.generatedAt,
+    }, { onConflict: 'magazine_id' });
+    if (error) console.warn('[store] saveMagazine Supabase error:', error.message);
+  } catch (err) {
+    console.warn('[store] saveMagazine Supabase exception:', err);
   }
 }
 

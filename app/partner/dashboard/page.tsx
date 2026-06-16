@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getPartnerSession } from '@/lib/auth/partner-session';
 import { getPartnerBySlug } from '@/lib/db/partners';
-import { countMagazinesByPartnerSlug } from '@/lib/db/magazines';
+import { countMagazinesByPartner } from '@/lib/db/magazines';
 import { countPartnerMagazines, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/partner-store';
 import PartnerDashboardClient from './PartnerDashboardClient';
 
@@ -15,7 +15,7 @@ export default async function PartnerDashboardPage() {
   const partner = await getPartnerBySlug(session.partnerSlug);
   if (!partner) redirect('/partner/login?next=/partner/dashboard');
 
-  const sbStats = await countMagazinesByPartnerSlug(partner.slug);
+  const sbStats = await countMagazinesByPartner(partner.slug, partner.id || undefined);
   const stats = sbStats ?? countPartnerMagazines(partner.id ?? '');
 
   return (

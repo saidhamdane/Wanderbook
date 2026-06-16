@@ -4,8 +4,10 @@ import {
   type PublicPartner,
   getPartnerAccountBySlug,
   listPartnerAccounts,
+  updatePartnerAccount,
 } from '@/lib/partner-store';
 import { isValidLogoSrc } from '@/lib/partner-utils';
+import type { PartnerSessionPayload } from '@/lib/auth/partner-session';
 
 type SupabasePartnerRow = {
   id: string;
@@ -143,6 +145,138 @@ export async function updatePartner(slug: string, updates: Record<string, unknow
   } catch (err) {
     console.warn('[db/partners] updatePartner exception:', err);
   }
+}
+
+export async function updatePartnerProfile(
+  slug: string,
+  data: {
+    business_name?: string;
+    business_type?: string | null;
+    main_island?: string | null;
+    whatsapp?: string | null;
+    website?: string | null;
+    logo_url?: string | null;
+    branding_note?: string | null;
+    preferred_template_id?: string | null;
+  }
+): Promise<{ error?: string }> {
+  const supabase = getSupabaseServer();
+  if (!supabase) return {};
+  try {
+    const { error } = await supabase
+      .from('partners')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('slug', slug);
+    if (error) {
+      console.error('[db/partners] updatePartnerProfile error:', error.message);
+      return { error: error.message };
+    }
+    return {};
+  } catch (err) {
+    console.error('[db/partners] updatePartnerProfile exception:', err);
+    return { error: String(err) };
+  }
+}
+
+type ProfileFields = {
+  businessName: string;
+  businessType?: string;
+  mainIsland?: string;
+  whatsapp?: string;
+  website?: string;
+  logoUrl?: string;
+  brandingNote?: string;
+  preferredTemplateId?: string;
+};
+
+/**
+ * Update profile fields for the currently logged-in partner.
+ * Resolves the partner row by slug → id → email (in order of availability).
+ * Never touches password_hash, email, plan, subscription_status, or Stripe fields.
+ */
+export async function updatePartnerProfileFromSession(
+  session: Pick<PartnerSessionPayload, 'partnerSlug' | 'partnerId' | 'email'>,
+  fields: ProfileFields
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = getSupabaseServer();
+
+  const row: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (fields.businessName !== undefined) row.business_name = fields.businessName;
+  if (fields.businessType !== undefined) row.business_type = fields.businessType || null;
+  if (fields.mainIsland !== undefined) row.main_island = fields.mainIsland || null;
+  if (fields.whatsapp !== undefined) row.whatsapp = fields.whatsapp || null;
+  if (fields.website !== undefined) row.website = fields.website || null;
+  if (fields.logoUrl !== undefined) row.logo_url = fields.logoUrl || null;
+  if (fields.brandingNote !== undefined) row.branding_note = fields.brandingNote || null;
+  if (fields.preferredTemplateId !== undefined) row.preferred_template_id = fields.preferredTemplateId || null;
+
+  if (supabase) {
+    // Try by slug first (most reliable unique key)
+    if (session.partnerSlug) {
+      try {
+        const { error } = await supabase
+          .from('partners')
+          .update(row)
+          .eq('slug', session.partnerSlug);
+        if (error) {
+          console.error('[db/partners] updatePartnerProfileFromSession (slug) error:', error.message);
+          // Fall through to id-based attempt
+        } else {
+          // Supabase updated OK; also sync local JSON if partner lives there
+          updatePartnerAccount(session.partnerId, fields);
+          return { ok: true };
+        }
+      } catch (err) {
+        console.error('[db/partners] updatePartnerProfileFromSession (slug) exception:', err);
+      }
+    }
+
+    // Fallback: try by id
+    if (session.partnerId) {
+      try {
+        const { error } = await supabase
+          .from('partners')
+          .update(row)
+          .eq('id', session.partnerId);
+        if (error) {
+          console.error('[db/partners] updatePartnerProfileFromSession (id) error:', error.message);
+        } else {
+          updatePartnerAccount(session.partnerId, fields);
+          return { ok: true };
+        }
+      } catch (err) {
+        console.error('[db/partners] updatePartnerProfileFromSession (id) exception:', err);
+      }
+    }
+
+    // Fallback: try by email
+    if (session.email) {
+      try {
+        const { error } = await supabase
+          .from('partners')
+          .update(row)
+          .ilike('email', session.email);
+        if (error) {
+          console.error('[db/partners] updatePartnerProfileFromSession (email) error:', error.message);
+          return { ok: false, error: error.message };
+        }
+        updatePartnerAccount(session.partnerId, fields);
+        return { ok: true };
+      } catch (err) {
+        console.error('[db/partners] updatePartnerProfileFromSession (email) exception:', err);
+        return { ok: false, error: String(err) };
+      }
+    }
+
+    return { ok: false, error: 'Could not identify partner — no slug, id, or email in session' };
+  }
+
+  // Supabase not configured — update local JSON only
+  const updated = updatePartnerAccount(session.partnerId, fields);
+  if (!updated) return { ok: false, error: 'Partner not found in local store and Supabase is not configured' };
+  return { ok: true };
 }
 
 /** Look up a partner by email (case-insensitive). Returns partial account with password_hash. */
