@@ -395,32 +395,42 @@ export function InteractiveFlipbookViewer({ magazine }: { magazine: MagazineDocu
             letter-spacing: 0.14em !important;
           }
           .magazine-mobile-readable .magazine-partner-card {
-            background: rgba(5, 10, 26, 0.76) !important;
-            box-shadow: 0 26px 90px rgba(0, 0, 0, 0.58) !important;
+            background: rgba(8, 12, 28, 0.86) !important;
+            box-shadow: 0 20px 64px rgba(0, 0, 0, 0.52) !important;
+          }
+          .magazine-mobile-readable .magazine-partner-card img {
+            max-width: 160px !important;
+            max-height: 100px !important;
           }
           .magazine-mobile-readable .magazine-partner-card-kicker {
-            font-size: 26px !important;
+            font-size: 22px !important;
             line-height: 1.35 !important;
-            letter-spacing: 0.12em !important;
+            letter-spacing: 0.18em !important;
           }
           .magazine-mobile-readable .magazine-partner-card-name {
-            font-size: 64px !important;
-            line-height: 1.02 !important;
+            font-size: 60px !important;
+            line-height: 1.05 !important;
           }
           .magazine-mobile-readable .magazine-partner-card-cta {
-            font-size: 38px !important;
-            line-height: 1.32 !important;
+            font-size: 34px !important;
+            line-height: 1.3 !important;
           }
           .magazine-mobile-readable .magazine-partner-card-contact {
-            font-size: 37px !important;
-            line-height: 1.38 !important;
             gap: 12px !important;
-            overflow-wrap: anywhere !important;
+          }
+          .magazine-mobile-readable .magazine-partner-card-contact a,
+          .magazine-mobile-readable .magazine-partner-card-contact button {
+            font-size: 34px !important;
+            line-height: 1.32 !important;
+            padding: 20px 28px !important;
+            border-radius: 14px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
           }
           .magazine-mobile-readable .magazine-partner-card-footer {
-            font-size: 28px !important;
+            font-size: 22px !important;
             line-height: 1.35 !important;
-            color: rgba(255, 255, 255, 0.86) !important;
+            color: rgba(255, 255, 255, 0.72) !important;
           }
         }
       `}</style>
@@ -574,7 +584,9 @@ export function InteractiveFlipbookViewer({ magazine }: { magazine: MagazineDocu
                       pageIndex={index}
                       palette={magazine.template.palette}
                       fonts={magazine.template.fonts}
-                      partner={magazine.partner}
+                      partner={magazine.partner && !(magazine.partner as Record<string, unknown>).magazineId
+                        ? { ...magazine.partner, magazineId: magazine.id }
+                        : magazine.partner}
                       language={magazine.language}
                       style={magazine.style}
                       copyProvider={magazine.copyProvider}
