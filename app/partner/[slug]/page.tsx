@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPublicPartnerBySlugFromDb } from '@/lib/db/partners';
 import { defaultTemplateIdForPartnerClient } from '@/lib/magazine/template-recommendations';
-import { getTemplateById } from '@/lib/magazine/template-registry';
+import { getTemplateById, getSafeTemplateId } from '@/lib/magazine/template-registry';
 import { getTemplateCoverImage } from '@/lib/magazine/template-covers';
 import { DEFAULT_PARTNER_OG_IMAGE, PUBLIC_SITE_ORIGIN, getCanonicalPartnerUrl, getPartnerDisplayName } from '@/lib/partner-utils';
 import { PartnerLogoBadge } from './PartnerLogoBadge';
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PartnerPageParams): Promise<M
   const canonicalUrl = getCanonicalPartnerUrl(partner.slug);
   const title = `Create your ${partner.mainIsland} travel magazine with ${businessName}`;
   const description = 'Upload your photos and receive a premium digital flipbook magazine of your experience.';
-  const selectedTemplateId = defaultTemplateIdForPartnerClient(partner.businessType, partner.preferredTemplateId);
+  const selectedTemplateId = getSafeTemplateId(defaultTemplateIdForPartnerClient(partner.businessType, partner.preferredTemplateId));
   const selectedTemplate = getTemplateById(selectedTemplateId);
   const ogImage = absolutePublicUrl(getTemplateCoverImage(selectedTemplate));
 
@@ -67,7 +67,7 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
   if (!partner) notFound();
 
   const businessName = getPartnerDisplayName(partner);
-  const selectedTemplateId = defaultTemplateIdForPartnerClient(partner.businessType, partner.preferredTemplateId);
+  const selectedTemplateId = getSafeTemplateId(defaultTemplateIdForPartnerClient(partner.businessType, partner.preferredTemplateId));
   const selectedTemplate = getTemplateById(selectedTemplateId);
   const selectedTemplateCover = getTemplateCoverImage(selectedTemplate);
   const selectedTemplateLine = selectedTemplateId === 'holiday-rental-memory'

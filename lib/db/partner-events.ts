@@ -44,9 +44,14 @@ export async function trackPartnerEvent(params: TrackEventParams): Promise<void>
     const { error } = await supabase.from('partner_events').insert(fullRow);
     if (!error) return;
 
-    // If the migration has not been applied (partner_id or magazine_id columns missing),
-    // fall back to the minimal schema that predates the migration.
-    if (error.code === '42703') {
+    // 42703 = PostgreSQL undefined_column; PGRST204 = PostgREST schema cache miss.
+    // Both mean the migration hasn't been applied yet — fall back to minimal schema.
+    const isSchemaMiss = error.code === '42703' || error.code === 'PGRST204'
+      || (error.message || '').includes('schema cache')
+      || (error.message || '').includes('column');
+
+    if (isSchemaMiss) {
+      console.warn('[partner-events] trackPartnerEvent schema miss, using minimal fallback:', error.message);
       const { error: fallbackErr } = await supabase.from('partner_events').insert({
         partner_slug: params.partnerSlug ?? null,
         event_type: params.eventType,

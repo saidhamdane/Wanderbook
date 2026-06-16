@@ -12,6 +12,15 @@ const registry: Record<string, ComponentType<LayoutProps>> = {
   'are-story':    dynamic(() => import('./aurora-editorial/AuroraStory')),
   'are-quote':    dynamic(() => import('./aurora-editorial/AuroraQuote')),
   'are-back':     dynamic(() => import('./aurora-editorial/AuroraBack')),
+  // ── Wanderbook Editorial (we-*) ─────────────────────────────────────────
+  'we-cover':   dynamic(() => import('./wanderbook-editorial/WECover')),
+  'we-toc':     dynamic(() => import('./wanderbook-editorial/WEToc')),
+  'we-intro':   dynamic(() => import('./wanderbook-editorial/WEIntro')),
+  'we-feature': dynamic(() => import('./wanderbook-editorial/WEFeature')),
+  'we-gallery': dynamic(() => import('./wanderbook-editorial/WEGallery')),
+  'we-story':   dynamic(() => import('./wanderbook-editorial/WEStory')),
+  'we-quote':   dynamic(() => import('./wanderbook-editorial/WEQuote')),
+  'we-back':    dynamic(() => import('./wanderbook-editorial/WEBack')),
   // ── Atlas Nocturne Editorial (ane-*) ─────────────────────────────────────
   'ane-cover':    dynamic(() => import('./atlas-nocturne/ANECover')),
   'ane-contents': dynamic(() => import('./atlas-nocturne/ANEContents')),

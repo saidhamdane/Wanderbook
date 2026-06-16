@@ -16,12 +16,19 @@ CREATE TABLE IF NOT EXISTS partner_events (
 );
 
 -- Add columns that may be missing if the table already existed without them
-ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS partner_id  uuid;
-ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS magazine_id text;
+ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS partner_id   uuid;
+ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS partner_slug text;
+ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS magazine_id  text;
+ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS event_type   text;
+ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS metadata     jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE partner_events ADD COLUMN IF NOT EXISTS created_at   timestamptz DEFAULT now();
 
 -- Indexes for fast analytics queries
-CREATE INDEX IF NOT EXISTS partner_events_partner_id_idx   ON partner_events (partner_id);
-CREATE INDEX IF NOT EXISTS partner_events_partner_slug_idx ON partner_events (partner_slug);
-CREATE INDEX IF NOT EXISTS partner_events_event_type_idx   ON partner_events (event_type);
-CREATE INDEX IF NOT EXISTS partner_events_magazine_id_idx  ON partner_events (magazine_id);
-CREATE INDEX IF NOT EXISTS partner_events_created_at_idx   ON partner_events (created_at);
+CREATE INDEX IF NOT EXISTS partner_events_magazine_id_idx   ON partner_events (magazine_id);
+CREATE INDEX IF NOT EXISTS partner_events_partner_id_idx    ON partner_events (partner_id);
+CREATE INDEX IF NOT EXISTS partner_events_partner_slug_idx  ON partner_events (partner_slug);
+CREATE INDEX IF NOT EXISTS partner_events_event_type_idx    ON partner_events (event_type);
+CREATE INDEX IF NOT EXISTS partner_events_created_at_idx    ON partner_events (created_at);
+
+-- Notify PostgREST to reload its schema cache
+NOTIFY pgrst, 'reload schema';

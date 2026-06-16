@@ -9,6 +9,7 @@ export { luxuryTemplate } from './luxury/schema';
 export { canvaTravelTemplate } from './canva-travel/schema';
 export { auroraEditorialTemplate } from './aurora-editorial/schema';
 export { atlasNocturneEditorialTemplate } from './atlas-nocturne-editorial/schema';
+export { wanderbookEditorialTemplate } from './wanderbook-editorial/schema';
 export {
   photographerExperienceTemplate,
   tourGuideExperienceTemplate,

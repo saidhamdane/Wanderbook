@@ -23,7 +23,7 @@ const ACTIVITY_CTA: Record<string, string> = {
 const ACTIVITY_TEMPLATE: Record<string, string> = {
   'Boat Tour': 'boat-trip-experience',
   'Photographer': 'photographer-experience',
-  'Holiday Rental': 'holiday-rental-guest-memory',
+  'Holiday Rental': 'holiday-rental-memory',
   'Tour Guide': 'tour-guide-experience',
   'Honeymoon': 'aurora-editorial',
   'Buggy Adventure': 'buggy-adventure-experience',
