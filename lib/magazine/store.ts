@@ -60,7 +60,7 @@ export async function loadMagazine(id: string): Promise<MagazineDocument | null>
     const { data, error } = await supabase
       .from('magazines')
       .select('data')
-      .eq('id', id)
+      .eq('magazine_id', id)
       .single();
     if (error || !data) return null;
     return data.data as MagazineDocument;

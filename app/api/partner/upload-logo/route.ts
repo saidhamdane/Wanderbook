@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import fs from 'fs/promises';
 import path from 'path';
 import { PARTNER_SESSION_COOKIE, getPartnerIdForSession, getPartnerAccountById, toPublicPartner, updatePartnerAccount } from '@/lib/partner-store';
-import { upsertPartner } from '@/lib/db/partners';
+import { upsertPartner, getPartnerById, updatePartner } from '@/lib/db/partners';
 import { uploadPartnerLogo } from '@/lib/supabase/storage';
 
 export const runtime = 'nodejs';
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const partnerId = getPartnerIdForSession(cookies().get(PARTNER_SESSION_COOKIE)?.value);
   if (!partnerId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const partner = getPartnerAccountById(partnerId);
+  const partner = getPartnerAccountById(partnerId) || await getPartnerById(partnerId);
   if (!partner) return NextResponse.json({ error: 'Partner not found' }, { status: 404 });
 
   const form = await req.formData();
@@ -69,14 +69,20 @@ export async function POST(req: Request) {
   });
 
   if (updated) {
+    // Partner existed in local JSON — sync the full record to Supabase
     upsertPartner(updated).catch((err) =>
       console.warn('[upload-logo] Supabase sync failed (non-fatal):', err)
     );
+  } else {
+    // Supabase-only partner — persist logo_url directly
+    updatePartner(partner.slug, { logo_url: logoUrl }).catch((err) =>
+      console.warn('[upload-logo] Supabase logo_url update failed (non-fatal):', err)
+    );
   }
 
-  return NextResponse.json({
-    ok: true,
-    logoUrl,
-    partner: updated ? { ...toPublicPartner(updated), plan: updated.plan } : undefined,
-  });
+  const returnPartner = updated
+    ? { ...toPublicPartner(updated), plan: updated.plan }
+    : { slug: partner.slug, businessName: partner.businessName, logoUrl, plan: partner.plan ?? 'free' };
+
+  return NextResponse.json({ ok: true, logoUrl, partner: returnPartner });
 }
