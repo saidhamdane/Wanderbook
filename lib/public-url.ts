@@ -6,3 +6,21 @@ export function publicSiteOrigin(): string {
   if (typeof window !== 'undefined') return window.location.origin;
   return '';
 }
+
+/**
+ * Convert a relative public-folder path to an absolute URL.
+ * - Already absolute (http/https) → returned as-is.
+ * - Starts with "/" → prefixed with NEXT_PUBLIC_APP_URL (or window.location.origin in browser).
+ * - Otherwise → returned as-is.
+ */
+export function resolvePublicAssetUrl(path: string | null | undefined): string {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('/')) {
+    const origin =
+      (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '') ||
+      (typeof window !== 'undefined' ? window.location.origin : '');
+    return origin + path;
+  }
+  return path;
+}

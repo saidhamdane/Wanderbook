@@ -108,9 +108,12 @@ export async function POST(req: NextRequest) {
         slug: partnerSlug,
         partnerId: partnerRecord?.id ?? undefined,
         businessName: partnerRecord?.businessName ?? partnerSlug,
+        businessType: partnerRecord?.businessType ?? '',
+        mainIsland: partnerRecord?.mainIsland ?? '',
         whatsapp: partnerRecord?.whatsapp ?? '',
         website: partnerRecord?.website ?? '',
-        businessType: partnerRecord?.businessType ?? '',
+        logoUrl: partnerRecord?.logoUrl ?? '',
+        brandingNote: partnerRecord?.brandingNote ?? '',
       };
       doc.source = 'partner_client';
     }

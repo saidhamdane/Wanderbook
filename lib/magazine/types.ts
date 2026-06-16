@@ -103,10 +103,15 @@ export type MagazineDocument = {
 
 export type LayoutPartner = {
   enabled?: boolean;
+  slug?: string;
+  partnerId?: string;
   businessName?: string;
+  businessType?: string;
+  mainIsland?: string;
   whatsapp?: string;
   website?: string;
-  businessType?: string;
+  logoUrl?: string;
+  brandingNote?: string;
   [key: string]: unknown;
 };
 

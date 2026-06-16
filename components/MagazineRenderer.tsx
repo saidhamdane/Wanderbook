@@ -38,6 +38,8 @@ export function MagazineRenderer({ doc, printMode }: Props) {
               palette={doc.template.palette}
               fonts={doc.template.fonts}
               pageIndex={index}
+              partner={doc.partner}
+              language={doc.language as string | undefined}
             />
           </div>
         );

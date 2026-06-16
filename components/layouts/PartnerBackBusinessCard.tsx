@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { LayoutProps } from '@/lib/magazine/types';
 import { magazineLabel } from '@/lib/magazine/localize-magazine';
-import { formatPartnerWebsiteDisplay, formatSpanishWhatsapp, getPartnerBookingCta } from '@/lib/partner-utils';
+import { formatPartnerWebsiteDisplay, formatSpanishWhatsapp, getPartnerBookingCta, isValidLogoSrc } from '@/lib/partner-utils';
 
 type PartnerBackBusinessCardProps = {
   slots: Record<string, string>;
@@ -32,6 +32,13 @@ export function PartnerBackBusinessCard({
 }: PartnerBackBusinessCardProps) {
   const businessName = firstValue(slots['partner-business-name'], partner?.businessName);
   if (!businessName) return null;
+
+  const rawLogoUrl = firstValue(
+    slots['partner-logo-url'],
+    partner?.logoUrl,
+    partner?.logo_url as string | undefined,
+  );
+  const logoUrl = isValidLogoSrc(rawLogoUrl) ? rawLogoUrl : '';
 
   const rawWhatsapp = firstValue(slots['partner-whatsapp'], partner?.whatsapp);
   const whatsapp = firstValue(slots['partner-whatsapp-display'], rawWhatsapp ? formatSpanishWhatsapp(rawWhatsapp) : '');
@@ -78,6 +85,24 @@ export function PartnerBackBusinessCard({
       >
         {magazineLabel(language, 'thankYouForTravellingWith')}
       </div>
+
+      {logoUrl && (
+        <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoUrl}
+            alt={businessName}
+            style={{
+              maxWidth: 120,
+              maxHeight: 80,
+              objectFit: 'contain',
+              display: 'block',
+              borderRadius: 6,
+              background: 'rgba(255,255,255,0.08)',
+            }}
+          />
+        </div>
+      )}
 
       <div
         className="magazine-partner-card-name"
