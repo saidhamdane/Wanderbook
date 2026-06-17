@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Logo } from '@/components/Logo';
 
 const BUSINESS_TYPES = ['Photographer', 'Tour Guide', 'Holiday Rental', 'Hotel', 'Excursion Company', 'Surf School', 'Other'];
 const ISLANDS = ['Tenerife', 'Fuerteventura', 'Lanzarote', 'Gran Canaria', 'La Palma', 'La Gomera', 'El Hierro'];
@@ -85,9 +86,7 @@ function PartnerAuthShell({ title, children }: { title: string; children: React.
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
-        <Link href="/" className="font-bold text-lg text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
-        </Link>
+        <Logo size="md" />
       </header>
       <section className="mx-auto max-w-xl px-5 py-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

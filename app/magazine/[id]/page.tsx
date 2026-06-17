@@ -6,6 +6,7 @@ import { InteractiveFlipbookViewer } from '@/components/magazine/InteractiveFlip
 import { ShareMagazineButton } from '@/components/magazine/ShareMagazineButton';
 import { localizedCreatedWith } from '@/lib/magazine/localize-magazine';
 import { MagazineViewTracker } from '@/components/magazine/MagazineViewTracker';
+import { Logo } from '@/components/Logo';
 
 type Params = {
   params: { id: string };
@@ -64,19 +65,7 @@ export default async function DigitalMagazinePage({ params }: Params) {
         borderBottom: '4px solid #f59e0b',
         flexWrap: 'wrap',
       }}>
-        <a
-          href="/"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontWeight: 700,
-            fontSize: 18,
-            color: '#fff',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Wanderbook Canarias
-        </a>
+        <Logo size="sm" variant="dark" />
         <div style={{
           display: 'flex',
           alignItems: 'center',

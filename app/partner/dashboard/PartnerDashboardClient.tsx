@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { formatSpanishWhatsapp, getCanonicalPartnerUrl, getPartnerDisplayName, isValidHttpUrl, isValidLogoSrc, normalizeExternalUrl } from '@/lib/partner-utils';
+import { Logo } from '@/components/Logo';
 import { ACTIVITY_TYPES } from '@/lib/partner-activity';
 import type { PartnerAnalytics } from '@/lib/db/partner-events';
 
@@ -180,9 +181,7 @@ export default function PartnerDashboardClient({
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="font-bold text-lg text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Wanderbook Canarias
-          </Link>
+          <Logo size="md" />
           <div className="flex items-center gap-2">
             <Link
               href={`/partner/${account.slug}`}

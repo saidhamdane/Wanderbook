@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Logo } from '@/components/Logo';
 
 export default function PartnerLoginPage() {
   return (
@@ -46,9 +47,7 @@ function LoginForm() {
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
-        <Link href="/" className="font-bold text-lg text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-          Wanderbook Canarias
-        </Link>
+        <Logo size="md" />
       </header>
       <section className="mx-auto max-w-md px-5 py-10">
         <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -56,7 +55,7 @@ function LoginForm() {
             Partner Login
           </div>
           <h1 className="mt-3 text-3xl text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Wanderbook Canarias Partner Login
+            Partner Login
           </h1>
           {resetSuccess && (
             <p className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">

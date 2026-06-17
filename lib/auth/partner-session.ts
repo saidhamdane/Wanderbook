@@ -33,7 +33,7 @@ function encodeToken(payload: PartnerSessionPayload): string {
   return `${data}.${sig}`;
 }
 
-/** Decode and verify a signed session token. Returns null if invalid.
+/** Decode and verify a signed session token. Returns null if invalid or expired.
  *  Exported so partner-store.ts can call it without using next/headers. */
 export function decodePartnerSession(token: string): PartnerSessionPayload | null {
   const secret = process.env.PARTNER_SESSION_SECRET;
@@ -57,7 +57,10 @@ export function decodePartnerSession(token: string): PartnerSessionPayload | nul
     const expBuf = Buffer.from(expected, 'hex');
     if (sigBuf.length !== expBuf.length) return null;
     if (!crypto.timingSafeEqual(sigBuf, expBuf)) return null;
-    return JSON.parse(Buffer.from(data, 'base64url').toString('utf-8')) as PartnerSessionPayload;
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString('utf-8')) as PartnerSessionPayload;
+    // Enforce server-side expiry so exfiltrated tokens cannot be replayed indefinitely
+    if (Math.floor(Date.now() / 1000) - (payload.iat ?? 0) > SESSION_MAX_AGE) return null;
+    return payload;
   } catch {
     return null;
   }
