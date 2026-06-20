@@ -63,13 +63,26 @@ function detectFallbackActivity(input: CompanyIntelligenceInput): string {
   return 'other';
 }
 
+function looksEnglish(value: string): boolean {
+  const lower = value.toLowerCase();
+  return (
+    lower.includes(' the ') ||
+    lower.startsWith('the ') ||
+    lower.includes('unleash') ||
+    lower.includes('explore ') ||
+    lower.includes('discover ') ||
+    lower.includes('your adventure') ||
+    /\byour\b/.test(lower)
+  );
+}
+
 function fallbackFor(input: CompanyIntelligenceInput): CompanyIntelligence {
   const businessName = input.partner.businessName;
   const island = input.island || input.partner.mainIsland;
   const activity = detectFallbackActivity(input);
   const themes = (input.positiveReviews || []).length > 0 ? ['friendly service', 'memorable experience'].slice(0, 2) : [];
   const spanish = input.language === 'es';
-  return {
+  const base = {
     detectedActivityType: activity,
     islandContextLine: spanish
       ? `${businessName} conecta a sus huéspedes con el ritmo de ${island}.`
@@ -94,6 +107,23 @@ function fallbackFor(input: CompanyIntelligenceInput): CompanyIntelligence {
       ? [`Momentos con ${businessName}`, `${island} en primera persona`, 'Un recuerdo para guardar']
       : [`Moments with ${businessName}`, `${island} in your own frame`, 'A memory worth keeping'],
   };
+
+  if (activity === 'buggy adventure' && spanish) {
+    return {
+      ...base,
+      companyPageTitle: `${businessName}: despierta tu espíritu aventurero`,
+      companyPageSubtitle: `Aventura en buggy en ${island}`,
+      companySummary: `${businessName} organiza rutas en buggy por el interior volcánico de ${island}: pistas de tierra, dunas y paisajes abiertos alejados de la costa.`,
+      companyPageBody: `${businessName} acompaña a sus viajeros por los caminos menos visibles de ${island}: terreno volcánico, pistas de arena y vistas sin multitudes.\n\nCada ruta está pensada para sentir la isla desde el suelo, sin prisas y con la energía propia de una aventura en buggy.`,
+      trustLine: 'Los viajeros destacan la energía del recorrido y el conocimiento del terreno.',
+      finalPageCtaLine: `Vuelve a explorar ${island} en buggy con ${businessName}`,
+      islandContextLine: `${island} tiene más de 150 km de pistas volcánicas. ${businessName} conoce las mejores.`,
+      activityDescription: `Una aventura en buggy diseñada para descubrir el interior de ${island}: dunas, volcanes y caminos que no aparecen en los mapas turísticos.`,
+      photoCaptions: [`Ruta con ${businessName}`, `Paisaje volcánico de ${island}`, 'Aventura en buggy'],
+    };
+  }
+
+  return base;
 }
 
 function buildSystemPrompt(language: 'en' | 'es'): string {
@@ -144,7 +174,7 @@ export async function generateCompanyIntelligence(input: CompanyIntelligenceInpu
     });
     const parsed = JSON.parse(completion.choices[0]?.message?.content || '{}');
     const fallback = fallbackFor(input);
-    return {
+    const result = {
       detectedActivityType: String(parsed.detectedActivityType || fallback.detectedActivityType),
       islandContextLine: String(parsed.islandContextLine || fallback.islandContextLine),
       activityDescription: String(parsed.activityDescription || fallback.activityDescription),
@@ -157,6 +187,13 @@ export async function generateCompanyIntelligence(input: CompanyIntelligenceInpu
       finalPageCtaLine: String(parsed.finalPageCtaLine || fallback.finalPageCtaLine),
       photoCaptions: Array.isArray(parsed.photoCaptions) ? parsed.photoCaptions.map(String).slice(0, 5) : fallback.photoCaptions,
     };
+    if (input.language === 'es') {
+      if (looksEnglish(result.companyPageTitle)) result.companyPageTitle = fallback.companyPageTitle;
+      if (looksEnglish(result.companyPageSubtitle)) result.companyPageSubtitle = fallback.companyPageSubtitle;
+      if (looksEnglish(result.trustLine)) result.trustLine = fallback.trustLine;
+      if (looksEnglish(result.finalPageCtaLine)) result.finalPageCtaLine = fallback.finalPageCtaLine;
+    }
+    return result;
   } catch (err) {
     console.warn('[ai/company-intelligence] generation failed:', err);
     return fallbackFor(input);

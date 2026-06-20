@@ -12,6 +12,17 @@ function paragraphs(value: string): string[] {
   return value.split(/\n+/).map((line) => line.trim()).filter(Boolean);
 }
 
+function looksEnglish(value: string): boolean {
+  const lower = value.toLowerCase();
+  return (
+    lower.startsWith('the ') ||
+    lower.includes(' the ') ||
+    lower.includes('unleash') ||
+    lower.includes('explore ') ||
+    /\byour\b/.test(lower)
+  );
+}
+
 export default function CompanyPageLayout({ slots, palette, fonts, partner, language }: LayoutProps) {
   const businessName = firstValue(partner?.businessName, slots['company-name']);
   if (!partner || !businessName) return null;
@@ -28,16 +39,32 @@ export default function CompanyPageLayout({ slots, palette, fonts, partner, lang
     partner.businessType,
   );
   const activityType = getActivityLabel(rawActivityType, language);
-  const title = firstValue(partner.aiCompanyPageTitle, `The ${businessName} Experience`);
+  const titleFallback = isSpanish
+    ? `La experiencia con ${businessName}`
+    : `The ${businessName} Experience`;
+  const title = firstValue(
+    isSpanish && partner.aiCompanyPageTitle && looksEnglish(partner.aiCompanyPageTitle)
+      ? undefined
+      : partner.aiCompanyPageTitle,
+    titleFallback
+  );
   const subtitle = firstValue(
-    partner.aiCompanyPageSubtitle,
+    isSpanish && partner.aiCompanyPageSubtitle && looksEnglish(partner.aiCompanyPageSubtitle)
+      ? undefined
+      : partner.aiCompanyPageSubtitle,
     activityType && island ? (isSpanish ? `${activityType} en ${island}` : `${activityType} on ${island}`) : ''
   );
   const body = firstValue(partner.aiCompanyPageBody, partner.aiCompanySummary);
   const contextLine = firstValue(partner.aiIslandContextLine);
   const activityDescription = firstValue(partner.aiActivityDescription);
   const themes = Array.isArray(partner.aiPositiveReviewThemes) ? partner.aiPositiveReviewThemes.filter(Boolean).slice(0, 6) : [];
-  const photos = Array.isArray(partner.googlePhotos) ? partner.googlePhotos.slice(0, 3) : [];
+  const demoCompanyImage = firstValue(
+    typeof partner.demoCompanyImage === 'string' ? partner.demoCompanyImage : undefined,
+    slots['company-photo']
+  );
+  const photos = demoCompanyImage
+    ? [{ reference: 'demo-company-image', proxyUrl: demoCompanyImage }]
+    : Array.isArray(partner.googlePhotos) ? partner.googlePhotos.slice(0, 3) : [];
   const rating = typeof partner.googleRating === 'number' ? partner.googleRating : undefined;
   const reviewCount = typeof partner.googleReviewCount === 'number' ? partner.googleReviewCount : undefined;
 

@@ -37,7 +37,8 @@ function scorePhoto(photo: PhotoAnalysis, slot: FlatSlot): number {
 export function assignImagesToTemplate(
   template: MagazineTemplate,
   userPhotos: PhotoAnalysis[],
-  stockPhotos: StockPhoto[]
+  stockPhotos: StockPhoto[],
+  prohibitedKeywords: string[] = []
 ): Record<string, string> {
   const slots = flattenImageSlots(template);
   slots.sort((a, b) => {
@@ -50,6 +51,12 @@ export function assignImagesToTemplate(
   const usedUser = new Set<string>();
   const usedStock = new Set<string>();
   const assignments: Record<string, string> = {};
+  const lowerProhibited = prohibitedKeywords.map((keyword) => keyword.toLowerCase());
+  const safeStock = stockPhotos.filter((photo) => {
+    if (lowerProhibited.length === 0) return true;
+    const haystack = `${photo.url} ${photo.photographer}`.toLowerCase();
+    return !lowerProhibited.some((keyword) => haystack.includes(keyword));
+  });
 
   for (const slot of slots) {
     let bestPhoto: PhotoAnalysis | null = null;
@@ -67,7 +74,7 @@ export function assignImagesToTemplate(
       usedUser.add(bestPhoto.id);
       continue;
     }
-    const stockMatch = stockPhotos.find(
+    const stockMatch = safeStock.find(
       (sp) =>
         !usedStock.has(sp.id) &&
         (slot.aspect === 'any' || sp.orientation === slot.aspect)
@@ -77,7 +84,7 @@ export function assignImagesToTemplate(
       usedStock.add(stockMatch.id);
       continue;
     }
-    const fallback = stockPhotos.find((sp) => !usedStock.has(sp.id));
+    const fallback = safeStock.find((sp) => !usedStock.has(sp.id));
     if (fallback) {
       assignments[slot.id] = fallback.url;
       usedStock.add(fallback.id);

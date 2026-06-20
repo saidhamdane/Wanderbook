@@ -81,6 +81,19 @@ export type StockPhoto = {
   orientation: 'portrait' | 'landscape' | 'square';
 };
 
+export type ImageAuditEntry = {
+  url: string;
+  source: 'demo' | 'traveler' | 'company';
+  slot: string;
+};
+
+export type ImageAudit = {
+  mode: 'demo' | 'traveler';
+  resolvedActivityType: string;
+  selectedImages: ImageAuditEntry[];
+  rejectedImages: Array<{ url: string; source: 'company' | 'demo'; reason: string }>;
+};
+
 export type MagazineDocument = {
   id: string;
   templateId: string;
@@ -101,6 +114,7 @@ export type MagazineDocument = {
     partnerId?: string;
     generatedAt: string;
   };
+  imageAudit?: ImageAudit;
   [key: string]: unknown;
   pages: Array<{
     pageId: string;
@@ -134,6 +148,7 @@ export type LayoutPartner = {
   googleRating?: number;
   googleReviewCount?: number;
   googlePhotos?: Array<{ reference: string; proxyUrl: string }>;
+  demoCompanyImage?: string;
   aiDetectedActivityType?: string;
   aiIslandContextLine?: string;
   aiActivityDescription?: string;

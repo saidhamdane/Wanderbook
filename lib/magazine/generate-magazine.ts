@@ -1,5 +1,6 @@
 import {
   GenerateMagazineInput,
+  ImageAuditEntry,
   ImageSlot,
   LayoutPartner,
   MagazineDocument,
@@ -13,6 +14,7 @@ import { assignImagesToTemplate } from './assign-images';
 import { generateEditorialCopy, normalizeLanguage } from './generate-copy';
 import { fetchPexelsPhotos } from './pexels';
 import { resolveActivityProfile } from './resolveActivityProfile';
+import type { DemoAssets } from './resolveActivityProfile';
 
 function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
   let n = 0;
@@ -22,6 +24,22 @@ function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
     }
   }
   return n;
+}
+
+function demoImageForSlot(
+  slotId: string,
+  assets: DemoAssets,
+  galleryCounter: { n: number }
+): string {
+  if (slotId === 'cover-photo') return assets.cover;
+  if (slotId === 'toc-photo' || slotId === 'contents-photo') return assets.contents;
+  if (slotId === 'intro-photo' || slotId === 'letter-photo') return assets.welcome;
+  if (slotId.startsWith('feature-photo') || slotId === 'hero-photo') return assets.localHighlights;
+  if (slotId === 'story-photo-1' || slotId === 'route-photo-1') return assets.story;
+  if (slotId === 'back-photo') return assets.finalCta;
+
+  const idx = galleryCounter.n++ % assets.gallery.length;
+  return assets.gallery[idx];
 }
 
 export function insertCompanyPageIfNeeded(doc: MagazineDocument, partner?: LayoutPartner): MagazineDocument {
@@ -41,6 +59,7 @@ export function insertCompanyPageIfNeeded(doc: MagazineDocument, partner?: Layou
       'partner-main-island': partner.mainIsland || '',
       'partner-activity-type': partner.activityLabel || partner.resolvedActivityType || partner.aiDetectedActivityType || partner.activityType || '',
       'partner-resolved-activity-type': partner.resolvedActivityType || '',
+      'company-photo': typeof partner.demoCompanyImage === 'string' ? partner.demoCompanyImage : '',
     },
   };
   const insertAt = Math.max(0, doc.pages.length - 1);
@@ -337,6 +356,7 @@ export async function generateMagazine(
   const template = getTemplateById(input.templateId);
   const analyzed = analyzeUploadedPhotos(input.userPhotos);
   const activityProfile = input.activityProfile;
+  const isDemoMode = analyzed.length === 0;
 
   if (input.templateId === 'hanover') {
     return generateHanoverMagazine(input, template, analyzed);
@@ -352,7 +372,7 @@ export async function generateMagazine(
 
   let stockPhotos: StockPhoto[] = [];
   const totalImageSlots = countImageSlots(template);
-  if (input.useStockFallback && analyzed.length < totalImageSlots) {
+  if (!isDemoMode && input.useStockFallback && analyzed.length < totalImageSlots) {
     const needed = Math.max(totalImageSlots - analyzed.length + 2, 6);
     const stockQuery = activityProfile?.allowedImageKeywords[0] || input.destination;
     stockPhotos = await fetchPexelsPhotos(stockQuery, needed);
@@ -376,7 +396,32 @@ export async function generateMagazine(
     prohibitedImageKeywords: activityProfile?.prohibitedImageKeywords,
   });
 
-  const imageAssignments = assignImagesToTemplate(template, analyzed, stockPhotos);
+  let imageAssignments: Record<string, string>;
+  const imageAuditSelected: ImageAuditEntry[] = [];
+
+  if (isDemoMode && activityProfile?.demoAssets) {
+    const galleryCounter = { n: 0 };
+    imageAssignments = {};
+    for (const page of template.pages) {
+      for (const slot of page.slots) {
+        if (slot.type === 'image') {
+          const url = demoImageForSlot(slot.id, activityProfile.demoAssets, galleryCounter);
+          imageAssignments[slot.id] = url;
+          imageAuditSelected.push({ url, source: 'demo', slot: slot.id });
+        }
+      }
+    }
+  } else {
+    imageAssignments = assignImagesToTemplate(
+      template,
+      analyzed,
+      stockPhotos,
+      activityProfile?.prohibitedImageKeywords ?? []
+    );
+    analyzed.forEach((photo, index) => {
+      imageAuditSelected.push({ url: photo.url, source: 'traveler', slot: `user-${index}` });
+    });
+  }
 
   const pages = template.pages.map((page) => {
     const slots: Record<string, string> = {};
@@ -409,6 +454,12 @@ export async function generateMagazine(
       generatedAt,
       `${analyzed.length} uploaded photos, ${stockPhotos.length} stock photos${activityProfile ? `, query: ${activityProfile.allowedImageKeywords[0]}` : ''}`
     ),
+    imageAudit: {
+      mode: isDemoMode ? 'demo' : 'traveler',
+      resolvedActivityType: activityProfile?.activityType ?? 'unknown',
+      selectedImages: imageAuditSelected,
+      rejectedImages: [],
+    },
   };
   return doc;
 }

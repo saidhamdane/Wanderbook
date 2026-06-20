@@ -1,158 +1,411 @@
-Fix Wanderbook partner magazine-style preview so the preview image, title, and description always match the company activity.
+Fix Wanderbook demo-image mode so every demo magazine uses only images matching the partner’s resolved activity type.
 
-Project:
-`/root/Wanderbook`
+Project path:
+/root/Wanderbook
 
-Current visible bug:
-On the public partner page for Fuerte Experience, the magazine-style preview shows:
+Important clarification:
 
-- "Tour Guide Experience"
-- a tour guide image
+The current images in generated Fuerte Experience magazines are DEMO / TEST images.
+They are NOT real traveler photos.
 
-This is wrong because the partner activity is Buggy Adventure / Fuerte Experience.
+Therefore:
+
+- Demo images must always match the company activity 100%.
+- Real traveler photos, when available later, must only appear in dedicated customer-memory/gallery pages.
+- Real traveler photos must never be used as default demo cover, contents, welcome, company, local-tip, or CTA images.
+- Demo magazines must never inherit static images from an unrelated old template.
+
+Current bug:
+
+Fuerte Experience resolves correctly as "buggy-adventure", and text is partly buggy-related, but the magazine still includes:
+
+- catamarans
+- boats
+- sailing
+- dolphins
+- marina photos
+- English fallback company copy in a Spanish magazine
+
+This is unacceptable.
 
 Main rule:
-The partner public page must never show a generic or unrelated activity preview image.
 
-The preview must use the same canonical `resolvedActivityType` from:
-`lib/magazine/resolveActivityProfile.ts`
+Every new demo magazine must use one canonical activity profile from:
 
-Do not create a second activity resolver.
-Do not use Tour Guide as a default fallback for all companies.
+"lib/magazine/resolveActivityProfile.ts"
 
-Required behavior:
+That same profile must determine:
 
-1. Public partner page preview must resolve activity in this priority order:
-   a. partner.ai_detected_activity_type if valid
-   b. partner.activity_type/business_type if valid
-   c. resolved activity from saved company enrichment
-   d. `other`
+- activity type
+- visual theme
+- demo images
+- cover image
+- contents image
+- welcome image
+- company page image
+- local highlights image
+- story image
+- gallery fallback images
+- final CTA background
+- allowed/prohibited image keywords
+- language-aware fallback copy
 
-2. For every activity type, define canonical preview data inside the existing canonical activity profile:
-   - previewTitle
-   - previewSubtitle
-   - previewImage
-   - previewAlt
-   - templateId
-   - language-aware labels
+Do not create a second resolver.
 
-Supported types:
-- surf-camp
-- villa-rental
-- tour-guide
-- boat-tour
-- photographer
-- buggy-adventure
+1. Add canonical demo visual assets by activity
+
+Extend "resolveActivityProfile.ts" with activity-aware demo asset slots:
+
+demoAssets: {
+  cover: string
+  contents: string
+  welcome: string
+  company: string
+  localHighlights: string
+  story: string
+  gallery: string[]
+  finalCta: string
+}
+
+Use only activity-matching demo assets.
+
+buggy-adventure
+
+Use images such as:
+
+- buggy
+- 4x4
+- off-road
+- volcanic terrain
+- dunes
+- desert routes
+- Fuerteventura inland landscapes
+
+Never use:
+
+- boat
+- sailing
+- catamaran
+- yacht
+- dolphin
+- marina
+- surfer
 - restaurant
-- hotel
-- other
+- hotel room
 
-3. Required visual mapping:
+boat-tour
 
-buggy-adventure:
-- Spanish title: "Aventura en Buggy"
-- English title: "Buggy Adventure"
-- image concept: buggy vehicle, volcanic roads, dunes, Fuerteventura adventure
-- never use guide, boat, surf, hotel, villa, or restaurant imagery
+Use only:
 
-boat-tour:
-- Spanish title: "Experiencia en Barco"
-- English title: "Boat Tour Experience"
-- image concept: boat, Atlantic, coast, sailing/catamaran only here
+- boat
+- catamaran
+- coast
+- Atlantic
+- sea
+- marina
+- sailing
 
-surf-camp:
-- Spanish title: "Semana de Surf"
-- English title: "Surf Camp Experience"
-- image concept: surfer, waves, surfboard, beach
+Never use buggy/off-road demo imagery.
 
-tour-guide:
-- Spanish title: "Ruta Guiada"
-- English title: "Tour Guide Experience"
-- image concept: local guide, route, viewpoint, local discovery
+surf-camp
 
-photographer:
-- Spanish title: "Sesión Fotográfica"
-- English title: "Photography Experience"
-- image concept: photographer, couple/family portrait, island light
+Use only:
 
-villa-rental:
-- Spanish title: "Tu Estancia en la Isla"
-- English title: "Your Island Stay"
-- image concept: villa, apartment, pool, home comfort
+- surfer
+- surfboard
+- waves
+- beach
+- surf lesson
+- lineup
 
-restaurant:
-- Spanish title: "Sabores de Fuerteventura"
-- English title: "Fuerteventura Flavours"
-- image concept: restaurant table, local food, dining atmosphere
+Never use buggy, yacht, catamaran, restaurant, hotel imagery.
 
-hotel:
-- Spanish title: "Tu Estancia Premium"
-- English title: "Your Premium Stay"
-- image concept: hotel room, pool, hospitality
+tour-guide
 
-other:
-- Spanish title: "Tu Experiencia en Fuerteventura"
-- English title: "Your Fuerteventura Experience"
-- image concept: neutral Canary Islands landscape only
-- never default to Tour Guide imagery
+Use only:
 
-4. Find the component that renders the public partner page preview:
-Likely one of:
-- app/partner/[slug]/page.tsx
-- app/partner/[slug]/PartnerClient.tsx
-- components related to partner landing or magazine style preview
+- guide
+- village
+- viewpoint
+- hiking
+- inland landscape
+- local route
+- island discovery
 
-Update it so title, image, alt text, and description are read only from:
-`resolveActivityProfile(...)`
+Never use default boats or buggies.
 
-5. Do not use hardcoded:
-- "Tour Guide Experience"
-- tour guide image
-- generic partner type fallback
-inside the partner public page.
+villa-rental
 
-6. If partner activity changes in dashboard or is updated by SerpApi/AI enrichment:
-- public page preview must reflect the updated resolved activity automatically
-- no manual code change required
+Use only:
 
-7. Add tests:
+- villa
+- apartment
+- terrace
+- pool
+- bedroom
+- living area
+- home comfort
+
+photographer
+
+Use only:
+
+- couple
+- family portrait
+- photographer
+- camera
+- sunset
+- island light
+
+restaurant
+
+Use only:
+
+- food
+- restaurant
+- local cuisine
+- table
+- dining atmosphere
+
+hotel
+
+Use only:
+
+- hotel room
+- pool
+- breakfast
+- hospitality
+- accommodation
+
+other
+
+Use only neutral Canary Islands landscapes.
+
+Never use Tour Guide or Boat images as a generic fallback.
+
+2. Remove old hardcoded maritime template defaults
+
+Search the whole repository for static/default image references containing or related to:
+
+- boat
+- sailing
+- catamaran
+- yacht
+- dolphin
+- marina
+- sea vessel
+- generic editorial ocean images
+
+Especially inspect:
+
+- wanderbook-editorial template/layout
+- cover pages
+- contents page
+- welcome/introduction page
+- gallery page
+- company page
+- story page
+- final partner CTA background
+
+Replace every hardcoded default with the correct slot from:
+
+"resolveActivityProfile(...).demoAssets"
+
+Do not remove the visual layout/design. Replace only inappropriate static default assets.
+
+3. Demo mode versus real traveler mode
+
+Implement clear source rules:
+
+Demo mode
+
+When a magazine is generated without real traveler uploads:
+
+- use activity-specific "demoAssets"
+- use activity-specific captions
+- do not use old generic travel images
+- do not use unrelated SerpApi/Google images automatically
+- do not use catamarans, dolphins, or boats for buggy activity
+
+Real traveler mode
+
+When real traveler photos exist:
+
+- customer photos can appear only in:
+  - "Historia con fotos del viajero"
+  - "Tus recuerdos"
+  - "Galería del viajero"
+- preserve the real photos
+- do not force them into cover or company pages unless explicitly selected
+- use neutral captions if an image does not visually match the activity
+- never caption a boat image as a buggy adventure
+
+Company photos
+
+Company/SerpApi photos may be used only after passing activity keyword filtering.
+
+If they do not match the resolved activity:
+
+- reject them
+- store rejection reason in metadata
+- use the relevant curated demo asset instead
+
+4. Fix Spanish language consistency
+
+When language is Spanish:
+
+Every visible fallback/default string must be Spanish:
+
+- company page title
+- company summary
+- subtitle
+- body
+- trust line
+- rating label
+- CTA labels
+- image captions
+- final card text
+- navigation labels
+- demo captions
+
+Fix the current Fuerte Experience problems:
+
+Replace English fallback content such as:
+
+- "Fuerte Experience: Unleash Your Adventurous Spirit"
+- "Explore Fuerteventura Like Never Before"
+- English company body text
+- English final-card trust line
+
+with natural Spanish copy specifically for buggy adventure.
+
+Example style:
+
+Fuerte Experience: despierta tu espíritu aventurero
+
+Explora Fuerteventura desde sus caminos volcánicos, dunas y paisajes abiertos.
+
+Una aventura en buggy pensada para descubrir la isla desde una perspectiva diferente.
+
+Do not rely only on AI. All fallback copy must be language-aware.
+
+5. Add visual audit metadata
+
+For every newly generated magazine, save metadata:
+
+imageAudit: {
+  mode: "demo" | "traveler",
+  resolvedActivityType: string,
+  selectedImages: Array<{
+    url: string
+    source: "demo" | "traveler" | "company"
+    slot: string
+  }>,
+  rejectedImages: Array<{
+    url: string
+    source: "company" | "demo"
+    reason: string
+  }>
+}
+
+This is for debugging only and must not be publicly exposed.
+
+6. Tests
+
 Create or update:
-`scripts/test-partner-preview-activity-consistency.cjs`
 
-Verify:
-A. Fuerte Experience / buggy-adventure:
-- preview title contains "Buggy" or "Aventura en Buggy"
-- preview image metadata/URL/alt contains buggy/adventure/dunes/volcanic concept
-- does not contain Tour Guide, guide, boat, catamaran, surf
+"scripts/test-magazine-demo-visual-consistency.cjs"
 
-B. Boat tour:
-- title and image are boat/coast related
-- does not contain buggy or guide defaults
+Required test cases:
 
-C. Surf camp:
-- title and image are surf related
-- does not contain photographer or tour-guide defaults
+A. Fuerte Experience / buggy-adventure / Spanish / demo mode
 
-D. other:
-- uses neutral Canary Islands preview
-- never uses Tour Guide as a fallback
+Must contain:
 
-E. Spanish public page:
-- preview title and subtitle are Spanish
-- English public page:
-- preview title and subtitle are English
+- buggy
+- aventura
+- volcánico, dunas, off-road, or rutas
 
-8. Run:
+Must not contain in any default/demo slot:
+
+- boat
+- sailing
+- catamaran
+- yacht
+- dolphin
+- marina
+- surf
+- English fallback headings or CTA text
+
+B. Boat tour / Spanish / demo mode
+
+Must contain:
+
+- barco
+- costa
+- mar or Atlántico
+
+Must not contain:
+
+- buggy
+- off-road
+- dunes vehicle
+
+C. Surf camp / Spanish / demo mode
+
+Must contain:
+
+- surf
+- olas
+- playa or tabla
+
+Must not contain:
+
+- photographer
+- buggy
+- catamaran
+- boat default imagery
+
+D. Other / Spanish / demo mode
+
+Must use neutral Canary Islands landscape only.
+
+Must never default to Tour Guide, Boat, Catamaran, or Buggy images.
+
+E. Real traveler photo exception
+
+A genuine traveler image may remain in traveler-story/gallery slots.
+
+It must not be selected automatically as:
+
+- demo cover
+- contents
+- introduction
+- company page
+- CTA background
+
+Its caption must remain neutral if unrelated to the activity.
+
+7. Run checks
+
+Run exactly:
+
 npx tsc --noEmit
 npm run build
-node scripts/test-partner-preview-activity-consistency.cjs
 node scripts/test-magazine-activity-consistency.cjs
+node scripts/test-partner-preview-activity-consistency.cjs
+node scripts/test-magazine-demo-visual-consistency.cjs
 git diff --check
 
-Do not deploy unless all checks pass.
+Do not deploy.
+Do not restart PM2.
+Do not modify Nginx.
 
 At the end report:
-- component changed
-- activity preview mapping added
-- tests passed
-- confirmation that Fuerte Experience now shows Buggy Adventure preview, not Tour Guide.
+
+1. All components/templates changed.
+2. All old hardcoded maritime default assets removed or gated.
+3. Demo assets selected for Buggy Adventure.
+4. Spanish fallback copy fixed.
+5. Test outputs.
+6. Confirmation that a newly generated Fuerte Experience demo magazine cannot contain default boats, catamarans, dolphins, or English fallback copy.

@@ -9,6 +9,17 @@ export type ResolvedActivityType =
   | 'hotel'
   | 'other';
 
+export type DemoAssets = {
+  cover: string;
+  contents: string;
+  welcome: string;
+  company: string;
+  localHighlights: string;
+  story: string;
+  gallery: string[];
+  finalCta: string;
+};
+
 export type ActivityProfile = {
   activityType: ResolvedActivityType;
   activityLabel: string;
@@ -24,6 +35,7 @@ export type ActivityProfile = {
   previewSubtitle: Record<'en' | 'es', string>;
   previewImage: string;
   previewAlt: Record<'en' | 'es', string>;
+  demoAssets: DemoAssets;
 };
 
 type ActivitySource = {
@@ -51,6 +63,19 @@ const ACTIVITY_TYPES: ResolvedActivityType[] = [
   'other',
 ];
 
+function demoAssetsFor(image: string): DemoAssets {
+  return {
+    cover: image,
+    contents: image,
+    welcome: image,
+    company: image,
+    localHighlights: image,
+    story: image,
+    gallery: [image, image, image, image, image],
+    finalCta: image,
+  };
+}
+
 const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'activityType' | 'activityLabel'>> = {
   'surf-camp': {
     activityLabelsByLanguage: { en: 'Surf Camp', es: 'Escuela de Surf' },
@@ -74,6 +99,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Surfer riding waves at a Fuerteventura surf camp',
       es: 'Surfista en las olas de una escuela de surf en Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/default-cover.jpg'),
   },
   'villa-rental': {
     activityLabelsByLanguage: { en: 'Holiday Rental', es: 'Alquiler Vacacional' },
@@ -97,6 +123,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Holiday villa with pool in Fuerteventura',
       es: 'Villa vacacional con piscina en Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/holiday-rental.jpg'),
   },
   'tour-guide': {
     activityLabelsByLanguage: { en: 'Tour Guide', es: 'Guia Turistico' },
@@ -123,6 +150,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Guided tour through Fuerteventura volcanic landscape',
       es: 'Ruta guiada por el paisaje volcanico de Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/tour-guide.jpg'),
   },
   'boat-tour': {
     activityLabelsByLanguage: { en: 'Boat Tour', es: 'Tour en Barco' },
@@ -149,6 +177,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Catamaran or boat tour on the Atlantic coast of Fuerteventura',
       es: 'Tour en catamaran o barco por la costa atlantica de Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/boat-trip.jpg'),
   },
   photographer: {
     activityLabelsByLanguage: { en: 'Photographer', es: 'Fotografo' },
@@ -175,6 +204,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Photography session on a Fuerteventura beach',
       es: 'Sesion fotografica en una playa de Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/aurora-editorial.jpg'),
   },
   'buggy-adventure': {
     activityLabelsByLanguage: { en: 'Buggy Adventure', es: 'Aventura en Buggy' },
@@ -201,6 +231,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Buggy adventure on volcanic roads in Fuerteventura',
       es: 'Aventura en buggy por las pistas volcanicas de Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/buggy-adventure.jpg'),
   },
   restaurant: {
     activityLabelsByLanguage: { en: 'Restaurant', es: 'Restaurante' },
@@ -227,6 +258,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Restaurant dining experience in Fuerteventura',
       es: 'Experiencia gastronomica en Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/aurora-editorial.jpg'),
   },
   hotel: {
     activityLabelsByLanguage: { en: 'Hotel', es: 'Hotel' },
@@ -253,6 +285,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Premium hotel stay in Fuerteventura',
       es: 'Estancia en hotel en Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/holiday-rental.jpg'),
   },
   other: {
     activityLabelsByLanguage: { en: 'Fuerteventura Experience', es: 'Experiencia en Fuerteventura' },
@@ -279,6 +312,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Fuerteventura island landscape',
       es: 'Paisaje de la isla de Fuerteventura',
     },
+    demoAssets: demoAssetsFor('/template-covers/atlas-nocturne.jpg'),
   },
 };
 

@@ -7,6 +7,7 @@ import { getPartnerBySlug } from '@/lib/db/partners';
 import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
 import { canPartnerCreateMagazine, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/subscription';
 import { trackPartnerEvent } from '@/lib/db/partner-events';
+import type { LayoutPartner } from '@/lib/magazine/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -33,6 +34,40 @@ function realContactValue(value: unknown): string {
     return '';
   }
   return text;
+}
+
+function applySpanishCompanyCopyOverride(
+  partner: LayoutPartner,
+  activityType: string | undefined
+): void {
+  function looksEnglish(value: string | undefined): boolean {
+    if (!value) return false;
+    const lower = value.toLowerCase();
+    return (
+      lower.startsWith('the ') ||
+      lower.includes(' the ') ||
+      lower.includes('unleash') ||
+      lower.includes('explore ') ||
+      /\byour\b/.test(lower)
+    );
+  }
+
+  if (activityType === 'buggy-adventure') {
+    const name = partner.businessName || '';
+    const island = partner.mainIsland || 'Fuerteventura';
+    if (looksEnglish(partner.aiCompanyPageTitle)) {
+      partner.aiCompanyPageTitle = `${name}: despierta tu espíritu aventurero`;
+    }
+    if (looksEnglish(partner.aiCompanyPageSubtitle)) {
+      partner.aiCompanyPageSubtitle = `Aventura en buggy en ${island}`;
+    }
+    if (looksEnglish(partner.aiCompanyFinalCtaLine)) {
+      partner.aiCompanyFinalCtaLine = `Vuelve a explorar ${island} en buggy con ${name}`;
+    }
+    if (looksEnglish(partner.aiCompanyTrustLine)) {
+      partner.aiCompanyTrustLine = 'Los viajeros destacan la energía del recorrido y el conocimiento del terreno.';
+    }
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -170,6 +205,7 @@ export async function POST(req: NextRequest) {
         googleRating: partnerRecord?.googleRating ?? undefined,
         googleReviewCount: partnerRecord?.googleReviewCount ?? undefined,
         googlePhotos: partnerRecord?.googlePhotos ?? undefined,
+        demoCompanyImage: activityProfile?.demoAssets.company,
         aiDetectedActivityType: partnerRecord?.aiDetectedActivityType ?? undefined,
         aiIslandContextLine: partnerRecord?.aiIslandContextLine ?? undefined,
         aiActivityDescription: partnerRecord?.aiActivityDescription ?? undefined,
@@ -182,6 +218,16 @@ export async function POST(req: NextRequest) {
         aiCompanyFinalCtaLine: partnerRecord?.aiCompanyFinalCtaLine ?? undefined,
         aiCompanyPhotoCaptions: partnerRecord?.aiCompanyPhotoCaptions ?? undefined,
       };
+      if (language === 'es' && activityProfile) {
+        applySpanishCompanyCopyOverride(doc.partner, activityProfile.activityType);
+      }
+      if (doc.imageAudit && activityProfile?.demoAssets.company) {
+        doc.imageAudit.selectedImages.push({
+          url: activityProfile.demoAssets.company,
+          source: 'demo',
+          slot: 'company-photo',
+        });
+      }
       if (doc.generationAudit) {
         doc.generationAudit.resolvedActivityType = activityProfile?.activityType || doc.generationAudit.resolvedActivityType;
         doc.generationAudit.selectedTemplate = doc.templateId;
@@ -204,7 +250,9 @@ export async function POST(req: NextRequest) {
       }).catch(() => {});
     }
 
-    return NextResponse.json(doc);
+    const publicDoc = { ...doc };
+    delete publicDoc.imageAudit;
+    return NextResponse.json(publicDoc);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: 'Generation failed', detail: message }, { status: 500 });
