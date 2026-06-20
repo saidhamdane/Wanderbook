@@ -43,6 +43,14 @@ export default async function PartnerDashboardPage() {
         plan: partner.plan,
         subscriptionStatus: partner.subscriptionStatus,
         monthlyMagazineLimit: partner.monthlyMagazineLimit ?? FREE_MONTHLY_MAGAZINE_LIMIT,
+        googlePlaceName: partner.googlePlaceName || '',
+        googleRating: partner.googleRating,
+        googleReviewCount: partner.googleReviewCount,
+        googlePhotos: partner.googlePhotos || [],
+        googleMatchStatus: partner.googleMatchStatus || '',
+        aiDetectedActivityType: partner.aiDetectedActivityType || '',
+        aiCompanySummary: partner.aiCompanySummary || '',
+        aiPositiveReviewThemes: partner.aiPositiveReviewThemes || [],
       }}
       stats={stats}
       analytics={analytics}

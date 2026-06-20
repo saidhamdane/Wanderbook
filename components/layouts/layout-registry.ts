@@ -3,6 +3,7 @@ import { ComponentType } from 'react';
 import { LayoutProps } from '@/lib/magazine/types';
 
 const registry: Record<string, ComponentType<LayoutProps>> = {
+  'company-page': dynamic(() => import('./CompanyPageLayout')),
   // ── Aurora Editorial (are-*) ─────────────────────────────────────────────
   'are-cover':    dynamic(() => import('./aurora-editorial/AuroraCover')),
   'are-contents': dynamic(() => import('./aurora-editorial/AuroraContents')),

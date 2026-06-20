@@ -3,6 +3,7 @@
 import type { CSSProperties } from 'react';
 import type { LayoutProps } from '@/lib/magazine/types';
 import { magazineLabel } from '@/lib/magazine/localize-magazine';
+import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
 import { formatSpanishWhatsapp, isValidLogoSrc, normalizeExternalUrl } from '@/lib/partner-utils';
 
 type PartnerBackBusinessCardProps = {
@@ -18,6 +19,21 @@ function firstValue(...values: Array<string | undefined>): string {
   return values.find((v) => v && v.trim().length > 0)?.trim() || '';
 }
 
+function realContactValue(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return '';
+  if (
+    normalized.includes('placeholder') ||
+    normalized.includes('demo') ||
+    normalized.includes('example.com') ||
+    normalized.includes('123456789') ||
+    normalized.includes('000000000')
+  ) {
+    return '';
+  }
+  return value.trim();
+}
+
 function trackClick(eventType: string, partnerSlug?: string, magazineId?: string) {
   try {
     const payload = JSON.stringify({ eventType, partnerSlug, magazineId });
@@ -29,17 +45,11 @@ function trackClick(eventType: string, partnerSlug?: string, magazineId?: string
   }
 }
 
-const ACTIVITY_CTA: Record<string, { en: string; es: string }> = {
-  'Boat Tour':         { en: 'Book your next boat experience',     es: 'Reserva tu próxima aventura en barco' },
-  'Photographer':      { en: 'Book your next photo session',       es: 'Reserva tu próxima sesión de fotos' },
-  'Holiday Rental':    { en: 'Book your next stay',                es: 'Reserva tu próxima estancia' },
-  'Tour Guide':        { en: 'Book your next guided experience',   es: 'Reserva tu próxima experiencia guiada' },
-  'Honeymoon':         { en: 'Plan your next romantic escape',     es: 'Planifica tu próxima escapada romántica' },
-  'Buggy Adventure':   { en: 'Book your next adventure',          es: 'Reserva tu próxima aventura' },
-  'General Experience':{ en: 'Book your next experience',         es: 'Reserva tu próxima experiencia' },
-};
-
 const PUBLIC_ORIGIN = 'https://wanderbookcanarias.com';
+
+function ctaFor(activityType: string, businessType: string): { en: string; es: string } {
+  return resolveActivityProfile({ activityType, businessType }).ctaLabels;
+}
 
 function nameSize(len: number): number {
   if (len <= 16) return 38;
@@ -65,35 +75,44 @@ export function PartnerBackBusinessCard({
   );
   const logoUrl = isValidLogoSrc(rawLogoUrl) ? rawLogoUrl : '';
 
-  const rawWhatsapp = firstValue(slots['partner-whatsapp'], partner?.whatsapp);
+  const rawWhatsapp = realContactValue(firstValue(slots['partner-whatsapp'], partner?.whatsapp));
   const whatsapp = rawWhatsapp ? formatSpanishWhatsapp(rawWhatsapp) : '';
   const whatsappLink = rawWhatsapp ? `https://wa.me/${rawWhatsapp.replace(/\D/g, '')}` : '';
 
-  const activityType = firstValue(slots['partner-activity-type'], partner?.activityType as string | undefined);
+  const activityType = firstValue(
+    slots['partner-activity-type'],
+    partner?.activityLabel as string | undefined,
+    partner?.resolvedActivityType as string | undefined,
+    partner?.aiDetectedActivityType as string | undefined,
+    partner?.activityType as string | undefined,
+  );
   const businessType  = firstValue(slots['partner-business-type'], partner?.businessType);
   const isSpanish = language === 'es';
   const lang = isSpanish ? 'es' : 'en';
 
-  const ctaEntry = ACTIVITY_CTA[activityType] || ACTIVITY_CTA[businessType] || ACTIVITY_CTA['General Experience'];
+  const ctaEntry = ctaFor(activityType, businessType);
   const defaultCta = ctaEntry[lang];
   const bookingCta = firstValue(slots['partner-booking-cta'], defaultCta);
 
-  const rawBookingUrl = firstValue(
+  const rawBookingUrl = realContactValue(firstValue(
     slots['partner-booking-url'],
     partner?.bookingUrl as string | undefined,
     partner?.website,
-  );
+  ));
   const bookingUrl = rawBookingUrl ? normalizeExternalUrl(rawBookingUrl) : '';
 
-  const rawInstagramUrl = firstValue(slots['partner-instagram-url'], partner?.instagramUrl as string | undefined);
+  const rawInstagramUrl = realContactValue(firstValue(slots['partner-instagram-url'], partner?.instagramUrl as string | undefined));
   const instagramUrl = rawInstagramUrl ? normalizeExternalUrl(rawInstagramUrl) : '';
 
-  const rawGoogleReviewUrl = firstValue(slots['partner-google-review-url'], partner?.googleReviewUrl as string | undefined);
+  const rawGoogleReviewUrl = realContactValue(firstValue(slots['partner-google-review-url'], partner?.googleReviewUrl as string | undefined));
   const googleReviewUrl = rawGoogleReviewUrl ? normalizeExternalUrl(rawGoogleReviewUrl) : '';
 
   const partnerSlug = firstValue(slots['partner-slug'], partner?.slug);
   const magazineId  = firstValue(slots['partner-magazine-id'], partner?.magazineId as string | undefined);
   const mainIsland  = firstValue(slots['partner-main-island'], partner?.mainIsland);
+  const trustLine = firstValue(partner?.aiCompanyTrustLine as string | undefined);
+  const googleRating = typeof partner?.googleRating === 'number' ? partner.googleRating : undefined;
+  const googleReviewCount = typeof partner?.googleReviewCount === 'number' ? partner.googleReviewCount : undefined;
 
   const magazineUrl = magazineId ? `${PUBLIC_ORIGIN}/magazine/${magazineId}` : '';
   const shareText = isSpanish
@@ -195,6 +214,39 @@ export function PartnerBackBusinessCard({
       {/* Accent rule */}
       <div style={{ width: 44, height: 2, margin: '12px auto 10px', background: accent, borderRadius: 1, opacity: 0.9 }} />
 
+      {mainIsland && (
+        <div
+          style={{
+            fontFamily: fonts.body,
+            fontSize: 10,
+            lineHeight: 1.35,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            fontWeight: 800,
+            color: 'rgba(255,255,255,0.60)',
+            marginBottom: 8,
+          }}
+        >
+          {mainIsland}
+        </div>
+      )}
+
+      {trustLine && (
+        <div
+          style={{
+            fontFamily: fonts.body,
+            fontSize: 12,
+            lineHeight: 1.45,
+            fontWeight: 650,
+            color: 'rgba(255,255,255,0.76)',
+            margin: '0 auto 10px',
+            maxWidth: 430,
+          }}
+        >
+          {trustLine}
+        </div>
+      )}
+
       {/* CTA headline */}
       <div
         className="magazine-partner-card-cta"
@@ -210,6 +262,21 @@ export function PartnerBackBusinessCard({
       >
         {bookingCta}
       </div>
+
+      {googleRating !== undefined && (
+        <div
+          style={{
+            margin: '-4px 0 12px',
+            fontFamily: fonts.body,
+            fontSize: 12,
+            lineHeight: 1.35,
+            fontWeight: 800,
+            color: accent,
+          }}
+        >
+          ★ {googleRating.toFixed(1)}{googleReviewCount ? ` · ${googleReviewCount} ${isSpanish ? 'reseñas' : 'reviews'}` : ''}
+        </div>
+      )}
 
       {/* Button stack — all full-width, vertically stacked */}
       <div

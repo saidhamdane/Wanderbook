@@ -34,7 +34,36 @@ type SupabasePartnerRow = {
   last_login_at: string | null;
   created_at: string;
   updated_at: string;
+  google_place_id?: string | null;
+  serpapi_place_id?: string | null;
+  serpapi_data_id?: string | null;
+  google_place_name?: string | null;
+  google_maps_url?: string | null;
+  google_rating?: number | null;
+  google_review_count?: number | null;
+  google_primary_type?: string | null;
+  google_types?: unknown[] | null;
+  google_reviews_cache?: unknown[] | null;
+  google_photos_cache?: Array<{ reference: string; proxyUrl: string }> | null;
+  google_match_confidence?: number | null;
+  google_match_status?: string | null;
+  ai_detected_activity_type?: string | null;
+  ai_company_summary?: string | null;
+  ai_positive_review_themes?: string[] | null;
+  ai_island_context_line?: string | null;
+  ai_activity_description?: string | null;
+  ai_company_page_title?: string | null;
+  ai_company_page_subtitle?: string | null;
+  ai_company_page_body?: string | null;
+  ai_company_trust_line?: string | null;
+  ai_company_final_cta_line?: string | null;
+  ai_company_photo_captions?: string[] | null;
+  company_enrichment_synced_at?: string | null;
 };
+
+function arrayOrUndefined<T>(value: unknown): T[] | undefined {
+  return Array.isArray(value) ? value as T[] : undefined;
+}
 
 function rowToPartialAccount(row: SupabasePartnerRow): Partial<PartnerAccount> {
   return {
@@ -59,6 +88,69 @@ function rowToPartialAccount(row: SupabasePartnerRow): Partial<PartnerAccount> {
     stripeSubscriptionId: row.stripe_subscription_id || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    serpApiPlaceId: row.serpapi_place_id || undefined,
+    serpApiDataId: row.serpapi_data_id || undefined,
+    googlePlaceName: row.google_place_name || undefined,
+    googlePrimaryType: row.google_primary_type || undefined,
+    googleTypes: arrayOrUndefined<string>(row.google_types),
+    googleRating: row.google_rating ?? undefined,
+    googleReviewCount: row.google_review_count ?? undefined,
+    googlePhotos: arrayOrUndefined<{ reference: string; proxyUrl: string }>(row.google_photos_cache),
+    googleMatchStatus: row.google_match_status || undefined,
+    aiDetectedActivityType: row.ai_detected_activity_type || undefined,
+    aiIslandContextLine: row.ai_island_context_line || undefined,
+    aiActivityDescription: row.ai_activity_description || undefined,
+    aiCompanySummary: row.ai_company_summary || undefined,
+    aiPositiveReviewThemes: arrayOrUndefined<string>(row.ai_positive_review_themes),
+    aiCompanyPageTitle: row.ai_company_page_title || undefined,
+    aiCompanyPageSubtitle: row.ai_company_page_subtitle || undefined,
+    aiCompanyPageBody: row.ai_company_page_body || undefined,
+    aiCompanyTrustLine: row.ai_company_trust_line || undefined,
+    aiCompanyFinalCtaLine: row.ai_company_final_cta_line || undefined,
+    aiCompanyPhotoCaptions: arrayOrUndefined<string>(row.ai_company_photo_captions),
+  };
+}
+
+function rowToPublicEnrichment(row: SupabasePartnerRow): Pick<
+  PublicPartner,
+  | 'googlePlaceName'
+  | 'googlePrimaryType'
+  | 'googleTypes'
+  | 'googleRating'
+  | 'googleReviewCount'
+  | 'googlePhotos'
+  | 'googleMatchStatus'
+  | 'aiDetectedActivityType'
+  | 'aiIslandContextLine'
+  | 'aiActivityDescription'
+  | 'aiCompanySummary'
+  | 'aiPositiveReviewThemes'
+  | 'aiCompanyPageTitle'
+  | 'aiCompanyPageSubtitle'
+  | 'aiCompanyPageBody'
+  | 'aiCompanyTrustLine'
+  | 'aiCompanyFinalCtaLine'
+  | 'aiCompanyPhotoCaptions'
+> {
+  return {
+    googlePlaceName: row.google_place_name || undefined,
+    googlePrimaryType: row.google_primary_type || undefined,
+    googleTypes: arrayOrUndefined<string>(row.google_types),
+    googleRating: row.google_rating ?? undefined,
+    googleReviewCount: row.google_review_count ?? undefined,
+    googlePhotos: arrayOrUndefined<{ reference: string; proxyUrl: string }>(row.google_photos_cache),
+    googleMatchStatus: row.google_match_status || undefined,
+    aiDetectedActivityType: row.ai_detected_activity_type || undefined,
+    aiIslandContextLine: row.ai_island_context_line || undefined,
+    aiActivityDescription: row.ai_activity_description || undefined,
+    aiCompanySummary: row.ai_company_summary || undefined,
+    aiPositiveReviewThemes: arrayOrUndefined<string>(row.ai_positive_review_themes),
+    aiCompanyPageTitle: row.ai_company_page_title || undefined,
+    aiCompanyPageSubtitle: row.ai_company_page_subtitle || undefined,
+    aiCompanyPageBody: row.ai_company_page_body || undefined,
+    aiCompanyTrustLine: row.ai_company_trust_line || undefined,
+    aiCompanyFinalCtaLine: row.ai_company_final_cta_line || undefined,
+    aiCompanyPhotoCaptions: arrayOrUndefined<string>(row.ai_company_photo_captions),
   };
 }
 
@@ -475,6 +567,7 @@ export async function getPublicPartnerBySlugFromDb(slug: string): Promise<Public
           googleReviewUrl: row.google_review_url || undefined,
           instagramUrl: row.instagram_url || undefined,
           bookingUrl: row.booking_url || undefined,
+          ...rowToPublicEnrichment(row),
         };
       }
     } catch (err) {
@@ -499,6 +592,22 @@ export async function getPublicPartnerBySlugFromDb(slug: string): Promise<Public
     googleReviewUrl: account.googleReviewUrl,
     instagramUrl: account.instagramUrl,
     bookingUrl: account.bookingUrl,
+    googlePlaceName: account.googlePlaceName,
+    googleRating: account.googleRating,
+    googleReviewCount: account.googleReviewCount,
+    googlePhotos: account.googlePhotos,
+    googleMatchStatus: account.googleMatchStatus,
+    aiDetectedActivityType: account.aiDetectedActivityType,
+    aiIslandContextLine: account.aiIslandContextLine,
+    aiActivityDescription: account.aiActivityDescription,
+    aiCompanySummary: account.aiCompanySummary,
+    aiPositiveReviewThemes: account.aiPositiveReviewThemes,
+    aiCompanyPageTitle: account.aiCompanyPageTitle,
+    aiCompanyPageSubtitle: account.aiCompanyPageSubtitle,
+    aiCompanyPageBody: account.aiCompanyPageBody,
+    aiCompanyTrustLine: account.aiCompanyTrustLine,
+    aiCompanyFinalCtaLine: account.aiCompanyFinalCtaLine,
+    aiCompanyPhotoCaptions: account.aiCompanyPhotoCaptions,
   };
 }
 

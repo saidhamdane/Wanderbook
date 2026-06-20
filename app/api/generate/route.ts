@@ -1,14 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveUploadedFiles } from '@/lib/upload-handler';
-import { generateMagazine } from '@/lib/magazine/generate-magazine';
+import { generateMagazine, insertCompanyPageIfNeeded } from '@/lib/magazine/generate-magazine';
 import { saveMagazine } from '@/lib/magazine/store';
 import { normalizeLanguage } from '@/lib/magazine/generate-copy';
-import { getPublicPartnerBySlugFromDb, getPartnerBySlug } from '@/lib/db/partners';
+import { getPartnerBySlug } from '@/lib/db/partners';
+import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
 import { canPartnerCreateMagazine, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/subscription';
 import { trackPartnerEvent } from '@/lib/db/partner-events';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+const EXPERIENCE_TEMPLATE_IDS = new Set([
+  'photographer-experience',
+  'tour-guide-experience',
+  'boat-trip-experience',
+  'buggy-adventure-experience',
+  'holiday-rental-memory',
+]);
+
+function realContactValue(value: unknown): string {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const normalized = text.toLowerCase();
+  if (
+    normalized.includes('placeholder') ||
+    normalized.includes('demo') ||
+    normalized.includes('example.com') ||
+    normalized.includes('123456789') ||
+    normalized.includes('000000000')
+  ) {
+    return '';
+  }
+  return text;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,9 +89,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    let partnerRecord = partnerSlug ? await getPartnerBySlug(partnerSlug) : null;
+    const activityProfile = partnerRecord
+      ? resolveActivityProfile(partnerRecord, language)
+      : undefined;
+
+    if (
+      activityProfile &&
+      activityProfile.activityType !== 'other' &&
+      activityProfile.templateId !== 'aurora-editorial' &&
+      templateId !== activityProfile.templateId
+    ) {
+      templateId = activityProfile.templateId;
+    } else if (activityProfile && !EXPERIENCE_TEMPLATE_IDS.has(templateId) && activityProfile.templateId !== 'aurora-editorial') {
+      templateId = activityProfile.templateId;
+    }
+
     // Enforce Free plan magazine limit before any expensive work
     if (partnerSlug) {
-      const partnerFull = await getPartnerBySlug(partnerSlug);
+      const partnerFull = partnerRecord;
       if (partnerFull) {
         const check = await canPartnerCreateMagazine(partnerFull);
         if (!check.allowed) {
@@ -97,13 +138,14 @@ export async function POST(req: NextRequest) {
       familyName,
       userPhotos: photos,
       useStockFallback,
-      sessionId
+      sessionId,
+      activityProfile,
+      partnerId: partnerRecord?.id,
     });
 
     doc.language = language;
 
     if (partnerSlug) {
-      const partnerRecord = await getPublicPartnerBySlugFromDb(partnerSlug);
       doc.partner = {
         enabled: true,
         slug: partnerSlug,
@@ -111,16 +153,41 @@ export async function POST(req: NextRequest) {
         businessName: partnerRecord?.businessName ?? partnerSlug,
         businessType: partnerRecord?.businessType ?? '',
         activityType: partnerRecord?.activityType ?? '',
+        resolvedActivityType: activityProfile?.activityType,
+        activityLabel: activityProfile?.activityLabel,
         mainIsland: partnerRecord?.mainIsland ?? '',
-        whatsapp: partnerRecord?.whatsapp ?? '',
-        website: partnerRecord?.website ?? '',
+        whatsapp: realContactValue(partnerRecord?.whatsapp),
+        website: realContactValue(partnerRecord?.website),
         logoUrl: partnerRecord?.logoUrl ?? '',
         brandingNote: partnerRecord?.brandingNote ?? '',
-        googleReviewUrl: partnerRecord?.googleReviewUrl ?? '',
-        instagramUrl: partnerRecord?.instagramUrl ?? '',
-        bookingUrl: partnerRecord?.bookingUrl ?? '',
+        googleReviewUrl: realContactValue(partnerRecord?.googleReviewUrl),
+        instagramUrl: realContactValue(partnerRecord?.instagramUrl),
+        bookingUrl: realContactValue(partnerRecord?.bookingUrl),
         magazineId: doc.id,
+        googlePlaceName: partnerRecord?.googlePlaceName ?? undefined,
+        googlePrimaryType: partnerRecord?.googlePrimaryType ?? undefined,
+        googleTypes: partnerRecord?.googleTypes ?? undefined,
+        googleRating: partnerRecord?.googleRating ?? undefined,
+        googleReviewCount: partnerRecord?.googleReviewCount ?? undefined,
+        googlePhotos: partnerRecord?.googlePhotos ?? undefined,
+        aiDetectedActivityType: partnerRecord?.aiDetectedActivityType ?? undefined,
+        aiIslandContextLine: partnerRecord?.aiIslandContextLine ?? undefined,
+        aiActivityDescription: partnerRecord?.aiActivityDescription ?? undefined,
+        aiCompanySummary: partnerRecord?.aiCompanySummary ?? undefined,
+        aiPositiveReviewThemes: partnerRecord?.aiPositiveReviewThemes ?? undefined,
+        aiCompanyPageTitle: partnerRecord?.aiCompanyPageTitle ?? undefined,
+        aiCompanyPageSubtitle: partnerRecord?.aiCompanyPageSubtitle ?? undefined,
+        aiCompanyPageBody: partnerRecord?.aiCompanyPageBody ?? undefined,
+        aiCompanyTrustLine: partnerRecord?.aiCompanyTrustLine ?? undefined,
+        aiCompanyFinalCtaLine: partnerRecord?.aiCompanyFinalCtaLine ?? undefined,
+        aiCompanyPhotoCaptions: partnerRecord?.aiCompanyPhotoCaptions ?? undefined,
       };
+      if (doc.generationAudit) {
+        doc.generationAudit.resolvedActivityType = activityProfile?.activityType || doc.generationAudit.resolvedActivityType;
+        doc.generationAudit.selectedTemplate = doc.templateId;
+        doc.generationAudit.partnerId = doc.partner.partnerId;
+      }
+      insertCompanyPageIfNeeded(doc, doc.partner);
       doc.source = 'partner_client';
     }
 

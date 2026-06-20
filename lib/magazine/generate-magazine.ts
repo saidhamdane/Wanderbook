@@ -1,6 +1,7 @@
 import {
   GenerateMagazineInput,
   ImageSlot,
+  LayoutPartner,
   MagazineDocument,
   MagazineTemplate,
   PhotoAnalysis,
@@ -11,6 +12,7 @@ import { analyzeUploadedPhotos } from './analyze-photos';
 import { assignImagesToTemplate } from './assign-images';
 import { generateEditorialCopy, normalizeLanguage } from './generate-copy';
 import { fetchPexelsPhotos } from './pexels';
+import { resolveActivityProfile } from './resolveActivityProfile';
 
 function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
   let n = 0;
@@ -20,6 +22,53 @@ function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
     }
   }
   return n;
+}
+
+export function insertCompanyPageIfNeeded(doc: MagazineDocument, partner?: LayoutPartner): MagazineDocument {
+  const hasAiCompanyContent = Boolean(
+    partner?.aiCompanyPageBody ||
+    partner?.aiCompanySummary ||
+    partner?.aiCompanyPageTitle
+  );
+  if (!partner?.enabled || !hasAiCompanyContent) return doc;
+  if (doc.pages.some((page) => page.layout === 'company-page' || page.pageId === 'company-page-partner')) return doc;
+
+  const companyPage = {
+    pageId: 'company-page-partner',
+    layout: 'company-page',
+    slots: {
+      'company-name': partner.businessName || '',
+      'partner-main-island': partner.mainIsland || '',
+      'partner-activity-type': partner.activityLabel || partner.resolvedActivityType || partner.aiDetectedActivityType || partner.activityType || '',
+      'partner-resolved-activity-type': partner.resolvedActivityType || '',
+    },
+  };
+  const insertAt = Math.max(0, doc.pages.length - 1);
+  doc.pages.splice(insertAt, 0, companyPage);
+  return doc;
+}
+
+function copySource(): 'openai' | 'claude' | 'defaults' {
+  if (process.env.OPENAI_API_KEY) return 'openai';
+  if (process.env.ANTHROPIC_API_KEY) return 'claude';
+  return 'defaults';
+}
+
+function generationAuditFor(
+  input: GenerateMagazineInput,
+  generatedAt: string,
+  imageSourceSummary: string
+): NonNullable<MagazineDocument['generationAudit']> {
+  const profile = input.activityProfile || resolveActivityProfile(null, input.language);
+  return {
+    resolvedActivityType: profile.activityType,
+    selectedTemplate: input.templateId,
+    language: normalizeLanguage(input.language),
+    copySource: copySource(),
+    imageSourceSummary,
+    partnerId: input.partnerId,
+    generatedAt,
+  };
 }
 
 async function generateRedBoldMagazine(
@@ -120,15 +169,17 @@ async function generateRedBoldMagazine(
     return { pageId: page.id, layout: page.layout, slots };
   });
 
+  const generatedAt = new Date().toISOString();
   return {
     id: 'mag_' + Date.now(),
     templateId: input.templateId,
     destination: input.destination,
     familyName: input.familyName || input.travelers || undefined,
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     sessionId: input.sessionId,
     pages,
-    template
+    template,
+    generationAudit: generationAuditFor(input, generatedAt, `${analyzed.length} uploaded photos, 0 stock photos`)
   };
 }
 
@@ -176,15 +227,17 @@ function generateHanoverMagazine(
     };
   });
 
+  const generatedAt = new Date().toISOString();
   return {
     id: 'mag_' + Date.now(),
     templateId: input.templateId,
     destination: input.destination,
     familyName: input.familyName || input.travelers || undefined,
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     sessionId: input.sessionId,
     pages,
     template,
+    generationAudit: generationAuditFor(input, generatedAt, `${analyzed.length} uploaded photos, 0 stock photos`),
   };
 }
 
@@ -264,15 +317,17 @@ async function generateLuxuryMagazine(
     return { pageId: page.id, layout: page.layout, slots };
   });
 
+  const generatedAt = new Date().toISOString();
   return {
     id: 'mag_' + Date.now(),
     templateId: input.templateId,
     destination: dest,
     familyName: family || undefined,
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     sessionId: input.sessionId,
     pages,
     template,
+    generationAudit: generationAuditFor(input, generatedAt, `${analyzed.length} uploaded photos, 0 stock photos`),
   };
 }
 
@@ -281,6 +336,7 @@ export async function generateMagazine(
 ): Promise<MagazineDocument> {
   const template = getTemplateById(input.templateId);
   const analyzed = analyzeUploadedPhotos(input.userPhotos);
+  const activityProfile = input.activityProfile;
 
   if (input.templateId === 'hanover') {
     return generateHanoverMagazine(input, template, analyzed);
@@ -298,16 +354,26 @@ export async function generateMagazine(
   const totalImageSlots = countImageSlots(template);
   if (input.useStockFallback && analyzed.length < totalImageSlots) {
     const needed = Math.max(totalImageSlots - analyzed.length + 2, 6);
-    stockPhotos = await fetchPexelsPhotos(input.destination, needed);
+    const stockQuery = activityProfile?.allowedImageKeywords[0] || input.destination;
+    stockPhotos = await fetchPexelsPhotos(stockQuery, needed);
   }
 
+  const lang = normalizeLanguage(input.language);
   const copy = await generateEditorialCopy({
     destination: input.destination,
     travelers: input.travelers,
     style: input.style,
     templateId: input.templateId,
     notes: input.notes,
-    language: normalizeLanguage(input.language)
+    language: lang,
+    activityType: activityProfile?.activityType,
+    activityLabel: activityProfile?.activityLabel,
+    activityLabelsByLanguage: activityProfile?.activityLabelsByLanguage,
+    pagePlan: activityProfile?.pagePlan,
+    ctaLabels: activityProfile?.ctaLabels,
+    localTipsTopics: activityProfile?.localTipsTopics,
+    copyTone: activityProfile?.copyTone,
+    prohibitedImageKeywords: activityProfile?.prohibitedImageKeywords,
   });
 
   const imageAssignments = assignImagesToTemplate(template, analyzed, stockPhotos);
@@ -328,14 +394,21 @@ export async function generateMagazine(
     return { pageId: page.id, layout: page.layout, slots };
   });
 
-  return {
+  const generatedAt = new Date().toISOString();
+  const doc: MagazineDocument = {
     id: 'mag_' + Date.now(),
     templateId: input.templateId,
     destination: input.destination,
     familyName: input.familyName || input.travelers || undefined,
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     sessionId: input.sessionId,
     pages,
-    template
+    template,
+    generationAudit: generationAuditFor(
+      input,
+      generatedAt,
+      `${analyzed.length} uploaded photos, ${stockPhotos.length} stock photos${activityProfile ? `, query: ${activityProfile.allowedImageKeywords[0]}` : ''}`
+    ),
   };
+  return doc;
 }

@@ -31,6 +31,26 @@ export type PartnerAccount = {
   monthlyMagazineLimit: number;
   createdAt: string;
   updatedAt: string;
+  serpApiPlaceId?: string;
+  serpApiDataId?: string;
+  googlePlaceName?: string;
+  googlePrimaryType?: string;
+  googleTypes?: string[];
+  googleRating?: number;
+  googleReviewCount?: number;
+  googlePhotos?: Array<{ reference: string; proxyUrl: string }>;
+  googleMatchStatus?: string;
+  aiDetectedActivityType?: string;
+  aiIslandContextLine?: string;
+  aiActivityDescription?: string;
+  aiCompanySummary?: string;
+  aiPositiveReviewThemes?: string[];
+  aiCompanyPageTitle?: string;
+  aiCompanyPageSubtitle?: string;
+  aiCompanyPageBody?: string;
+  aiCompanyTrustLine?: string;
+  aiCompanyFinalCtaLine?: string;
+  aiCompanyPhotoCaptions?: string[];
 };
 
 export type PublicPartner = {
@@ -48,6 +68,26 @@ export type PublicPartner = {
   googleReviewUrl?: string;
   instagramUrl?: string;
   bookingUrl?: string;
+  serpApiPlaceId?: string;
+  serpApiDataId?: string;
+  googlePlaceName?: string;
+  googlePrimaryType?: string;
+  googleTypes?: string[];
+  googleRating?: number;
+  googleReviewCount?: number;
+  googlePhotos?: Array<{ reference: string; proxyUrl: string }>;
+  googleMatchStatus?: string;
+  aiDetectedActivityType?: string;
+  aiIslandContextLine?: string;
+  aiActivityDescription?: string;
+  aiCompanySummary?: string;
+  aiPositiveReviewThemes?: string[];
+  aiCompanyPageTitle?: string;
+  aiCompanyPageSubtitle?: string;
+  aiCompanyPageBody?: string;
+  aiCompanyTrustLine?: string;
+  aiCompanyFinalCtaLine?: string;
+  aiCompanyPhotoCaptions?: string[];
 };
 
 type SessionRecord = {
@@ -286,6 +326,26 @@ export function toPublicPartner(partner: PartnerAccount): PublicPartner {
     mainIsland: partner.mainIsland,
     brandingNote: partner.brandingNote || `Created for you by ${partner.businessName}`,
     preferredTemplateId: partner.preferredTemplateId,
+    serpApiPlaceId: partner.serpApiPlaceId,
+    serpApiDataId: partner.serpApiDataId,
+    googlePlaceName: partner.googlePlaceName,
+    googlePrimaryType: partner.googlePrimaryType,
+    googleTypes: partner.googleTypes,
+    googleRating: partner.googleRating,
+    googleReviewCount: partner.googleReviewCount,
+    googlePhotos: partner.googlePhotos,
+    googleMatchStatus: partner.googleMatchStatus,
+    aiDetectedActivityType: partner.aiDetectedActivityType,
+    aiIslandContextLine: partner.aiIslandContextLine,
+    aiActivityDescription: partner.aiActivityDescription,
+    aiCompanySummary: partner.aiCompanySummary,
+    aiPositiveReviewThemes: partner.aiPositiveReviewThemes,
+    aiCompanyPageTitle: partner.aiCompanyPageTitle,
+    aiCompanyPageSubtitle: partner.aiCompanyPageSubtitle,
+    aiCompanyPageBody: partner.aiCompanyPageBody,
+    aiCompanyTrustLine: partner.aiCompanyTrustLine,
+    aiCompanyFinalCtaLine: partner.aiCompanyFinalCtaLine,
+    aiCompanyPhotoCaptions: partner.aiCompanyPhotoCaptions,
   };
 }
 

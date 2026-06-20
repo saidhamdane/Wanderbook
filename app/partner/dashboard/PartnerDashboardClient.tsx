@@ -7,7 +7,7 @@ import { Logo } from '@/components/Logo';
 import { ACTIVITY_TYPES } from '@/lib/partner-activity';
 import type { PartnerAnalytics } from '@/lib/db/partner-events';
 
-const BUSINESS_TYPES = ['Photographer', 'Tour Guide', 'Holiday Rental', 'Hotel', 'Excursion Company', 'Surf School', 'Other'];
+const BUSINESS_TYPES = ['Surf Camp', 'Villa Rental', 'Tour Guide', 'Boat Tour', 'Photographer', 'Buggy Adventure', 'Restaurant', 'Hotel', 'Other'];
 const ISLANDS = ['Tenerife', 'Fuerteventura', 'Lanzarote', 'Gran Canaria', 'La Palma', 'La Gomera', 'El Hierro'];
 
 type DashboardPartner = {
@@ -28,6 +28,19 @@ type DashboardPartner = {
   plan: 'free' | 'unlimited_monthly' | 'pro';
   subscriptionStatus: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired';
   monthlyMagazineLimit: number;
+  googlePlaceName?: string;
+  googleRating?: number;
+  googleReviewCount?: number;
+  googlePhotos?: Array<{ reference: string; proxyUrl: string }>;
+  googleMatchStatus?: string;
+  aiDetectedActivityType?: string;
+  aiCompanySummary?: string;
+  aiPositiveReviewThemes?: string[];
+};
+
+type CompanyProfileState = {
+  status: 'idle' | 'loading' | 'synced' | 'not_found' | 'no_api_key' | 'error';
+  message?: string;
 };
 
 function qrCardDownloadFilename(partnerSlug: string): string {
@@ -66,6 +79,12 @@ export default function PartnerDashboardClient({
   const [logoMessage, setLogoMessage] = useState('');
   const [logoError, setLogoError] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
+  const initialProfileStatus: CompanyProfileState['status'] = account.googleMatchStatus === 'synced'
+    ? 'synced'
+    : account.googleMatchStatus === 'not_found'
+      ? 'not_found'
+      : 'idle';
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfileState>({ status: initialProfileStatus });
   const partnerLink = getCanonicalPartnerUrl(account.slug);
   const qrCodeUrl = `/api/partner/qr?slug=${encodeURIComponent(account.slug)}&disposition=inline`;
   const qrCardDownloadUrl = `/api/partner/qr-card?slug=${encodeURIComponent(account.slug)}`;
@@ -174,6 +193,48 @@ export default function PartnerDashboardClient({
       setLogoMessage('Logo uploaded successfully');
     } finally {
       setUploadingLogo(false);
+    }
+  }
+
+  async function syncCompanyProfile() {
+    setCompanyProfile({ status: 'loading' });
+    try {
+      const res = await fetch('/api/partner/company-auto-sync', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCompanyProfile({ status: 'error', message: data.error || 'Company profile sync failed.' });
+        return;
+      }
+      if (data.status === 'missing_key') {
+        setCompanyProfile({ status: 'no_api_key' });
+        return;
+      }
+      if (data.status === 'not_found') {
+        setAccount((current) => ({ ...current, googleMatchStatus: 'not_found' }));
+        setCompanyProfile({ status: 'not_found' });
+        return;
+      }
+      if (data.status === 'synced' && data.data) {
+        setAccount((current) => ({
+          ...current,
+          googlePlaceName: data.data.googlePlaceName || '',
+          googleRating: data.data.googleRating,
+          googleReviewCount: data.data.googleReviewCount,
+          googlePhotos: data.data.googlePhotos || [],
+          googleMatchStatus: 'synced',
+          aiDetectedActivityType: data.data.detectedActivityType || '',
+          aiCompanySummary: data.data.companySummary || '',
+          aiPositiveReviewThemes: data.data.positiveReviewThemes || [],
+        }));
+        setCompanyProfile({ status: 'synced' });
+        return;
+      }
+      setCompanyProfile({ status: 'error', message: 'Unexpected response from company profile sync.' });
+    } catch {
+      setCompanyProfile({ status: 'error', message: 'Network error. Please try again.' });
     }
   }
 
@@ -385,6 +446,98 @@ export default function PartnerDashboardClient({
           {saved && !saving && <span className="ml-3 text-sm font-semibold text-green-700">Profile saved successfully.</span>}
           {saveError && <p className="mt-3 text-sm font-semibold text-red-700">{saveError}</p>}
         </form>
+
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-2xl text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>AI Company Profile</h2>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+                Wanderbook can automatically write your magazine pages based on your business name and island.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={syncCompanyProfile}
+              disabled={companyProfile.status === 'loading'}
+              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-60"
+            >
+              {companyProfile.status === 'loading' ? 'Generating...' : 'Generate company profile from Google'}
+            </button>
+          </div>
+
+          {companyProfile.status === 'loading' && (
+            <div className="mt-5 flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber-300 border-t-amber-700" />
+              Searching Google Maps, reading reviews, and writing your company page...
+            </div>
+          )}
+
+          {companyProfile.status === 'no_api_key' && (
+            <p className="mt-5 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+              Google enrichment is not configured on this server. Your magazines will still include AI-written content.
+            </p>
+          )}
+
+          {companyProfile.status === 'not_found' && (
+            <p className="mt-5 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+              We couldn&apos;t find your business on Google automatically. Your AI-written magazine will use your business name and island.
+            </p>
+          )}
+
+          {companyProfile.status === 'error' && (
+            <p className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700">
+              {companyProfile.message || 'Company profile sync failed.'}
+            </p>
+          )}
+
+          {companyProfile.status === 'synced' && (
+            <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="rounded-xl bg-slate-50 p-4">
+                {account.googlePlaceName && (
+                  <p className="text-xs font-semibold tracking-[0.16em] text-slate-500">MATCHED COMPANY</p>
+                )}
+                {account.googlePlaceName && <p className="mt-1 text-lg font-bold text-slate-950">{account.googlePlaceName}</p>}
+                {typeof account.googleRating === 'number' && (
+                  <p className="mt-2 text-sm font-bold text-amber-700">
+                    ★ {account.googleRating.toFixed(1)}{account.googleReviewCount ? ` · ${account.googleReviewCount} reviews` : ''}
+                  </p>
+                )}
+                {account.aiDetectedActivityType && (
+                  <p className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-700">
+                    {account.aiDetectedActivityType}
+                  </p>
+                )}
+                {account.aiCompanySummary && (
+                  <p className="mt-4 text-sm leading-6 text-slate-700">{account.aiCompanySummary}</p>
+                )}
+                {account.aiPositiveReviewThemes && account.aiPositiveReviewThemes.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {account.aiPositiveReviewThemes.map((theme) => (
+                      <span key={theme} className="rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-bold text-amber-800">
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <p className="mt-4 text-sm font-semibold text-green-700">Profile will appear in your next generated magazine.</p>
+              </div>
+
+              {account.googlePhotos && account.googlePhotos.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {account.googlePhotos.slice(0, 3).map((photo) => (
+                    <img
+                      key={photo.reference}
+                      src={photo.proxyUrl}
+                      alt=""
+                      className="h-28 w-full rounded-xl object-cover"
+                      onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
       </div>
     </main>
   );

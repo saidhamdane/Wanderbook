@@ -23,6 +23,14 @@ type CopyInput = {
   templateId: string;
   notes?: string;
   language: string;
+  activityType?: string;
+  activityLabel?: string;
+  activityLabelsByLanguage?: Record<'en' | 'es', string>;
+  pagePlan?: Record<'en' | 'es', string[]>;
+  ctaLabels?: Record<'en' | 'es', string>;
+  localTipsTopics?: Record<'en' | 'es', string[]>;
+  copyTone?: string;
+  prohibitedImageKeywords?: string[];
 };
 
 function slotIdsForTemplate(templateId: string): string[] {
@@ -39,7 +47,7 @@ function slotIdsForTemplate(templateId: string): string[] {
 function defaultsFor(input: CopyInput): Record<string, string> {
   const d = input.destination;
   const y = String(new Date().getFullYear());
-  return {
+  const defaults = {
     coverTitle: 'WANDER',
     coverSubtitle: 'Together',
     coverMagazineLabel: 'TRAVEL MAGAZINE',
@@ -205,24 +213,290 @@ function defaultsFor(input: CopyInput): Record<string, string> {
     quoteBody:
       'Our journey to ' + d + ' reminded us why we travel — not to escape life, but to keep life from escaping us.'
   };
+  if (!input.activityType) return defaults;
+  return { ...defaults, ...activityDefaultsFor(input, y) };
+}
+
+function activityDefaultsFor(input: CopyInput, year: string): Record<string, string> {
+  const d = input.destination;
+  const lang = input.language === 'es' ? 'es' : 'en';
+  const label = input.activityLabelsByLanguage?.[lang] || input.activityLabel || (lang === 'es' ? 'Experiencia en Fuerteventura' : 'Fuerteventura Experience');
+  const plan = input.pagePlan?.[lang] || [];
+  const cta = input.ctaLabels?.[lang] || (lang === 'es' ? 'Reserva tu proxima experiencia' : 'Book your next experience');
+  const topics = input.localTipsTopics?.[lang] || [];
+  const isSpanish = lang === 'es';
+
+  const common = isSpanish
+    ? {
+        edition: 'EDICION ' + year,
+        'cover-title': label.toUpperCase(),
+        'cover-kicker': 'FUERTEVENTURA',
+        'cover-line-1': plan[0] || label + ' en ' + d,
+        'cover-line-2': 'Una revista creada para recordar la experiencia',
+        'cover-year': year,
+        'cover-stat': '8 PAGINAS · UNA EXPERIENCIA',
+        'toc-item-1': plan[1] || 'Bienvenida',
+        'toc-item-2': plan[2] || 'Sobre la empresa',
+        'toc-item-3': plan[3] || 'La isla',
+        'toc-item-4': plan[4] || 'Momentos destacados',
+        'toc-item-5': plan[5] || 'Historia en fotos',
+        'toc-item-6': plan[7] || 'Reserva',
+        'toc-caption': label + ' · ' + d,
+        'intro-title': 'Bienvenido a tu ' + label.toLowerCase(),
+        'intro-body': 'Esta revista recoge una experiencia real en ' + d + ': el ambiente, el recorrido, los detalles de la empresa y los momentos que hacen que el recuerdo sea propio.',
+        'intro-byline': 'Creado para viajeros de ' + d,
+        'feature-title': plan[3] || 'Fuerteventura en primera persona',
+        'feature-body': 'La experiencia se entiende mejor desde el terreno: luz volcanica, caminos abiertos, costa y pueblos cercanos segun el ritmo de la actividad. Cada pagina mantiene el foco en ' + label.toLowerCase() + '.',
+        'feature-stat-1': topics[0] || 'Contexto local',
+        'feature-stat-2': topics[1] || 'Momentos reales',
+        'feature-stat-3': topics[2] || 'Recuerdo personal',
+        'gallery-caption-1': 'Llegada',
+        'gallery-caption-2': 'Paisaje',
+        'gallery-caption-3': 'Detalle',
+        'gallery-caption-4': 'Ruta',
+        'gallery-caption-5': 'Recuerdo',
+        'story-title': plan[4] || 'Momentos de la experiencia',
+        'story-lead': 'Una historia visual de ' + label.toLowerCase() + ' en ' + d + '.',
+        'story-body': 'Las mejores paginas salen de los detalles concretos: el punto de encuentro, la energia del grupo, el paisaje y la manera en que la empresa acompana cada momento.',
+        'quote-text': 'Un buen recuerdo no necesita exagerar: basta con volver a mirar el dia y reconocerlo.',
+        'quote-attr': 'Nota de la experiencia',
+        'back-title': cta,
+        'back-contact': 'Gracias por viajar con nosotros',
+      }
+    : {
+        edition: year + ' EDITION',
+        'cover-title': label.toUpperCase(),
+        'cover-kicker': 'FUERTEVENTURA',
+        'cover-line-1': plan[0] || label + ' in ' + d,
+        'cover-line-2': 'A magazine made to remember the experience',
+        'cover-year': year,
+        'cover-stat': '8 PAGES · ONE EXPERIENCE',
+        'toc-item-1': plan[1] || 'Welcome',
+        'toc-item-2': plan[2] || 'About the company',
+        'toc-item-3': plan[3] || 'The island',
+        'toc-item-4': plan[4] || 'Highlights',
+        'toc-item-5': plan[5] || 'Photo story',
+        'toc-item-6': plan[7] || 'Book again',
+        'toc-caption': label + ' · ' + d,
+        'intro-title': 'Welcome to your ' + label,
+        'intro-body': 'This magazine gathers one real experience in ' + d + ': the atmosphere, the route, the company details and the moments that make the memory feel personal.',
+        'intro-byline': 'Created for travelers in ' + d,
+        'feature-title': plan[3] || 'Fuerteventura up close',
+        'feature-body': 'The experience is best understood through the setting: volcanic light, open roads, coast and villages shaped around the rhythm of the activity. Every page keeps the focus on ' + label + '.',
+        'feature-stat-1': topics[0] || 'Local context',
+        'feature-stat-2': topics[1] || 'Real moments',
+        'feature-stat-3': topics[2] || 'Personal memory',
+        'gallery-caption-1': 'Arrival',
+        'gallery-caption-2': 'Landscape',
+        'gallery-caption-3': 'Detail',
+        'gallery-caption-4': 'Route',
+        'gallery-caption-5': 'Memory',
+        'story-title': plan[4] || 'Experience highlights',
+        'story-lead': 'A visual story of ' + label + ' in ' + d + '.',
+        'story-body': 'The best pages come from concrete details: the meeting point, the energy of the group, the landscape and the way the company shapes each moment.',
+        'quote-text': 'A good memory does not need exaggeration: it only needs the day to feel true when you see it again.',
+        'quote-attr': 'Experience note',
+        'back-title': cta,
+        'back-contact': 'Thank you for travelling with us',
+      };
+
+  if (input.activityType === 'buggy-adventure') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'AVENTURA EN BUGGY' : 'BUGGY ADVENTURE',
+      'intro-title': isSpanish ? 'La aventura empieza en tierra volcanica' : 'The adventure starts on volcanic ground',
+      'intro-body': isSpanish
+        ? 'Tu aventura en buggy en Fuerteventura recorre caminos abiertos, terreno volcanico y rincones donde la isla se siente directa, seca y llena de energia.'
+        : 'Your buggy adventure in Fuerteventura follows open roads, volcanic ground and corners where the island feels direct, dry and full of energy.',
+      'feature-title': isSpanish ? 'El lado todoterreno de Fuerteventura' : 'The off-road side of Fuerteventura',
+      'feature-body': isSpanish
+        ? 'Polvo, pistas volcanicas y paisajes abiertos marcan el ritmo. Esta pagina habla solo de la ruta, la conduccion y la sensacion de explorar Fuerteventura desde un buggy.'
+        : 'Dust, volcanic tracks and open landscapes set the pace. This page stays with the route, the drive and the feeling of exploring Fuerteventura from a buggy.',
+      'story-title': isSpanish ? 'Ruta, motor y paisaje' : 'Route, engine and landscape',
+      'story-lead': isSpanish ? 'Una historia de aventura en buggy, caminos de tierra y miradores abiertos.' : 'A story of buggy adventure, dirt roads and open viewpoints.',
+      'story-body': isSpanish
+        ? 'Las fotos del cliente cuentan la parte mas viva del dia: prepararse, salir a la ruta, sentir el terreno y volver con la ropa marcada por el polvo.'
+        : 'The customer photos tell the liveliest part of the day: getting ready, heading onto the route, feeling the ground and returning with dust on every layer.',
+      'feature-stat-1': isSpanish ? 'Pistas volcanicas' : 'Volcanic tracks',
+      'feature-stat-2': isSpanish ? 'Ruta todoterreno' : 'Off-road route',
+      'feature-stat-3': isSpanish ? 'Aventura en buggy' : 'Buggy adventure',
+    };
+  }
+
+  if (input.activityType === 'boat-tour') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'TOUR EN BARCO' : 'BOAT TOUR',
+      'intro-title': isSpanish ? 'Fuerteventura desde el mar' : 'Fuerteventura from the sea',
+      'intro-body': isSpanish
+        ? 'El viaje mira la isla desde el Atlantico: mar, barco, costa y luz abierta para recordar una salida tranquila y especial.'
+        : 'This journey sees the island from the Atlantic: sea, boat, coast and open light for a calm, memorable trip.',
+      'feature-title': isSpanish ? 'Costa y Atlantico' : 'Coast and Atlantic',
+      'feature-body': isSpanish
+        ? 'El mar cambia la forma de ver Fuerteventura. Desde el barco aparecen la costa, el viento y esa luz azul que hace que el dia se quede en la memoria.'
+        : 'The sea changes how Fuerteventura looks. From the boat come the coast, the wind and the blue light that keeps the day in memory.',
+      'story-title': isSpanish ? 'Momentos de mar y costa' : 'Sea and coast highlights',
+      'story-lead': isSpanish ? 'Una historia de barco, mar y costa en Fuerteventura.' : 'A story of boat, sea and coast in Fuerteventura.',
+      'feature-stat-1': isSpanish ? 'Mar' : 'Sea',
+      'feature-stat-2': isSpanish ? 'Barco' : 'Boat',
+      'feature-stat-3': isSpanish ? 'Costa' : 'Coast',
+    };
+  }
+
+  if (input.activityType === 'tour-guide') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'GUIA TURISTICO' : 'TOUR GUIDE',
+      'intro-title': isSpanish ? 'La isla con una guia cercana' : 'The island with a local guide',
+      'intro-body': isSpanish
+        ? 'Una ruta guiada convierte Fuerteventura en una historia: guia, isla, pueblos, miradores y detalles que no siempre aparecen en un mapa.'
+        : 'A guided route turns Fuerteventura into a story: guide, island, villages, viewpoints and details that do not always appear on a map.',
+      'feature-title': isSpanish ? 'Historias autenticas de la isla' : 'Authentic island stories',
+      'feature-body': isSpanish
+        ? 'La ruta une paisaje y contexto local. Con una guia clara, cada parada ayuda a entender la isla, sus caminos y sus pueblos con mas profundidad.'
+        : 'The route connects landscape and local context. With a clear guide, each stop helps travelers understand the island, its roads and its villages more deeply.',
+      'story-title': isSpanish ? 'Ruta, isla y memoria' : 'Route, island and memory',
+      'story-lead': isSpanish ? 'Una historia de guia local, ruta y lugares visitados.' : 'A story of local guiding, route and places visited.',
+      'feature-stat-1': isSpanish ? 'Guia' : 'Guide',
+      'feature-stat-2': isSpanish ? 'Isla' : 'Island',
+      'feature-stat-3': isSpanish ? 'Ruta' : 'Route',
+    };
+  }
+
+  if (input.activityType === 'surf-camp') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'ESCUELA DE SURF' : 'SURF CAMP',
+      'intro-title': isSpanish ? 'El ritmo del mar en Fuerteventura' : 'The rhythm of the sea in Fuerteventura',
+      'intro-body': isSpanish
+        ? 'Tu semana de surf en Fuerteventura combina clases, olas y la energia de una isla pensada para surfear.'
+        : 'Your surf week in Fuerteventura combines lessons, waves and the energy of an island built for surfing.',
+      'feature-title': isSpanish ? 'Olas, clases y progresion' : 'Waves, lessons and progression',
+      'feature-body': isSpanish
+        ? 'El viento y el swell de Fuerteventura ofrecen condiciones distintas cada dia. La escuela adapta cada sesion al nivel y al estado del mar.'
+        : 'The wind and swell of Fuerteventura offer different conditions every day. The camp adapts each session to level and sea state.',
+      'story-title': isSpanish ? 'En el agua y en la orilla' : 'In the water and on the shore',
+      'story-lead': isSpanish ? 'Una historia de olas, clases y progresion en Fuerteventura.' : 'A story of waves, lessons and progression in Fuerteventura.',
+      'feature-stat-1': isSpanish ? 'Olas' : 'Waves',
+      'feature-stat-2': isSpanish ? 'Clases' : 'Lessons',
+      'feature-stat-3': isSpanish ? 'Progresion' : 'Progression',
+    };
+  }
+
+  if (input.activityType === 'villa-rental') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'ALQUILER VACACIONAL' : 'HOLIDAY RENTAL',
+      'intro-title': isSpanish ? 'Una estancia a tu ritmo en Fuerteventura' : 'A stay at your own pace in Fuerteventura',
+      'intro-body': isSpanish
+        ? 'Tu estancia en Fuerteventura tiene la comodidad de un hogar local y la libertad de descubrir la isla sin prisa.'
+        : 'Your stay in Fuerteventura has the comfort of a local home and the freedom to discover the island at your own pace.',
+      'feature-title': isSpanish ? 'Vivir la isla como local' : 'Living the island like a local',
+      'feature-body': isSpanish
+        ? 'Mercados, playas cercanas, atardeceres desde la terraza. La estancia hace que Fuerteventura se sienta propia desde el primer dia.'
+        : 'Markets, nearby beaches, sunsets from the terrace. The stay makes Fuerteventura feel like yours from day one.',
+      'story-title': isSpanish ? 'Los dias de la estancia' : 'Days of the stay',
+      'story-lead': isSpanish ? 'Una historia de descanso, luz y vida local en Fuerteventura.' : 'A story of rest, light and local life in Fuerteventura.',
+      'feature-stat-1': isSpanish ? 'Comodidad' : 'Comfort',
+      'feature-stat-2': isSpanish ? 'Playas' : 'Beaches',
+      'feature-stat-3': isSpanish ? 'Estancia' : 'Stay',
+    };
+  }
+
+  if (input.activityType === 'photographer') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'SESION DE FOTOS' : 'PHOTO SESSION',
+      'intro-title': isSpanish ? 'La luz de Fuerteventura en cada imagen' : 'The light of Fuerteventura in every image',
+      'intro-body': isSpanish
+        ? 'Tu sesion de fotos captura la luz dorada, los paisajes abiertos y los momentos que hacen que Fuerteventura sea tan especial.'
+        : 'Your photo session captures the golden light, open landscapes and moments that make Fuerteventura so special.',
+      'feature-title': isSpanish ? 'La luz y el encuadre perfecto' : 'The perfect light and frame',
+      'feature-body': isSpanish
+        ? 'El fotografo conoce los rincones y las horas donde la isla se ve mejor. Cada sesion es un recorrido por la luz.'
+        : 'The photographer knows the corners and hours where the island looks its best. Each session is a journey through light.',
+      'story-title': isSpanish ? 'Momentos de la sesion' : 'Session highlights',
+      'story-lead': isSpanish ? 'Una historia de luz, encuadre y recuerdo en Fuerteventura.' : 'A story of light, frame and memory in Fuerteventura.',
+      'feature-stat-1': isSpanish ? 'Luz dorada' : 'Golden hour',
+      'feature-stat-2': isSpanish ? 'Playas' : 'Beaches',
+      'feature-stat-3': isSpanish ? 'Recuerdo' : 'Memory',
+    };
+  }
+
+  if (input.activityType === 'restaurant') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'RESTAURANTE' : 'RESTAURANT',
+      'intro-title': isSpanish ? 'Sabores locales en Fuerteventura' : 'Local flavors in Fuerteventura',
+      'intro-body': isSpanish
+        ? 'La experiencia en el restaurante une producto local, ambiente y los momentos de mesa que se quedan en la memoria.'
+        : 'The restaurant experience brings together local produce, atmosphere and the table moments that stay in memory.',
+      'feature-title': isSpanish ? 'Cocina y producto de la isla' : 'Island cuisine and produce',
+      'feature-body': isSpanish
+        ? 'El restaurante trabaja con ingredientes locales y una cocina que refleja el caracter de Fuerteventura.'
+        : 'The restaurant works with local ingredients and a cuisine that reflects the character of Fuerteventura.',
+      'story-title': isSpanish ? 'Momentos en la mesa' : 'Table moments',
+      'story-lead': isSpanish ? 'Una historia de comida, sabor y ambiente en Fuerteventura.' : 'A story of food, flavor and atmosphere in Fuerteventura.',
+      'feature-stat-1': isSpanish ? 'Sabor local' : 'Local flavor',
+      'feature-stat-2': isSpanish ? 'Producto' : 'Produce',
+      'feature-stat-3': isSpanish ? 'Mesa' : 'Table',
+    };
+  }
+
+  if (input.activityType === 'hotel') {
+    return {
+      ...common,
+      'cover-title': isSpanish ? 'HOTEL' : 'HOTEL',
+      'intro-title': isSpanish ? 'Una estancia en Fuerteventura' : 'A stay in Fuerteventura',
+      'intro-body': isSpanish
+        ? 'El hotel ofrece comodidad, servicio y la isla al alcance de la mano para que cada dia sea sencillo y especial.'
+        : 'The hotel offers comfort, service and the island within reach so every day is easy and special.',
+      'feature-title': isSpanish ? 'Servicio y comodidad en la isla' : 'Service and comfort on the island',
+      'feature-body': isSpanish
+        ? 'Desde la llegada hasta la salida, el hotel hace que la estancia en Fuerteventura sea sin esfuerzo y con todo a la mano.'
+        : 'From arrival to departure, the hotel makes the stay in Fuerteventura effortless and well-appointed.',
+      'story-title': isSpanish ? 'Los dias de la estancia en el hotel' : 'Hotel stay highlights',
+      'story-lead': isSpanish ? 'Una historia de comodidad, servicio y estancia en Fuerteventura.' : 'A story of comfort, service and island stays in Fuerteventura.',
+      'feature-stat-1': isSpanish ? 'Llegada' : 'Arrival',
+      'feature-stat-2': isSpanish ? 'Comodidad' : 'Comfort',
+      'feature-stat-3': isSpanish ? 'Estancia' : 'Stay',
+    };
+  }
+
+  return common;
 }
 
 function buildUserPrompt(input: CopyInput): string {
   const slotIds = slotIdsForTemplate(input.templateId);
   const slotList = slotIds.map((id) => '- ' + id).join('\n');
-  const notes = input.notes ? '\n\nFamily notes: ' + input.notes : '';
+  const notes = input.notes ? '\n\nNotes: ' + input.notes : '';
   const languageName = LANGUAGE_NAMES[input.language] ?? 'English';
+  const activityLine = input.activityType
+    ? 'Write the editorial copy for a ' + (input.activityLabel || input.activityType) + ' travel magazine.'
+    : 'Write the editorial copy for a personal family travel magazine.';
+  const activityRules = input.activityType
+    ? [
+        '',
+        'Resolved activity profile:',
+        '- Activity type: ' + input.activityType + '.',
+        '- Activity label: ' + (input.activityLabel || input.activityType) + '.',
+        '- Page plan: ' + (input.pagePlan?.[input.language === 'es' ? 'es' : 'en'] || []).join(' | '),
+        '- Copy tone: ' + (input.copyTone || input.style) + '.',
+        '- Never mention or imply these unrelated activities unless user notes explicitly require them: ' + (input.prohibitedImageKeywords || []).join(', ') + '.',
+      ].join('\n')
+    : '';
   return [
-    'Write the editorial copy for a personal family travel magazine.',
+    activityLine,
     'Destination: ' + input.destination + '.',
     'Travelers: ' + input.travelers + '.',
     'Preferred tone: ' + input.style + '.' + notes,
+    activityRules,
     '',
     'Return ONLY a JSON object whose keys match exactly these slot IDs, with string values:',
     slotList,
     '',
     'Rules:',
-    '- Write every value in ' + languageName + '. Do not mix languages. Keep place names and proper nouns in their original spelling.',
+    '- Every string value MUST be in ' + languageName + '. This is mandatory and applies to every field including CTA labels, button text, and captions. Do not mix languages. Keep place names and proper nouns in their original spelling.',
     '- Be specific to ' + input.destination + '. Reference real local food, light, terrain.',
     '- Tone should feel like a polished magazine, warm and intimate, never generic.',
     '- Keep headlines short. Keep body copy under the implied magazine length.',
@@ -241,6 +515,10 @@ async function enrichWithClaude(
   try {
     const { default: Anthropic } = await import('@anthropic-ai/sdk');
     const client = new Anthropic({ apiKey });
+    const languageName = LANGUAGE_NAMES[input.language] ?? 'English';
+    const magazineSubject = input.activityType
+      ? `${input.activityLabel || input.activityType} travel magazine`
+      : 'family travel magazine';
     const msg = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 400,
@@ -249,16 +527,20 @@ async function enrichWithClaude(
           role: 'user',
           content: [
             'You are an editor at Condé Nast Traveller.',
-            `Write editorial copy for a family travel magazine about a trip to ${input.destination}.`,
-            `Family: ${input.travelers}. Tone: ${input.style}.`,
+            `Write editorial copy in ${languageName} for a ${magazineSubject} about ${input.destination}.`,
+            `Travelers: ${input.travelers}. Tone: ${input.copyTone || input.style}.`,
+            input.prohibitedImageKeywords?.length
+              ? `Never mention these unrelated activities: ${input.prohibitedImageKeywords.join(', ')}.`
+              : '',
+            `Every string value MUST be in ${languageName}.`,
             'Return ONLY a JSON object with these keys (max 20 words each):',
             '  coverKicker   — witty 3-word travel phrase (e.g. "Sun. Salt. Story.")',
             '  storyIntro    — two evocative opening sentences about the destination',
-            '  pullQuote     — one beautiful sentence about family travel',
+            '  pullQuote     — one beautiful sentence about the experience',
             '  featureTitle  — four-word editorial section title',
             '  quoteBody     — poetic one-liner about this specific place',
             'JSON only. No markdown. No explanation.'
-          ].join('\n'),
+          ].filter(Boolean).join('\n'),
         }
       ]
     });
@@ -299,9 +581,9 @@ export async function generateEditorialCopy(
           content:
             'You are a senior editorial writer for a luxury travel magazine writing in ' +
             languageName +
-            '. Respond ONLY with valid JSON, no markdown, no explanation. Every string value must be in ' +
+            '. Respond ONLY with valid JSON, no markdown, no explanation. Every string value MUST be in ' +
             languageName +
-            '.'
+            '. This is mandatory and applies to every field including CTA labels, button text, and captions.'
         },
         { role: 'user', content: buildUserPrompt(input) }
       ]

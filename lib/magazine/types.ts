@@ -92,6 +92,15 @@ export type MagazineDocument = {
   style?: string;
   partner?: LayoutPartner;
   copyProvider?: unknown;
+  generationAudit?: {
+    resolvedActivityType: ResolvedActivityType;
+    selectedTemplate: string;
+    language: string;
+    copySource: 'openai' | 'claude' | 'defaults';
+    imageSourceSummary: string;
+    partnerId?: string;
+    generatedAt: string;
+  };
   [key: string]: unknown;
   pages: Array<{
     pageId: string;
@@ -108,6 +117,8 @@ export type LayoutPartner = {
   businessName?: string;
   businessType?: string;
   activityType?: string;
+  resolvedActivityType?: ResolvedActivityType;
+  activityLabel?: string;
   mainIsland?: string;
   whatsapp?: string;
   website?: string;
@@ -117,6 +128,23 @@ export type LayoutPartner = {
   instagramUrl?: string;
   bookingUrl?: string;
   magazineId?: string;
+  googlePlaceName?: string;
+  googlePrimaryType?: string;
+  googleTypes?: string[];
+  googleRating?: number;
+  googleReviewCount?: number;
+  googlePhotos?: Array<{ reference: string; proxyUrl: string }>;
+  aiDetectedActivityType?: string;
+  aiIslandContextLine?: string;
+  aiActivityDescription?: string;
+  aiCompanySummary?: string;
+  aiPositiveReviewThemes?: string[];
+  aiCompanyPageTitle?: string;
+  aiCompanyPageSubtitle?: string;
+  aiCompanyPageBody?: string;
+  aiCompanyTrustLine?: string;
+  aiCompanyFinalCtaLine?: string;
+  aiCompanyPhotoCaptions?: string[];
   [key: string]: unknown;
 };
 
@@ -132,6 +160,7 @@ export type LayoutProps = {
 };
 
 import type { UploadedPhoto } from '@/lib/upload-handler';
+import type { ActivityProfile, ResolvedActivityType } from './resolveActivityProfile';
 
 export type GenerateMagazineInput = {
   templateId: string;
@@ -145,4 +174,6 @@ export type GenerateMagazineInput = {
   userPhotos: UploadedPhoto[];
   useStockFallback: boolean;
   sessionId?: string;
+  activityProfile?: ActivityProfile;
+  partnerId?: string;
 };
