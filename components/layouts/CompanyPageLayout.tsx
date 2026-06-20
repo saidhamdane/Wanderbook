@@ -1,7 +1,7 @@
 'use client';
 
 import type { LayoutProps } from '@/lib/magazine/types';
-import { getActivityLabel } from '@/lib/magazine/resolveActivityProfile';
+import { getActivityLabel, resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
 import { PageRoot } from './layout-utils';
 
 function firstValue(...values: Array<string | undefined>): string {
@@ -23,6 +23,19 @@ function looksEnglish(value: string): boolean {
   );
 }
 
+function spanishCompanyFallbacks(businessName: string, island: string, rawActivityType: string) {
+  const profile = resolveActivityProfile({ activityType: rawActivityType }, 'es');
+  const activity = profile.activityLabel;
+  return {
+    title: `La experiencia con ${businessName}`,
+    subtitle: activity && island ? `${activity} en ${island}` : activity,
+    body: `Esta pagina presenta a ${businessName} dentro de una experiencia de ${activity.toLowerCase()} pensada para viajeros de ${island || 'Fuerteventura'}. El contenido mantiene el foco en la actividad, el contexto local y los detalles que convierten el viaje en un recuerdo propio.`,
+    summary: `${businessName} crea una experiencia de ${activity.toLowerCase()} conectada con la isla y sus viajeros.`,
+    trustLine: 'Los viajeros destacan el trato cercano y la experiencia vivida.',
+    ctaLine: `Reserva tu proxima experiencia con ${businessName}.`,
+  };
+}
+
 export default function CompanyPageLayout({ slots, palette, fonts, partner, language }: LayoutProps) {
   const businessName = firstValue(partner?.businessName, slots['company-name']);
   if (!partner || !businessName) return null;
@@ -39,24 +52,33 @@ export default function CompanyPageLayout({ slots, palette, fonts, partner, lang
     partner.businessType,
   );
   const activityType = getActivityLabel(rawActivityType, language);
+  const spanishFallback = spanishCompanyFallbacks(businessName, island, rawActivityType);
+  const safeSpanish = (value: string | undefined, fallback: string) =>
+    isSpanish && value && looksEnglish(value) ? fallback : value;
   const titleFallback = isSpanish
-    ? `La experiencia con ${businessName}`
+    ? spanishFallback.title
     : `The ${businessName} Experience`;
   const title = firstValue(
-    isSpanish && partner.aiCompanyPageTitle && looksEnglish(partner.aiCompanyPageTitle)
-      ? undefined
-      : partner.aiCompanyPageTitle,
+    safeSpanish(partner.aiCompanyPageTitle, spanishFallback.title),
     titleFallback
   );
   const subtitle = firstValue(
-    isSpanish && partner.aiCompanyPageSubtitle && looksEnglish(partner.aiCompanyPageSubtitle)
-      ? undefined
-      : partner.aiCompanyPageSubtitle,
+    safeSpanish(partner.aiCompanyPageSubtitle, spanishFallback.subtitle),
     activityType && island ? (isSpanish ? `${activityType} en ${island}` : `${activityType} on ${island}`) : ''
   );
-  const body = firstValue(partner.aiCompanyPageBody, partner.aiCompanySummary);
+  const body = firstValue(
+    safeSpanish(partner.aiCompanyPageBody, spanishFallback.body),
+    safeSpanish(partner.aiCompanySummary, spanishFallback.summary),
+    isSpanish ? spanishFallback.body : ''
+  );
+  const trustLine = safeSpanish(partner.aiCompanyTrustLine, spanishFallback.trustLine);
+  const ctaLine = safeSpanish(partner.aiCompanyFinalCtaLine, spanishFallback.ctaLine);
   const contextLine = firstValue(partner.aiIslandContextLine);
-  const activityDescription = firstValue(partner.aiActivityDescription);
+  const activityDescription = firstValue(
+    safeSpanish(partner.aiActivityDescription, trustLine || spanishFallback.trustLine),
+    trustLine,
+    ctaLine
+  );
   const themes = Array.isArray(partner.aiPositiveReviewThemes) ? partner.aiPositiveReviewThemes.filter(Boolean).slice(0, 6) : [];
   const demoCompanyImage = firstValue(
     typeof partner.demoCompanyImage === 'string' ? partner.demoCompanyImage : undefined,

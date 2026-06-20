@@ -10,6 +10,7 @@ import { Logo } from '@/components/Logo';
 
 type Params = {
   params: { id: string };
+  searchParams?: { mode?: string };
 };
 
 export const dynamic = 'force-dynamic';
@@ -36,13 +37,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-export default async function DigitalMagazinePage({ params }: Params) {
+export default async function DigitalMagazinePage({ params, searchParams }: Params) {
   const doc = await loadMagazine(params.id);
   if (!doc) notFound();
 
   const anyDoc = doc as any;
   const source = anyDoc.source || (anyDoc.partner?.enabled ? 'business_owner' : 'personal');
   const businessName = anyDoc.partner?.businessName || anyDoc.partnerName;
+  const isDemo = doc.generationMode === 'demo' || doc.isPubliclyShareable === false || searchParams?.mode === 'demo';
 
   return (
     <main style={{
@@ -73,14 +75,30 @@ export default async function DigitalMagazinePage({ params }: Params) {
           flexWrap: 'wrap',
           justifyContent: 'flex-end',
         }}>
-          <DownloadPdfButton magazineId={doc.id} />
-          <ShareMagazineButton
-            magazineId={doc.id}
-            destination={doc.destination}
-            businessName={source === 'partner_client' ? businessName : undefined}
-          />
+          {!isDemo && <DownloadPdfButton magazineId={doc.id} />}
+          {!isDemo && (
+            <ShareMagazineButton
+              magazineId={doc.id}
+              destination={doc.destination}
+              businessName={source === 'partner_client' ? businessName : undefined}
+            />
+          )}
         </div>
       </header>
+
+      {isDemo && (
+        <p style={{
+          margin: '14px 12px 0',
+          color: '#fde68a',
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: '0.12em',
+          textAlign: 'center',
+          textTransform: 'uppercase',
+        }}>
+          Demo preview
+        </p>
+      )}
 
       {source === 'partner_client' && businessName && (
         <p style={{

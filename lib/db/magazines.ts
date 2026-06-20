@@ -89,20 +89,21 @@ export async function countMagazinesByPartner(
     : `partner_slug.eq.${partnerSlug}`;
 
   try {
-    const { count: total, error: e1 } = await supabase
+    const { data, error } = await supabase
       .from('magazines')
-      .select('*', { count: 'exact', head: true })
+      .select('data,created_at')
       .or(orFilter);
 
-    const { count: month, error: e2 } = await supabase
-      .from('magazines')
-      .select('*', { count: 'exact', head: true })
-      .or(orFilter)
-      .gte('created_at', startOfMonth.toISOString());
-
-    if (e1) { console.warn('[db/magazines] countMagazinesByPartner total error:', e1.message); return null; }
-    if (e2) { console.warn('[db/magazines] countMagazinesByPartner month error:', e2.message); return null; }
-    return { total: total ?? 0, month: month ?? 0 };
+    if (error) { console.warn('[db/magazines] countMagazinesByPartner error:', error.message); return null; }
+    const realTravelerRows = (data || []).filter((row) => {
+      const doc = row.data as MagazineDocument | null;
+      return doc?.generationMode !== 'demo' && doc?.source !== 'partner_demo';
+    });
+    const monthRows = realTravelerRows.filter((row) => {
+      const generatedAt = String(row.created_at || (row.data as MagazineDocument | null)?.generatedAt || '');
+      return generatedAt >= startOfMonth.toISOString();
+    });
+    return { total: realTravelerRows.length, month: monthRows.length };
   } catch (err) {
     console.warn('[db/magazines] countMagazinesByPartner exception:', err);
     return null;

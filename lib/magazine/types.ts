@@ -1,3 +1,11 @@
+export type MagazineGenerationMode = 'demo' | 'traveler';
+
+export type MagazineImageSource =
+  | 'curated-demo'
+  | 'demo-upload'
+  | 'traveler-upload'
+  | 'company-photo';
+
 export type ImageSlot = {
   type: 'image';
   id: string;
@@ -83,15 +91,18 @@ export type StockPhoto = {
 
 export type ImageAuditEntry = {
   url: string;
-  source: 'demo' | 'traveler' | 'company';
+  source: MagazineImageSource;
   slot: string;
+  activityType: string;
+  accepted: boolean;
+  rejectionReason?: string;
 };
 
 export type ImageAudit = {
-  mode: 'demo' | 'traveler';
+  mode: MagazineGenerationMode;
   resolvedActivityType: string;
   selectedImages: ImageAuditEntry[];
-  rejectedImages: Array<{ url: string; source: 'company' | 'demo'; reason: string }>;
+  rejectedImages: Array<{ url: string; source: MagazineImageSource; reason: string }>;
 };
 
 export type MagazineDocument = {
@@ -115,6 +126,8 @@ export type MagazineDocument = {
     generatedAt: string;
   };
   imageAudit?: ImageAudit;
+  generationMode?: MagazineGenerationMode;
+  isPubliclyShareable?: boolean;
   [key: string]: unknown;
   pages: Array<{
     pageId: string;
@@ -187,6 +200,8 @@ export type GenerateMagazineInput = {
   tagline?: string;
   familyName?: string;
   userPhotos: UploadedPhoto[];
+  generationMode?: MagazineGenerationMode;
+  demoUploads?: UploadedPhoto[];
   useStockFallback: boolean;
   sessionId?: string;
   activityProfile?: ActivityProfile;

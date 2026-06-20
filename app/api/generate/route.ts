@@ -7,7 +7,7 @@ import { getPartnerBySlug } from '@/lib/db/partners';
 import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
 import { canPartnerCreateMagazine, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/subscription';
 import { trackPartnerEvent } from '@/lib/db/partner-events';
-import type { LayoutPartner } from '@/lib/magazine/types';
+import type { LayoutPartner, MagazineGenerationMode } from '@/lib/magazine/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -52,21 +52,101 @@ function applySpanishCompanyCopyOverride(
     );
   }
 
-  if (activityType === 'buggy-adventure') {
-    const name = partner.businessName || '';
-    const island = partner.mainIsland || 'Fuerteventura';
-    if (looksEnglish(partner.aiCompanyPageTitle)) {
-      partner.aiCompanyPageTitle = `${name}: despierta tu espíritu aventurero`;
-    }
-    if (looksEnglish(partner.aiCompanyPageSubtitle)) {
-      partner.aiCompanyPageSubtitle = `Aventura en buggy en ${island}`;
-    }
-    if (looksEnglish(partner.aiCompanyFinalCtaLine)) {
-      partner.aiCompanyFinalCtaLine = `Vuelve a explorar ${island} en buggy con ${name}`;
-    }
-    if (looksEnglish(partner.aiCompanyTrustLine)) {
-      partner.aiCompanyTrustLine = 'Los viajeros destacan la energía del recorrido y el conocimiento del terreno.';
-    }
+  const name = partner.businessName || 'la empresa';
+  const island = partner.mainIsland || 'Fuerteventura';
+  const fallbackByActivity: Record<string, {
+    title: string;
+    subtitle: string;
+    summary: string;
+    body: string;
+    trustLine: string;
+    ctaLine: string;
+  }> = {
+    'buggy-adventure': {
+      title: `${name}: aventura todoterreno en ${island}`,
+      subtitle: `Aventura en buggy por paisajes volcanicos`,
+      summary: `${name} crea rutas de buggy con foco en caminos de tierra, terreno volcanico y aventura segura en ${island}.`,
+      body: `La experiencia con ${name} recorre el lado mas aventurero de ${island}: pistas abiertas, paisaje seco y momentos pensados para recordar la ruta sin perder el foco en la actividad.`,
+      trustLine: 'Los viajeros destacan la energia del recorrido y el conocimiento del terreno.',
+      ctaLine: `Vuelve a explorar ${island} en buggy con ${name}.`,
+    },
+    'boat-tour': {
+      title: `${name}: ${island} desde el mar`,
+      subtitle: `Tour en barco por la costa atlantica`,
+      summary: `${name} ofrece una salida en barco centrada en mar, costa y luz atlantica.`,
+      body: `La experiencia muestra ${island} desde el Atlantico, con el barco como protagonista y una mirada tranquila a la costa, el viento y el horizonte.`,
+      trustLine: 'Los viajeros destacan la calma del mar, la atencion del equipo y las vistas de la costa.',
+      ctaLine: `Reserva tu proxima salida en barco con ${name}.`,
+    },
+    'surf-camp': {
+      title: `${name}: surf en ${island}`,
+      subtitle: 'Olas, clases y progresion en la playa',
+      summary: `${name} acompana a los viajeros en una experiencia de surf adaptada al ritmo del mar.`,
+      body: `Cada sesion conecta playa, tabla y aprendizaje para que el recuerdo mantenga el foco en las olas y en la progresion del viajero.`,
+      trustLine: 'Los viajeros destacan la cercania de los instructores y el ambiente de aprendizaje.',
+      ctaLine: `Reserva tu proxima clase de surf con ${name}.`,
+    },
+    'tour-guide': {
+      title: `${name}: rutas con mirada local`,
+      subtitle: `Guia turistico en ${island}`,
+      summary: `${name} acerca la isla a traves de rutas, miradores, pueblos y contexto local.`,
+      body: `La experiencia guiada convierte cada parada en parte de una historia: paisaje, cultura y detalles de ${island} contados con cercania.`,
+      trustLine: 'Los viajeros destacan el conocimiento local y el trato cercano.',
+      ctaLine: `Reserva tu proxima ruta guiada con ${name}.`,
+    },
+    'villa-rental': {
+      title: `${name}: estancia con comodidad local`,
+      subtitle: `Alquiler vacacional en ${island}`,
+      summary: `${name} ofrece una estancia pensada para descansar y vivir la isla a tu ritmo.`,
+      body: `La experiencia combina comodidad, ubicacion y detalles practicos para que cada dia en ${island} se sienta facil y propio.`,
+      trustLine: 'Los huespedes destacan la comodidad, la limpieza y la atencion recibida.',
+      ctaLine: `Reserva tu proxima estancia con ${name}.`,
+    },
+    photographer: {
+      title: `${name}: recuerdos con luz de isla`,
+      subtitle: `Sesion fotografica en ${island}`,
+      summary: `${name} crea sesiones fotograficas con retratos, paisaje y luz natural como protagonistas.`,
+      body: `La sesion busca momentos autenticos y encuadres cuidados para convertir la experiencia en un recuerdo visual de ${island}.`,
+      trustLine: 'Los viajeros destacan la direccion cercana y el resultado natural de las fotos.',
+      ctaLine: `Reserva tu proxima sesion de fotos con ${name}.`,
+    },
+    restaurant: {
+      title: `${name}: sabores de ${island}`,
+      subtitle: 'Cocina local y momentos de mesa',
+      summary: `${name} reune producto, servicio y ambiente para una experiencia gastronomica memorable.`,
+      body: `La visita se centra en el sabor, la mesa y la hospitalidad, con una cocina que conecta con el caracter de ${island}.`,
+      trustLine: 'Los clientes destacan el sabor, el servicio y el ambiente del restaurante.',
+      ctaLine: `Reserva tu proxima mesa en ${name}.`,
+    },
+    hotel: {
+      title: `${name}: estancia en ${island}`,
+      subtitle: 'Comodidad, servicio y hospitalidad',
+      summary: `${name} ofrece una estancia cuidada para disfrutar la isla con comodidad.`,
+      body: `Desde la llegada hasta la salida, la experiencia se centra en descanso, atencion y detalles que hacen mas facil el viaje.`,
+      trustLine: 'Los huespedes destacan la comodidad, el servicio y la ubicacion.',
+      ctaLine: `Reserva tu proxima estancia con ${name}.`,
+    },
+    other: {
+      title: `${name}: experiencia en ${island}`,
+      subtitle: 'Una revista recuerdo de la experiencia',
+      summary: `${name} forma parte de una experiencia pensada para recordar la isla con contexto y cercania.`,
+      body: `La revista mantiene una mirada neutral y local sobre ${island}, con paisajes y detalles que acompanan el recuerdo del viajero.`,
+      trustLine: 'Los viajeros destacan el trato cercano y la experiencia vivida.',
+      ctaLine: `Reserva tu proxima experiencia con ${name}.`,
+    },
+  };
+  const fallback = fallbackByActivity[activityType || 'other'] ?? fallbackByActivity.other;
+
+  if (looksEnglish(partner.aiCompanyPageTitle)) partner.aiCompanyPageTitle = fallback.title;
+  if (looksEnglish(partner.aiCompanyPageSubtitle)) partner.aiCompanyPageSubtitle = fallback.subtitle;
+  if (looksEnglish(partner.aiCompanySummary)) partner.aiCompanySummary = fallback.summary;
+  if (looksEnglish(partner.aiCompanyPageBody)) partner.aiCompanyPageBody = fallback.body;
+  if (looksEnglish(partner.aiCompanyFinalCtaLine)) partner.aiCompanyFinalCtaLine = fallback.ctaLine;
+  if (looksEnglish(partner.aiCompanyTrustLine)) partner.aiCompanyTrustLine = fallback.trustLine;
+  if (Array.isArray(partner.aiCompanyPhotoCaptions)) {
+    partner.aiCompanyPhotoCaptions = partner.aiCompanyPhotoCaptions.map((caption) =>
+      looksEnglish(caption) ? fallback.subtitle : caption
+    );
   }
 }
 
@@ -83,7 +163,9 @@ export async function POST(req: NextRequest) {
     let familyName: string | undefined;
     let useStockFallback = true;
     let photoFiles: File[] = [];
+    let demoPhotoFiles: File[] = [];
     let partnerSlug: string | undefined;
+    let generationMode: MagazineGenerationMode = 'traveler';
 
     if (ct.includes('application/json')) {
       const body = await req.json();
@@ -97,6 +179,7 @@ export async function POST(req: NextRequest) {
       familyName = body.familyName ? String(body.familyName) : undefined;
       useStockFallback = body.useStockFallback !== false;
       partnerSlug = body.partnerSlug ? String(body.partnerSlug) : undefined;
+      generationMode = body.generationMode === 'demo' ? 'demo' : 'traveler';
     } else {
       const form = await req.formData();
       templateId = String(form.get('templateId') || '');
@@ -109,9 +192,14 @@ export async function POST(req: NextRequest) {
       familyName = form.get('familyName') ? String(form.get('familyName')) : undefined;
       useStockFallback = String(form.get('useStockFallback') || 'true') === 'true';
       partnerSlug = form.get('partnerSlug') ? String(form.get('partnerSlug')) : undefined;
+      generationMode = String(form.get('generationMode') || 'traveler') === 'demo' ? 'demo' : 'traveler';
       const fileEntries = form.getAll('photos');
       for (const entry of fileEntries) {
         if (entry instanceof File && entry.size > 0) photoFiles.push(entry);
+      }
+      const demoEntries = form.getAll('demoPhotos');
+      for (const entry of demoEntries) {
+        if (entry instanceof File && entry.size > 0) demoPhotoFiles.push(entry);
       }
     }
 
@@ -141,7 +229,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Enforce Free plan magazine limit before any expensive work
-    if (partnerSlug) {
+    if (partnerSlug && generationMode !== 'demo') {
       const partnerFull = partnerRecord;
       if (partnerFull) {
         const check = await canPartnerCreateMagazine(partnerFull);
@@ -161,6 +249,9 @@ export async function POST(req: NextRequest) {
     }
 
     const { sessionId, photos } = await saveUploadedFiles(photoFiles);
+    const { photos: demoPhotos } = demoPhotoFiles.length > 0
+      ? await saveUploadedFiles(demoPhotoFiles)
+      : { photos: [] };
 
     const doc = await generateMagazine({
       templateId,
@@ -172,6 +263,8 @@ export async function POST(req: NextRequest) {
       tagline,
       familyName,
       userPhotos: photos,
+      generationMode,
+      demoUploads: demoPhotos,
       useStockFallback,
       sessionId,
       activityProfile,
@@ -179,6 +272,8 @@ export async function POST(req: NextRequest) {
     });
 
     doc.language = language;
+    doc.generationMode = generationMode;
+    doc.isPubliclyShareable = generationMode !== 'demo';
 
     if (partnerSlug) {
       doc.partner = {
@@ -198,7 +293,7 @@ export async function POST(req: NextRequest) {
         googleReviewUrl: realContactValue(partnerRecord?.googleReviewUrl),
         instagramUrl: realContactValue(partnerRecord?.instagramUrl),
         bookingUrl: realContactValue(partnerRecord?.bookingUrl),
-        magazineId: doc.id,
+        magazineId: generationMode === 'demo' ? undefined : doc.id,
         googlePlaceName: partnerRecord?.googlePlaceName ?? undefined,
         googlePrimaryType: partnerRecord?.googlePrimaryType ?? undefined,
         googleTypes: partnerRecord?.googleTypes ?? undefined,
@@ -224,8 +319,10 @@ export async function POST(req: NextRequest) {
       if (doc.imageAudit && activityProfile?.demoAssets.company) {
         doc.imageAudit.selectedImages.push({
           url: activityProfile.demoAssets.company,
-          source: 'demo',
+          source: 'company-photo',
           slot: 'company-photo',
+          activityType: activityProfile.activityType,
+          accepted: true,
         });
       }
       if (doc.generationAudit) {
@@ -234,13 +331,13 @@ export async function POST(req: NextRequest) {
         doc.generationAudit.partnerId = doc.partner.partnerId;
       }
       insertCompanyPageIfNeeded(doc, doc.partner);
-      doc.source = 'partner_client';
+      doc.source = generationMode === 'demo' ? 'partner_demo' : 'partner_client';
     }
 
     await saveMagazine(doc);
 
     // Track magazine creation event (fire-and-forget)
-    if (partnerSlug && doc.partner) {
+    if (partnerSlug && doc.partner && generationMode !== 'demo') {
       trackPartnerEvent({
         partnerId: (doc.partner.partnerId as string | undefined) ?? undefined,
         partnerSlug,

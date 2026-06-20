@@ -584,7 +584,7 @@ export function InteractiveFlipbookViewer({ magazine }: { magazine: MagazineDocu
                       pageIndex={index}
                       palette={magazine.template.palette}
                       fonts={magazine.template.fonts}
-                      partner={magazine.partner && !(magazine.partner as Record<string, unknown>).magazineId
+                      partner={magazine.partner && magazine.isPubliclyShareable !== false && !(magazine.partner as Record<string, unknown>).magazineId
                         ? { ...magazine.partner, magazineId: magazine.id }
                         : magazine.partner}
                       language={magazine.language}

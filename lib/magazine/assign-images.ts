@@ -38,7 +38,8 @@ export function assignImagesToTemplate(
   template: MagazineTemplate,
   userPhotos: PhotoAnalysis[],
   stockPhotos: StockPhoto[],
-  prohibitedKeywords: string[] = []
+  prohibitedKeywords: string[] = [],
+  travelerSlotPredicate?: (slotId: string) => boolean
 ): Record<string, string> {
   const slots = flattenImageSlots(template);
   slots.sort((a, b) => {
@@ -61,12 +62,15 @@ export function assignImagesToTemplate(
   for (const slot of slots) {
     let bestPhoto: PhotoAnalysis | null = null;
     let bestScore = -Infinity;
-    for (const photo of userPhotos) {
-      if (usedUser.has(photo.id)) continue;
-      const score = scorePhoto(photo, slot);
-      if (score > bestScore) {
-        bestScore = score;
-        bestPhoto = photo;
+    const canUseTravelerPhoto = travelerSlotPredicate ? travelerSlotPredicate(slot.id) : true;
+    if (canUseTravelerPhoto) {
+      for (const photo of userPhotos) {
+        if (usedUser.has(photo.id)) continue;
+        const score = scorePhoto(photo, slot);
+        if (score > bestScore) {
+          bestScore = score;
+          bestPhoto = photo;
+        }
       }
     }
     if (bestPhoto) {

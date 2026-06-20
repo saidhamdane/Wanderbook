@@ -1,8 +1,10 @@
 import {
   GenerateMagazineInput,
+  ImageAudit,
   ImageAuditEntry,
   ImageSlot,
   LayoutPartner,
+  MagazineImageSource,
   MagazineDocument,
   MagazineTemplate,
   PhotoAnalysis,
@@ -14,7 +16,9 @@ import { assignImagesToTemplate } from './assign-images';
 import { generateEditorialCopy, normalizeLanguage } from './generate-copy';
 import { fetchPexelsPhotos } from './pexels';
 import { resolveActivityProfile } from './resolveActivityProfile';
+import { classifyDemoImage } from './classify-demo-image';
 import type { DemoAssets } from './resolveActivityProfile';
+import type { UploadedPhoto } from '@/lib/upload-handler';
 
 function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
   let n = 0;
@@ -40,6 +44,53 @@ function demoImageForSlot(
 
   const idx = galleryCounter.n++ % assets.gallery.length;
   return assets.gallery[idx];
+}
+
+function stockPhotosFromDemoAssets(assets: DemoAssets): StockPhoto[] {
+  return [
+    { id: 'curated-cover', url: assets.cover, photographer: 'Wanderbook', orientation: 'portrait' },
+    { id: 'curated-contents', url: assets.contents, photographer: 'Wanderbook', orientation: 'portrait' },
+    { id: 'curated-welcome', url: assets.welcome, photographer: 'Wanderbook', orientation: 'landscape' },
+    { id: 'curated-company', url: assets.company, photographer: 'Wanderbook', orientation: 'landscape' },
+    { id: 'curated-local', url: assets.localHighlights, photographer: 'Wanderbook', orientation: 'landscape' },
+    { id: 'curated-story', url: assets.story, photographer: 'Wanderbook', orientation: 'landscape' },
+    { id: 'curated-final', url: assets.finalCta, photographer: 'Wanderbook', orientation: 'portrait' },
+    ...assets.gallery.map((url, index) => ({
+      id: `curated-gallery-${index}`,
+      url,
+      photographer: 'Wanderbook',
+      orientation: 'landscape' as const,
+    })),
+  ];
+}
+
+function isTravelerPhotoSlot(slotId: string): boolean {
+  return (
+    slotId.startsWith('story-photo') ||
+    slotId.startsWith('gallery-photo') ||
+    slotId.startsWith('memories-') ||
+    slotId.startsWith('memory-') ||
+    slotId.startsWith('route-photo')
+  );
+}
+
+function imageSourceForAssignment(
+  url: string,
+  slotId: string,
+  userPhotos: PhotoAnalysis[],
+  activityType: string
+): ImageAuditEntry {
+  const userMatch = userPhotos.some((photo) => photo.url === url);
+  const source: MagazineImageSource = userMatch && isTravelerPhotoSlot(slotId)
+    ? 'traveler-upload'
+    : 'curated-demo';
+  return {
+    url,
+    source,
+    slot: slotId,
+    activityType,
+    accepted: true,
+  };
 }
 
 export function insertCompanyPageIfNeeded(doc: MagazineDocument, partner?: LayoutPartner): MagazineDocument {
@@ -356,7 +407,8 @@ export async function generateMagazine(
   const template = getTemplateById(input.templateId);
   const analyzed = analyzeUploadedPhotos(input.userPhotos);
   const activityProfile = input.activityProfile;
-  const isDemoMode = analyzed.length === 0;
+  const generationMode = input.generationMode === 'demo' ? 'demo' : 'traveler';
+  const isDemoMode = generationMode === 'demo';
 
   if (input.templateId === 'hanover') {
     return generateHanoverMagazine(input, template, analyzed);
@@ -376,6 +428,9 @@ export async function generateMagazine(
     const needed = Math.max(totalImageSlots - analyzed.length + 2, 6);
     const stockQuery = activityProfile?.allowedImageKeywords[0] || input.destination;
     stockPhotos = await fetchPexelsPhotos(stockQuery, needed);
+  }
+  if (!isDemoMode && activityProfile?.demoAssets) {
+    stockPhotos = [...stockPhotos, ...stockPhotosFromDemoAssets(activityProfile.demoAssets)];
   }
 
   const lang = normalizeLanguage(input.language);
@@ -398,16 +453,47 @@ export async function generateMagazine(
 
   let imageAssignments: Record<string, string>;
   const imageAuditSelected: ImageAuditEntry[] = [];
+  const rejectedDemoImages: ImageAudit['rejectedImages'] = [];
+  const acceptedDemoUploads: UploadedPhoto[] = [];
+
+  if (isDemoMode && input.demoUploads?.length && activityProfile) {
+    for (const upload of input.demoUploads) {
+      const result = await classifyDemoImage(upload.url, activityProfile.activityType);
+      if (result.accepted) {
+        acceptedDemoUploads.push(upload);
+      } else {
+        rejectedDemoImages.push({
+          url: upload.url,
+          source: 'demo-upload',
+          reason: result.rejectionReason ?? 'concept-mismatch',
+        });
+      }
+    }
+  }
 
   if (isDemoMode && activityProfile?.demoAssets) {
     const galleryCounter = { n: 0 };
     imageAssignments = {};
+    const demoPhotos = analyzeUploadedPhotos(acceptedDemoUploads);
+    let demoPhotoIdx = 0;
     for (const page of template.pages) {
       for (const slot of page.slots) {
         if (slot.type === 'image') {
-          const url = demoImageForSlot(slot.id, activityProfile.demoAssets, galleryCounter);
+          let source: MagazineImageSource = 'curated-demo';
+          let url = demoImageForSlot(slot.id, activityProfile.demoAssets, galleryCounter);
+          if (demoPhotos.length > 0) {
+            url = demoPhotos[demoPhotoIdx % demoPhotos.length].url;
+            demoPhotoIdx++;
+            source = 'demo-upload';
+          }
           imageAssignments[slot.id] = url;
-          imageAuditSelected.push({ url, source: 'demo', slot: slot.id });
+          imageAuditSelected.push({
+            url,
+            source,
+            slot: slot.id,
+            activityType: activityProfile.activityType,
+            accepted: true,
+          });
         }
       }
     }
@@ -416,11 +502,14 @@ export async function generateMagazine(
       template,
       analyzed,
       stockPhotos,
-      activityProfile?.prohibitedImageKeywords ?? []
+      activityProfile?.prohibitedImageKeywords ?? [],
+      isDemoMode ? undefined : isTravelerPhotoSlot
     );
-    analyzed.forEach((photo, index) => {
-      imageAuditSelected.push({ url: photo.url, source: 'traveler', slot: `user-${index}` });
-    });
+    const resolvedActivityType = activityProfile?.activityType ?? 'unknown';
+    for (const [slot, url] of Object.entries(imageAssignments)) {
+      if (!url) continue;
+      imageAuditSelected.push(imageSourceForAssignment(url, slot, analyzed, resolvedActivityType));
+    }
   }
 
   const pages = template.pages.map((page) => {
@@ -455,11 +544,13 @@ export async function generateMagazine(
       `${analyzed.length} uploaded photos, ${stockPhotos.length} stock photos${activityProfile ? `, query: ${activityProfile.allowedImageKeywords[0]}` : ''}`
     ),
     imageAudit: {
-      mode: isDemoMode ? 'demo' : 'traveler',
+      mode: generationMode,
       resolvedActivityType: activityProfile?.activityType ?? 'unknown',
       selectedImages: imageAuditSelected,
-      rejectedImages: [],
+      rejectedImages: isDemoMode ? rejectedDemoImages : [],
     },
+    generationMode,
+    isPubliclyShareable: generationMode !== 'demo',
   };
   return doc;
 }

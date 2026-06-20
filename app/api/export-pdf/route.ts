@@ -26,6 +26,9 @@ export async function POST(req: NextRequest) {
   if (!doc) {
     return NextResponse.json({ error: 'Magazine not found' }, { status: 404 });
   }
+  if (doc.generationMode === 'demo' || doc.isPubliclyShareable === false) {
+    return NextResponse.json({ error: 'PDF export is disabled for demo magazines' }, { status: 403 });
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const previewUrl = appUrl + '/preview/' + magazineId + '?print=true';
