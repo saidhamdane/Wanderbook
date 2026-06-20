@@ -20,6 +20,10 @@ export type ActivityProfile = {
   ctaLabels: Record<'en' | 'es', string>;
   localTipsTopics: Record<'en' | 'es', string[]>;
   copyTone: string;
+  previewTitle: Record<'en' | 'es', string>;
+  previewSubtitle: Record<'en' | 'es', string>;
+  previewImage: string;
+  previewAlt: Record<'en' | 'es', string>;
 };
 
 type ActivitySource = {
@@ -63,6 +67,13 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['condiciones de olas', 'ritmo de playa', 'pueblos surferos'],
     },
     copyTone: 'energetic, coastal and practical, focused on surf progression and island rhythm',
+    previewTitle: { en: 'Surf Camp Experience', es: 'Semana de Surf' },
+    previewSubtitle: { en: 'Waves, board and island sun', es: 'Olas, tabla y sol en la isla' },
+    previewImage: '/template-covers/default-cover.jpg',
+    previewAlt: {
+      en: 'Surfer riding waves at a Fuerteventura surf camp',
+      es: 'Surfista en las olas de una escuela de surf en Fuerteventura',
+    },
   },
   'villa-rental': {
     activityLabelsByLanguage: { en: 'Holiday Rental', es: 'Alquiler Vacacional' },
@@ -79,6 +90,13 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['comodidad al llegar', 'playas cercanas', 'dias tranquilos'],
     },
     copyTone: 'calm, welcoming and local, focused on comfort, direct booking and guest memories',
+    previewTitle: { en: 'Your Island Stay', es: 'Tu Estancia en la Isla' },
+    previewSubtitle: { en: 'A premium guest memory magazine', es: 'Tu revista recuerdo de la estancia' },
+    previewImage: '/template-covers/holiday-rental.jpg',
+    previewAlt: {
+      en: 'Holiday villa with pool in Fuerteventura',
+      es: 'Villa vacacional con piscina en Fuerteventura',
+    },
   },
   'tour-guide': {
     activityLabelsByLanguage: { en: 'Tour Guide', es: 'Guia Turistico' },
@@ -95,6 +113,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['rutas por la isla', 'miradores', 'pueblos'],
     },
     copyTone: 'knowledgeable, warm and place-specific, focused on routes, villages and local stories',
+    previewTitle: { en: 'Tour Guide Experience', es: 'Ruta Guiada' },
+    previewSubtitle: {
+      en: 'Local routes, viewpoints and island stories',
+      es: 'Rutas locales, miradores e historias de la isla',
+    },
+    previewImage: '/template-covers/tour-guide.jpg',
+    previewAlt: {
+      en: 'Guided tour through Fuerteventura volcanic landscape',
+      es: 'Ruta guiada por el paisaje volcanico de Fuerteventura',
+    },
   },
   'boat-tour': {
     activityLabelsByLanguage: { en: 'Boat Tour', es: 'Tour en Barco' },
@@ -111,6 +139,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['estado del mar', 'costa', 'luz atlantica'],
     },
     copyTone: 'fresh, coastal and relaxed, focused on sea views, coastline and the Atlantic',
+    previewTitle: { en: 'Boat Tour Experience', es: 'Experiencia en Barco' },
+    previewSubtitle: {
+      en: 'Atlantic coast, sailing and sea moments',
+      es: 'Costa atlantica, vela y momentos en el mar',
+    },
+    previewImage: '/template-covers/boat-trip.jpg',
+    previewAlt: {
+      en: 'Catamaran or boat tour on the Atlantic coast of Fuerteventura',
+      es: 'Tour en catamaran o barco por la costa atlantica de Fuerteventura',
+    },
   },
   photographer: {
     activityLabelsByLanguage: { en: 'Photographer', es: 'Fotografo' },
@@ -127,6 +165,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['hora dorada', 'playas para fotos', 'retratos naturales'],
     },
     copyTone: 'visual, emotional and polished, focused on portraits, light and keepsake memories',
+    previewTitle: { en: 'Photography Experience', es: 'Sesión Fotográfica' },
+    previewSubtitle: {
+      en: 'Portraits in the Fuerteventura light',
+      es: 'Retratos con la luz de Fuerteventura',
+    },
+    previewImage: '/template-covers/aurora-editorial.jpg',
+    previewAlt: {
+      en: 'Photography session on a Fuerteventura beach',
+      es: 'Sesion fotografica en una playa de Fuerteventura',
+    },
   },
   'buggy-adventure': {
     activityLabelsByLanguage: { en: 'Buggy Adventure', es: 'Aventura en Buggy' },
@@ -143,6 +191,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['pistas volcanicas', 'caminos de tierra', 'ruta de aventura'],
     },
     copyTone: 'active, grounded and adventurous, focused on buggies, volcanic roads and off-road landscape',
+    previewTitle: { en: 'Buggy Adventure', es: 'Aventura en Buggy' },
+    previewSubtitle: {
+      en: 'Volcanic roads, dunes and off-road thrills',
+      es: 'Pistas volcanicas, dunas y aventura todoterreno',
+    },
+    previewImage: '/template-covers/buggy-adventure.jpg',
+    previewAlt: {
+      en: 'Buggy adventure on volcanic roads in Fuerteventura',
+      es: 'Aventura en buggy por las pistas volcanicas de Fuerteventura',
+    },
   },
   restaurant: {
     activityLabelsByLanguage: { en: 'Restaurant', es: 'Restaurante' },
@@ -159,6 +217,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['platos locales', 'momentos en la mesa', 'producto de la isla'],
     },
     copyTone: 'sensory and welcoming, focused on food, service and local flavor',
+    previewTitle: { en: 'Fuerteventura Flavours', es: 'Sabores de Fuerteventura' },
+    previewSubtitle: {
+      en: 'Local food and dining atmosphere',
+      es: 'Gastronomia local y ambiente de restaurante',
+    },
+    previewImage: '/template-covers/aurora-editorial.jpg',
+    previewAlt: {
+      en: 'Restaurant dining experience in Fuerteventura',
+      es: 'Experiencia gastronomica en Fuerteventura',
+    },
   },
   hotel: {
     activityLabelsByLanguage: { en: 'Hotel', es: 'Hotel' },
@@ -175,6 +243,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['llegada', 'comodidad', 'lugares cercanos'],
     },
     copyTone: 'calm and premium, focused on comfort, service and island stays',
+    previewTitle: { en: 'Your Premium Stay', es: 'Tu Estancia Premium' },
+    previewSubtitle: {
+      en: 'Comfort, hospitality and island moments',
+      es: 'Comodidad, hospitalidad y momentos en la isla',
+    },
+    previewImage: '/template-covers/holiday-rental.jpg',
+    previewAlt: {
+      en: 'Premium hotel stay in Fuerteventura',
+      es: 'Estancia en hotel en Fuerteventura',
+    },
   },
   other: {
     activityLabelsByLanguage: { en: 'Fuerteventura Experience', es: 'Experiencia en Fuerteventura' },
@@ -191,6 +269,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['entorno de la isla', 'experiencia del cliente', 'contexto local'],
     },
     copyTone: 'specific, warm and practical, focused on the company and the island experience',
+    previewTitle: { en: 'Your Fuerteventura Experience', es: 'Tu Experiencia en Fuerteventura' },
+    previewSubtitle: {
+      en: 'A premium digital magazine of your experience',
+      es: 'Una revista digital premium de tu experiencia',
+    },
+    previewImage: '/template-covers/atlas-nocturne.jpg',
+    previewAlt: {
+      en: 'Fuerteventura island landscape',
+      es: 'Paisaje de la isla de Fuerteventura',
+    },
   },
 };
 
@@ -226,28 +314,26 @@ export function isResolvedActivityType(value: unknown): value is ResolvedActivit
 }
 
 export function resolveActivityType(source?: ActivitySource | null): ResolvedActivityType {
+  const ai = resolveFromText(source?.aiDetectedActivityType);
+  if (ai) return ai;
+
   const explicit = resolveFromText(source?.activityType);
   if (explicit) return explicit;
 
   const category = resolveFromText([
     source?.businessType,
+  ].filter(Boolean).join(' '));
+  if (category) return category;
+
+  const enriched = resolveFromText([
     source?.googlePrimaryType,
     source?.googleTypes?.join(' '),
     source?.serpApiType,
     source?.serpApiTypes?.join(' '),
-  ].filter(Boolean).join(' '));
-  if (category) return category;
-
-  const ai = resolveFromText(source?.aiDetectedActivityType);
-  if (ai) return ai;
-
-  const reviewText = source?.reviews?.map((review) => review.text).filter(Boolean).join(' ');
-  const inferred = resolveFromText([
-    source?.businessName,
     source?.googlePlaceName,
-    reviewText,
+    source?.reviews?.map((review) => review.text).filter(Boolean).join(' '),
   ].filter(Boolean).join(' '));
-  if (inferred) return inferred;
+  if (enriched) return enriched;
 
   return 'other';
 }

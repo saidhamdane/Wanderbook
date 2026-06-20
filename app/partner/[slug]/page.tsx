@@ -3,9 +3,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getPublicPartnerBySlugFromDb } from '@/lib/db/partners';
-import { defaultTemplateIdForPartnerClient } from '@/lib/magazine/template-recommendations';
-import { getTemplateById, getSafeTemplateId } from '@/lib/magazine/template-registry';
-import { getTemplateCoverImage } from '@/lib/magazine/template-covers';
+import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
+import { getSafeTemplateId } from '@/lib/magazine/template-registry';
 import { DEFAULT_PARTNER_OG_IMAGE, PUBLIC_SITE_ORIGIN, getCanonicalPartnerUrl, getPartnerDisplayName } from '@/lib/partner-utils';
 import { PartnerLogoBadge } from './PartnerLogoBadge';
 import { Logo } from '@/components/Logo';
@@ -14,6 +13,7 @@ export const dynamic = 'force-dynamic';
 
 type PartnerPageParams = {
   params: { slug: string };
+  searchParams?: { lang?: string | string[] };
 };
 
 function absolutePublicUrl(pathOrUrl?: string): string {
@@ -22,17 +22,40 @@ function absolutePublicUrl(pathOrUrl?: string): string {
   return `${PUBLIC_SITE_ORIGIN}${pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`}`;
 }
 
+function getPartnerPageLanguage(searchParams?: PartnerPageParams['searchParams']): 'en' | 'es' {
+  const raw = Array.isArray(searchParams?.lang) ? searchParams?.lang[0] : searchParams?.lang;
+  return raw === 'en' ? 'en' : 'es';
+}
+
+function resolvePartnerPreviewProfile(
+  partner: Awaited<ReturnType<typeof getPublicPartnerBySlugFromDb>>,
+  lang: 'en' | 'es'
+) {
+  return resolveActivityProfile(
+    {
+      activityType: partner?.activityType,
+      aiDetectedActivityType: partner?.aiDetectedActivityType,
+      businessType: partner?.businessType,
+      businessName: partner?.businessName,
+      googlePlaceName: partner?.googlePlaceName,
+      googlePrimaryType: partner?.googlePrimaryType,
+      googleTypes: partner?.googleTypes,
+    },
+    lang
+  );
+}
+
 export async function generateMetadata({ params }: PartnerPageParams): Promise<Metadata> {
   const partner = await getPublicPartnerBySlugFromDb(params.slug);
   if (!partner) return {};
 
+  const lang = 'es';
+  const activityProfile = resolvePartnerPreviewProfile(partner, lang);
   const businessName = getPartnerDisplayName(partner);
   const canonicalUrl = getCanonicalPartnerUrl(partner.slug);
   const title = `Create your ${partner.mainIsland} travel magazine with ${businessName}`;
   const description = 'Upload your photos and receive a premium digital flipbook magazine of your experience.';
-  const selectedTemplateId = getSafeTemplateId(defaultTemplateIdForPartnerClient(partner.businessType, partner.preferredTemplateId));
-  const selectedTemplate = getTemplateById(selectedTemplateId);
-  const ogImage = absolutePublicUrl(getTemplateCoverImage(selectedTemplate));
+  const ogImage = absolutePublicUrl(activityProfile.previewImage);
 
   return {
     metadataBase: new URL(PUBLIC_SITE_ORIGIN),
@@ -50,7 +73,7 @@ export async function generateMetadata({ params }: PartnerPageParams): Promise<M
       images: [
         {
           url: ogImage || DEFAULT_PARTNER_OG_IMAGE,
-          alt: title,
+          alt: activityProfile.previewAlt[lang],
         },
       ],
     },
@@ -63,17 +86,18 @@ export async function generateMetadata({ params }: PartnerPageParams): Promise<M
   };
 }
 
-export default async function PartnerLandingPage({ params }: { params: { slug: string } }) {
+export default async function PartnerLandingPage({ params, searchParams }: PartnerPageParams) {
   const partner = await getPublicPartnerBySlugFromDb(params.slug);
   if (!partner) notFound();
 
+  const lang = getPartnerPageLanguage(searchParams);
+  const activityProfile = resolvePartnerPreviewProfile(partner, lang);
   const businessName = getPartnerDisplayName(partner);
-  const selectedTemplateId = getSafeTemplateId(defaultTemplateIdForPartnerClient(partner.businessType, partner.preferredTemplateId));
-  const selectedTemplate = getTemplateById(selectedTemplateId);
-  const selectedTemplateCover = getTemplateCoverImage(selectedTemplate);
-  const selectedTemplateLine = selectedTemplateId === 'holiday-rental-memory'
-    ? `A premium guest memory magazine created with ${businessName}.`
-    : `A premium experience magazine created with ${businessName}.`;
+  const selectedTemplateId = getSafeTemplateId(partner.preferredTemplateId || activityProfile.templateId);
+  const previewTitle = activityProfile.previewTitle[lang];
+  const previewSubtitle = activityProfile.previewSubtitle[lang];
+  const previewImage = activityProfile.previewImage;
+  const previewAlt = activityProfile.previewAlt[lang];
   const createHref =
     '/create?' +
     new URLSearchParams({
@@ -81,7 +105,7 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
       partnerMode: 'true',
       clientFlow: 'true',
       template: selectedTemplateId,
-      lang: 'es',
+      lang,
     }).toString();
 
   return (
@@ -121,8 +145,8 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
           <div className="mx-auto w-full max-w-[190px] overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-xl sm:max-w-[220px]">
             <div className="relative aspect-[4/5] w-full">
               <Image
-                src={selectedTemplateCover}
-                alt={`${selectedTemplate.name} cover`}
+                src={previewImage}
+                alt={previewAlt}
                 fill
                 priority
                 sizes="(max-width: 640px) 190px, 220px"
@@ -133,7 +157,7 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
                   Your magazine style
                 </p>
                 <p className="mt-1 text-base font-bold leading-tight text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  {selectedTemplate.name}
+                  {previewTitle}
                 </p>
               </div>
             </div>
@@ -143,10 +167,10 @@ export default async function PartnerLandingPage({ params }: { params: { slug: s
               Your magazine style
             </p>
             <h2 className="mt-1 text-xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-              {selectedTemplate.name}
+              {previewTitle}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              {selectedTemplateLine}
+              {previewSubtitle}
             </p>
           </div>
         </section>

@@ -1,0 +1,158 @@
+Fix Wanderbook partner magazine-style preview so the preview image, title, and description always match the company activity.
+
+Project:
+`/root/Wanderbook`
+
+Current visible bug:
+On the public partner page for Fuerte Experience, the magazine-style preview shows:
+
+- "Tour Guide Experience"
+- a tour guide image
+
+This is wrong because the partner activity is Buggy Adventure / Fuerte Experience.
+
+Main rule:
+The partner public page must never show a generic or unrelated activity preview image.
+
+The preview must use the same canonical `resolvedActivityType` from:
+`lib/magazine/resolveActivityProfile.ts`
+
+Do not create a second activity resolver.
+Do not use Tour Guide as a default fallback for all companies.
+
+Required behavior:
+
+1. Public partner page preview must resolve activity in this priority order:
+   a. partner.ai_detected_activity_type if valid
+   b. partner.activity_type/business_type if valid
+   c. resolved activity from saved company enrichment
+   d. `other`
+
+2. For every activity type, define canonical preview data inside the existing canonical activity profile:
+   - previewTitle
+   - previewSubtitle
+   - previewImage
+   - previewAlt
+   - templateId
+   - language-aware labels
+
+Supported types:
+- surf-camp
+- villa-rental
+- tour-guide
+- boat-tour
+- photographer
+- buggy-adventure
+- restaurant
+- hotel
+- other
+
+3. Required visual mapping:
+
+buggy-adventure:
+- Spanish title: "Aventura en Buggy"
+- English title: "Buggy Adventure"
+- image concept: buggy vehicle, volcanic roads, dunes, Fuerteventura adventure
+- never use guide, boat, surf, hotel, villa, or restaurant imagery
+
+boat-tour:
+- Spanish title: "Experiencia en Barco"
+- English title: "Boat Tour Experience"
+- image concept: boat, Atlantic, coast, sailing/catamaran only here
+
+surf-camp:
+- Spanish title: "Semana de Surf"
+- English title: "Surf Camp Experience"
+- image concept: surfer, waves, surfboard, beach
+
+tour-guide:
+- Spanish title: "Ruta Guiada"
+- English title: "Tour Guide Experience"
+- image concept: local guide, route, viewpoint, local discovery
+
+photographer:
+- Spanish title: "Sesión Fotográfica"
+- English title: "Photography Experience"
+- image concept: photographer, couple/family portrait, island light
+
+villa-rental:
+- Spanish title: "Tu Estancia en la Isla"
+- English title: "Your Island Stay"
+- image concept: villa, apartment, pool, home comfort
+
+restaurant:
+- Spanish title: "Sabores de Fuerteventura"
+- English title: "Fuerteventura Flavours"
+- image concept: restaurant table, local food, dining atmosphere
+
+hotel:
+- Spanish title: "Tu Estancia Premium"
+- English title: "Your Premium Stay"
+- image concept: hotel room, pool, hospitality
+
+other:
+- Spanish title: "Tu Experiencia en Fuerteventura"
+- English title: "Your Fuerteventura Experience"
+- image concept: neutral Canary Islands landscape only
+- never default to Tour Guide imagery
+
+4. Find the component that renders the public partner page preview:
+Likely one of:
+- app/partner/[slug]/page.tsx
+- app/partner/[slug]/PartnerClient.tsx
+- components related to partner landing or magazine style preview
+
+Update it so title, image, alt text, and description are read only from:
+`resolveActivityProfile(...)`
+
+5. Do not use hardcoded:
+- "Tour Guide Experience"
+- tour guide image
+- generic partner type fallback
+inside the partner public page.
+
+6. If partner activity changes in dashboard or is updated by SerpApi/AI enrichment:
+- public page preview must reflect the updated resolved activity automatically
+- no manual code change required
+
+7. Add tests:
+Create or update:
+`scripts/test-partner-preview-activity-consistency.cjs`
+
+Verify:
+A. Fuerte Experience / buggy-adventure:
+- preview title contains "Buggy" or "Aventura en Buggy"
+- preview image metadata/URL/alt contains buggy/adventure/dunes/volcanic concept
+- does not contain Tour Guide, guide, boat, catamaran, surf
+
+B. Boat tour:
+- title and image are boat/coast related
+- does not contain buggy or guide defaults
+
+C. Surf camp:
+- title and image are surf related
+- does not contain photographer or tour-guide defaults
+
+D. other:
+- uses neutral Canary Islands preview
+- never uses Tour Guide as a fallback
+
+E. Spanish public page:
+- preview title and subtitle are Spanish
+- English public page:
+- preview title and subtitle are English
+
+8. Run:
+npx tsc --noEmit
+npm run build
+node scripts/test-partner-preview-activity-consistency.cjs
+node scripts/test-magazine-activity-consistency.cjs
+git diff --check
+
+Do not deploy unless all checks pass.
+
+At the end report:
+- component changed
+- activity preview mapping added
+- tests passed
+- confirmation that Fuerte Experience now shows Buggy Adventure preview, not Tour Guide.
