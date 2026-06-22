@@ -44,11 +44,21 @@ function applySpanishCompanyCopyOverride(
     if (!value) return false;
     const lower = value.toLowerCase();
     return (
-      lower.startsWith('the ') ||
-      lower.includes(' the ') ||
-      lower.includes('unleash') ||
-      lower.includes('explore ') ||
-      /\byour\b/.test(lower)
+      /\bthe\b/.test(lower) ||
+      /\bour\b/.test(lower) ||
+      /\byour\b/.test(lower) ||
+      /\bawait\b/.test(lower) ||
+      /\brugged\b/.test(lower) ||
+      /\bunleash\b/.test(lower) ||
+      /\bexplore\b/.test(lower) ||
+      /\bdiscover\b/.test(lower) ||
+      /\blandscapes\b/.test(lower) ||
+      /\bexploration\b/.test(lower) ||
+      /\bunforgettable\b/.test(lower) ||
+      /\bexperience\b/.test(lower) ||
+      /\bwith\b/.test(lower) ||
+      /\band\b/.test(lower) ||
+      /\bfor\b/.test(lower)
     );
   }
 
@@ -61,6 +71,7 @@ function applySpanishCompanyCopyOverride(
     body: string;
     trustLine: string;
     ctaLine: string;
+    contextLine: string;
   }> = {
     'buggy-adventure': {
       title: `${name}: aventura todoterreno en ${island}`,
@@ -69,6 +80,7 @@ function applySpanishCompanyCopyOverride(
       body: `La experiencia con ${name} recorre el lado mas aventurero de ${island}: pistas abiertas, paisaje seco y momentos pensados para recordar la ruta sin perder el foco en la actividad.`,
       trustLine: 'Los viajeros destacan la energia del recorrido y el conocimiento del terreno.',
       ctaLine: `Vuelve a explorar ${island} en buggy con ${name}.`,
+      contextLine: 'Los paisajes volcanicos de Fuerteventura te esperan para una aventura inolvidable.',
     },
     'boat-tour': {
       title: `${name}: ${island} desde el mar`,
@@ -77,6 +89,7 @@ function applySpanishCompanyCopyOverride(
       body: `La experiencia muestra ${island} desde el Atlantico, con el barco como protagonista y una mirada tranquila a la costa, el viento y el horizonte.`,
       trustLine: 'Los viajeros destacan la calma del mar, la atencion del equipo y las vistas de la costa.',
       ctaLine: `Reserva tu proxima salida en barco con ${name}.`,
+      contextLine: `Descubre ${island} desde el mar con una salida pensada para disfrutar la costa.`,
     },
     'surf-camp': {
       title: `${name}: surf en ${island}`,
@@ -85,6 +98,7 @@ function applySpanishCompanyCopyOverride(
       body: `Cada sesion conecta playa, tabla y aprendizaje para que el recuerdo mantenga el foco en las olas y en la progresion del viajero.`,
       trustLine: 'Los viajeros destacan la cercania de los instructores y el ambiente de aprendizaje.',
       ctaLine: `Reserva tu proxima clase de surf con ${name}.`,
+      contextLine: `Descubre ${island} desde la playa, las olas y el ritmo del surf.`,
     },
     'tour-guide': {
       title: `${name}: rutas con mirada local`,
@@ -93,6 +107,7 @@ function applySpanishCompanyCopyOverride(
       body: `La experiencia guiada convierte cada parada en parte de una historia: paisaje, cultura y detalles de ${island} contados con cercania.`,
       trustLine: 'Los viajeros destacan el conocimiento local y el trato cercano.',
       ctaLine: `Reserva tu proxima ruta guiada con ${name}.`,
+      contextLine: `Descubre ${island} con una ruta guiada y una mirada local.`,
     },
     'villa-rental': {
       title: `${name}: estancia con comodidad local`,
@@ -101,6 +116,7 @@ function applySpanishCompanyCopyOverride(
       body: `La experiencia combina comodidad, ubicacion y detalles practicos para que cada dia en ${island} se sienta facil y propio.`,
       trustLine: 'Los huespedes destacan la comodidad, la limpieza y la atencion recibida.',
       ctaLine: `Reserva tu proxima estancia con ${name}.`,
+      contextLine: `Descubre ${island} desde una estancia tranquila y bien situada.`,
     },
     photographer: {
       title: `${name}: recuerdos con luz de isla`,
@@ -109,6 +125,7 @@ function applySpanishCompanyCopyOverride(
       body: `La sesion busca momentos autenticos y encuadres cuidados para convertir la experiencia en un recuerdo visual de ${island}.`,
       trustLine: 'Los viajeros destacan la direccion cercana y el resultado natural de las fotos.',
       ctaLine: `Reserva tu proxima sesion de fotos con ${name}.`,
+      contextLine: `Descubre ${island} con una sesion donde la luz y el recuerdo son protagonistas.`,
     },
     restaurant: {
       title: `${name}: sabores de ${island}`,
@@ -117,6 +134,7 @@ function applySpanishCompanyCopyOverride(
       body: `La visita se centra en el sabor, la mesa y la hospitalidad, con una cocina que conecta con el caracter de ${island}.`,
       trustLine: 'Los clientes destacan el sabor, el servicio y el ambiente del restaurante.',
       ctaLine: `Reserva tu proxima mesa en ${name}.`,
+      contextLine: `Descubre ${island} a traves de su mesa, sus sabores y su hospitalidad.`,
     },
     hotel: {
       title: `${name}: estancia en ${island}`,
@@ -125,6 +143,7 @@ function applySpanishCompanyCopyOverride(
       body: `Desde la llegada hasta la salida, la experiencia se centra en descanso, atencion y detalles que hacen mas facil el viaje.`,
       trustLine: 'Los huespedes destacan la comodidad, el servicio y la ubicacion.',
       ctaLine: `Reserva tu proxima estancia con ${name}.`,
+      contextLine: `Descubre ${island} desde una estancia comoda y cuidada.`,
     },
     other: {
       title: `${name}: experiencia en ${island}`,
@@ -133,6 +152,7 @@ function applySpanishCompanyCopyOverride(
       body: `La revista mantiene una mirada neutral y local sobre ${island}, con paisajes y detalles que acompanan el recuerdo del viajero.`,
       trustLine: 'Los viajeros destacan el trato cercano y la experiencia vivida.',
       ctaLine: `Reserva tu proxima experiencia con ${name}.`,
+      contextLine: `Descubre ${island} a traves de una experiencia pensada para cada viajero.`,
     },
   };
   const fallback = fallbackByActivity[activityType || 'other'] ?? fallbackByActivity.other;
@@ -143,6 +163,8 @@ function applySpanishCompanyCopyOverride(
   if (looksEnglish(partner.aiCompanyPageBody)) partner.aiCompanyPageBody = fallback.body;
   if (looksEnglish(partner.aiCompanyFinalCtaLine)) partner.aiCompanyFinalCtaLine = fallback.ctaLine;
   if (looksEnglish(partner.aiCompanyTrustLine)) partner.aiCompanyTrustLine = fallback.trustLine;
+  if (looksEnglish(partner.aiIslandContextLine)) partner.aiIslandContextLine = fallback.contextLine;
+  if (looksEnglish(partner.aiActivityDescription)) partner.aiActivityDescription = fallback.trustLine;
   if (Array.isArray(partner.aiCompanyPhotoCaptions)) {
     partner.aiCompanyPhotoCaptions = partner.aiCompanyPhotoCaptions.map((caption) =>
       looksEnglish(caption) ? fallback.subtitle : caption
@@ -300,7 +322,7 @@ export async function POST(req: NextRequest) {
         googleRating: partnerRecord?.googleRating ?? undefined,
         googleReviewCount: partnerRecord?.googleReviewCount ?? undefined,
         googlePhotos: partnerRecord?.googlePhotos ?? undefined,
-        demoCompanyImage: activityProfile?.demoAssets.company,
+        demoCompanyImage: activityProfile?.demoAssets.company[0],
         aiDetectedActivityType: partnerRecord?.aiDetectedActivityType ?? undefined,
         aiIslandContextLine: partnerRecord?.aiIslandContextLine ?? undefined,
         aiActivityDescription: partnerRecord?.aiActivityDescription ?? undefined,
@@ -316,9 +338,10 @@ export async function POST(req: NextRequest) {
       if (language === 'es' && activityProfile) {
         applySpanishCompanyCopyOverride(doc.partner, activityProfile.activityType);
       }
-      if (doc.imageAudit && activityProfile?.demoAssets.company) {
+      const demoCompanyImage = activityProfile?.demoAssets.company[0];
+      if (doc.imageAudit && demoCompanyImage) {
         doc.imageAudit.selectedImages.push({
-          url: activityProfile.demoAssets.company,
+          url: demoCompanyImage,
           source: 'company-photo',
           slot: 'company-photo',
           activityType: activityProfile.activityType,

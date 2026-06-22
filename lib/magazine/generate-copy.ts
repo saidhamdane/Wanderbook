@@ -44,6 +44,19 @@ function slotIdsForTemplate(templateId: string): string[] {
   return ids;
 }
 
+export function normalizeSpanishSentences(text: string): string {
+  const properNouns = ['Fuerteventura', 'Fuerte Experience', 'WhatsApp', 'Buggy', 'Instagram', 'Google'];
+  return text
+    .replace(/^\s*([a-záéíóúüñ])/u, (match, char) => match.replace(char, char.toUpperCase()))
+    .replace(/([a-záéíóúüñ\d,;])\s+([A-ZÁÉÍÓÚÜÑ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)/g, (match, prev, word, offset, source) => {
+      const before = source.slice(0, offset + 1);
+      const repeatedBuggy = word === 'Buggy' && /\bbuggy$/i.test(before);
+      if (!repeatedBuggy && properNouns.some((noun) => word === noun || noun.startsWith(`${word} `))) return match;
+      return `${prev}. ${word}`;
+    })
+    .replace(/(^|[.!?]\s+)([a-záéíóúüñ])/g, (_, separator, char) => separator + char.toUpperCase());
+}
+
 function defaultsFor(input: CopyInput): Record<string, string> {
   const d = input.destination;
   const y = String(new Date().getFullYear());
@@ -225,6 +238,12 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
   const cta = input.ctaLabels?.[lang] || (lang === 'es' ? 'Reserva tu proxima experiencia' : 'Book your next experience');
   const topics = input.localTipsTopics?.[lang] || [];
   const isSpanish = lang === 'es';
+  const finish = (result: Record<string, string>) => {
+    if (!isSpanish) return result;
+    return Object.fromEntries(
+      Object.entries(result).map(([key, value]) => [key, normalizeSpanishSentences(value)])
+    ) as Record<string, string>;
+  };
 
   const common = isSpanish
     ? {
@@ -301,7 +320,7 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       };
 
   if (input.activityType === 'buggy-adventure') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'AVENTURA EN BUGGY' : 'BUGGY ADVENTURE',
       'intro-title': isSpanish ? 'La aventura empieza en tierra volcanica' : 'The adventure starts on volcanic ground',
@@ -320,11 +339,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Pistas volcanicas' : 'Volcanic tracks',
       'feature-stat-2': isSpanish ? 'Ruta todoterreno' : 'Off-road route',
       'feature-stat-3': isSpanish ? 'Aventura en buggy' : 'Buggy adventure',
-    };
+    });
   }
 
   if (input.activityType === 'boat-tour') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'TOUR EN BARCO' : 'BOAT TOUR',
       'intro-title': isSpanish ? 'Fuerteventura desde el mar' : 'Fuerteventura from the sea',
@@ -340,11 +359,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Mar' : 'Sea',
       'feature-stat-2': isSpanish ? 'Barco' : 'Boat',
       'feature-stat-3': isSpanish ? 'Costa' : 'Coast',
-    };
+    });
   }
 
   if (input.activityType === 'tour-guide') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'GUIA TURISTICO' : 'TOUR GUIDE',
       'intro-title': isSpanish ? 'La isla con una guia cercana' : 'The island with a local guide',
@@ -360,11 +379,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Guia' : 'Guide',
       'feature-stat-2': isSpanish ? 'Isla' : 'Island',
       'feature-stat-3': isSpanish ? 'Ruta' : 'Route',
-    };
+    });
   }
 
   if (input.activityType === 'surf-camp') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'ESCUELA DE SURF' : 'SURF CAMP',
       'intro-title': isSpanish ? 'El ritmo del mar en Fuerteventura' : 'The rhythm of the sea in Fuerteventura',
@@ -380,11 +399,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Olas' : 'Waves',
       'feature-stat-2': isSpanish ? 'Clases' : 'Lessons',
       'feature-stat-3': isSpanish ? 'Progresion' : 'Progression',
-    };
+    });
   }
 
   if (input.activityType === 'villa-rental') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'ALQUILER VACACIONAL' : 'HOLIDAY RENTAL',
       'intro-title': isSpanish ? 'Una estancia a tu ritmo en Fuerteventura' : 'A stay at your own pace in Fuerteventura',
@@ -400,11 +419,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Comodidad' : 'Comfort',
       'feature-stat-2': isSpanish ? 'Playas' : 'Beaches',
       'feature-stat-3': isSpanish ? 'Estancia' : 'Stay',
-    };
+    });
   }
 
   if (input.activityType === 'photographer') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'SESION DE FOTOS' : 'PHOTO SESSION',
       'intro-title': isSpanish ? 'La luz de Fuerteventura en cada imagen' : 'The light of Fuerteventura in every image',
@@ -420,11 +439,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Luz dorada' : 'Golden hour',
       'feature-stat-2': isSpanish ? 'Playas' : 'Beaches',
       'feature-stat-3': isSpanish ? 'Recuerdo' : 'Memory',
-    };
+    });
   }
 
   if (input.activityType === 'restaurant') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'RESTAURANTE' : 'RESTAURANT',
       'intro-title': isSpanish ? 'Sabores locales en Fuerteventura' : 'Local flavors in Fuerteventura',
@@ -440,11 +459,11 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Sabor local' : 'Local flavor',
       'feature-stat-2': isSpanish ? 'Producto' : 'Produce',
       'feature-stat-3': isSpanish ? 'Mesa' : 'Table',
-    };
+    });
   }
 
   if (input.activityType === 'hotel') {
-    return {
+    return finish({
       ...common,
       'cover-title': isSpanish ? 'HOTEL' : 'HOTEL',
       'intro-title': isSpanish ? 'Una estancia en Fuerteventura' : 'A stay in Fuerteventura',
@@ -460,10 +479,10 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
       'feature-stat-1': isSpanish ? 'Llegada' : 'Arrival',
       'feature-stat-2': isSpanish ? 'Comodidad' : 'Comfort',
       'feature-stat-3': isSpanish ? 'Estancia' : 'Stay',
-    };
+    });
   }
 
-  return common;
+  return finish(common);
 }
 
 function buildUserPrompt(input: CopyInput): string {

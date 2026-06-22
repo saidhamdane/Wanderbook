@@ -148,7 +148,7 @@ async function testBuggyDemo() {
     'image audit must identify rejected boat/catamaran upload'
   );
   assert(
-    doc.imageAudit.selectedImages.some((entry) => entry.url === buggyTestPhoto.url || entry.url === activityProfile.demoAssets.cover),
+    doc.imageAudit.selectedImages.some((entry) => entry.url === buggyTestPhoto.url || activityProfile.demoAssets.cover.includes(entry.url)),
     'buggy demo must select the accepted buggy upload or curated buggy asset'
   );
   for (const entry of doc.imageAudit.selectedImages) {
@@ -178,9 +178,7 @@ async function testBoatTourDemo() {
     activityProfile,
   });
 
-  for (const { value } of imageSlots(doc)) {
-    assert(value.includes('/template-covers/boat-trip.jpg'), `boat demo image slot must use curated boat asset: ${value}`);
-  }
+  assert(new Set(imageSlots(doc).map(({ value }) => value)).size >= 2, 'boat demo image slots must use varied curated boat assets');
   assertNoTermsInRenderedDoc(doc, ['buggy', 'off-road'], 'boat demo');
 }
 

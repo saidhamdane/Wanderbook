@@ -15,17 +15,28 @@ function paragraphs(value: string): string[] {
 function looksEnglish(value: string): boolean {
   const lower = value.toLowerCase();
   return (
-    lower.startsWith('the ') ||
-    lower.includes(' the ') ||
-    lower.includes('unleash') ||
-    lower.includes('explore ') ||
-    /\byour\b/.test(lower)
+    /\bthe\b/.test(lower) ||
+    /\bour\b/.test(lower) ||
+    /\byour\b/.test(lower) ||
+    /\bawait\b/.test(lower) ||
+    /\brugged\b/.test(lower) ||
+    /\bunleash\b/.test(lower) ||
+    /\bexplore\b/.test(lower) ||
+    /\bdiscover\b/.test(lower) ||
+    /\blandscapes\b/.test(lower) ||
+    /\bexploration\b/.test(lower) ||
+    /\bunforgettable\b/.test(lower) ||
+    /\bexperience\b/.test(lower) ||
+    /\bwith\b/.test(lower) ||
+    /\band\b/.test(lower) ||
+    /\bfor\b/.test(lower)
   );
 }
 
 function spanishCompanyFallbacks(businessName: string, island: string, rawActivityType: string) {
   const profile = resolveActivityProfile({ activityType: rawActivityType }, 'es');
   const activity = profile.activityLabel;
+  const isBuggy = profile.activityType === 'buggy-adventure';
   return {
     title: `La experiencia con ${businessName}`,
     subtitle: activity && island ? `${activity} en ${island}` : activity,
@@ -33,6 +44,9 @@ function spanishCompanyFallbacks(businessName: string, island: string, rawActivi
     summary: `${businessName} crea una experiencia de ${activity.toLowerCase()} conectada con la isla y sus viajeros.`,
     trustLine: 'Los viajeros destacan el trato cercano y la experiencia vivida.',
     ctaLine: `Reserva tu proxima experiencia con ${businessName}.`,
+    contextLine: isBuggy
+      ? 'Los paisajes volcanicos de Fuerteventura te esperan para una aventura inolvidable.'
+      : `Descubre ${island || 'Fuerteventura'} a traves de una experiencia de ${activity.toLowerCase()} pensada para cada viajero.`,
   };
 }
 
@@ -73,13 +87,25 @@ export default function CompanyPageLayout({ slots, palette, fonts, partner, lang
   );
   const trustLine = safeSpanish(partner.aiCompanyTrustLine, spanishFallback.trustLine);
   const ctaLine = safeSpanish(partner.aiCompanyFinalCtaLine, spanishFallback.ctaLine);
-  const contextLine = firstValue(partner.aiIslandContextLine);
+  const contextLine = firstValue(
+    safeSpanish(partner.aiIslandContextLine, spanishFallback.contextLine),
+    isSpanish ? spanishFallback.contextLine : ''
+  );
   const activityDescription = firstValue(
     safeSpanish(partner.aiActivityDescription, trustLine || spanishFallback.trustLine),
     trustLine,
     ctaLine
   );
-  const themes = Array.isArray(partner.aiPositiveReviewThemes) ? partner.aiPositiveReviewThemes.filter(Boolean).slice(0, 6) : [];
+  const themes = Array.isArray(partner.aiPositiveReviewThemes)
+    ? partner.aiPositiveReviewThemes
+        .filter(Boolean)
+        .slice(0, 6)
+        .map((theme, index) =>
+          isSpanish && looksEnglish(theme)
+            ? ['Trato cercano', 'Experiencia local', 'Recuerdo especial'][index % 3]
+            : theme
+        )
+    : [];
   const demoCompanyImage = firstValue(
     typeof partner.demoCompanyImage === 'string' ? partner.demoCompanyImage : undefined,
     slots['company-photo']

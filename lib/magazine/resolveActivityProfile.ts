@@ -10,14 +10,14 @@ export type ResolvedActivityType =
   | 'other';
 
 export type DemoAssets = {
-  cover: string;
-  contents: string;
-  welcome: string;
-  company: string;
-  localHighlights: string;
-  story: string;
+  cover: string[];
+  contents: string[];
+  welcome: string[];
+  company: string[];
+  localHighlights: string[];
+  story: string[];
   gallery: string[];
-  finalCta: string;
+  finalCta: string[];
 };
 
 export type ActivityProfile = {
@@ -65,14 +65,14 @@ const ACTIVITY_TYPES: ResolvedActivityType[] = [
 
 function demoAssetsFor(image: string): DemoAssets {
   return {
-    cover: image,
-    contents: image,
-    welcome: image,
-    company: image,
-    localHighlights: image,
-    story: image,
+    cover: [image],
+    contents: [image],
+    welcome: [image],
+    company: [image],
+    localHighlights: [image],
+    story: [image],
     gallery: [image, image, image, image, image],
-    finalCta: image,
+    finalCta: [image],
   };
 }
 
@@ -177,7 +177,22 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Catamaran or boat tour on the Atlantic coast of Fuerteventura',
       es: 'Tour en catamaran o barco por la costa atlantica de Fuerteventura',
     },
-    demoAssets: demoAssetsFor('/template-covers/boat-trip.jpg'),
+    demoAssets: {
+      cover: ['https://images.pexels.com/photos/1001682/pexels-photo-1001682.jpeg?w=1200'],
+      contents: ['https://images.pexels.com/photos/1001683/pexels-photo-1001683.jpeg?w=1200'],
+      welcome: ['https://images.pexels.com/photos/1655166/pexels-photo-1655166.jpeg?w=1200'],
+      company: ['https://images.pexels.com/photos/296242/pexels-photo-296242.jpeg?w=1200'],
+      localHighlights: ['https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg?w=1200'],
+      story: ['https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg?w=1200'],
+      gallery: [
+        'https://images.pexels.com/photos/1001682/pexels-photo-1001682.jpeg?w=1200',
+        'https://images.pexels.com/photos/1001683/pexels-photo-1001683.jpeg?w=1200',
+        'https://images.pexels.com/photos/1655166/pexels-photo-1655166.jpeg?w=1200',
+        'https://images.pexels.com/photos/296242/pexels-photo-296242.jpeg?w=1200',
+        'https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg?w=1200',
+      ],
+      finalCta: ['https://images.pexels.com/photos/163236/luxury-yacht-boat-speed-water-163236.jpeg?w=1200'],
+    },
   },
   photographer: {
     activityLabelsByLanguage: { en: 'Photographer', es: 'Fotografo' },
@@ -231,7 +246,22 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Buggy adventure on volcanic roads in Fuerteventura',
       es: 'Aventura en buggy por las pistas volcanicas de Fuerteventura',
     },
-    demoAssets: demoAssetsFor('/template-covers/buggy-adventure.jpg'),
+    demoAssets: {
+      cover: ['https://images.unsplash.com/photo-1631902082973-72d82e5e076e?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+      contents: ['https://images.unsplash.com/photo-1646612336424-7d19c214c7de?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+      welcome: ['https://images.unsplash.com/photo-1596827414857-1ab11c6f323b?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+      company: ['https://images.unsplash.com/photo-1629280557063-3c470c1954d1?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+      localHighlights: ['https://images.unsplash.com/photo-1583384991243-e52c264d35d4?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+      story: ['https://images.unsplash.com/photo-1624062999803-976e1adc8ea2?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+      gallery: [
+        'https://images.unsplash.com/photo-1631902082973-72d82e5e076e?auto=format&fit=crop&fm=jpg&q=80&w=1400',
+        'https://images.unsplash.com/photo-1646612336424-7d19c214c7de?auto=format&fit=crop&fm=jpg&q=80&w=1400',
+        'https://images.unsplash.com/photo-1596827414857-1ab11c6f323b?auto=format&fit=crop&fm=jpg&q=80&w=1400',
+        'https://images.unsplash.com/photo-1629280557063-3c470c1954d1?auto=format&fit=crop&fm=jpg&q=80&w=1400',
+        'https://images.unsplash.com/photo-1624062999803-976e1adc8ea2?auto=format&fit=crop&fm=jpg&q=80&w=1400',
+      ],
+      finalCta: ['https://images.unsplash.com/photo-1646612336424-7d19c214c7de?auto=format&fit=crop&fm=jpg&q=80&w=1400'],
+    },
   },
   restaurant: {
     activityLabelsByLanguage: { en: 'Restaurant', es: 'Restaurante' },

@@ -35,17 +35,10 @@ function testBuggyDemoVisual() {
   }, 'es');
 
   assert(profile.demoAssets, 'buggy-adventure must have demoAssets');
-  const buggyImage = '/template-covers/buggy-adventure.jpg';
-  assert.strictEqual(profile.demoAssets.cover, buggyImage, 'cover must be buggy image');
-  assert.strictEqual(profile.demoAssets.contents, buggyImage, 'contents must be buggy image');
-  assert.strictEqual(profile.demoAssets.welcome, buggyImage, 'welcome must be buggy image');
-  assert.strictEqual(profile.demoAssets.company, buggyImage, 'company must be buggy image');
-  assert.strictEqual(profile.demoAssets.localHighlights, buggyImage, 'local highlights must be buggy image');
-  assert.strictEqual(profile.demoAssets.story, buggyImage, 'story must be buggy image');
-  assert.strictEqual(profile.demoAssets.finalCta, buggyImage, 'final CTA must be buggy image');
-  profile.demoAssets.gallery.forEach((img, i) =>
-    assert.strictEqual(img, buggyImage, `gallery[${i}] must be buggy image`)
-  );
+  for (const slot of ['cover', 'contents', 'welcome', 'company', 'localHighlights', 'story', 'finalCta', 'gallery']) {
+    assert(Array.isArray(profile.demoAssets[slot]), `demoAssets.${slot} must be an array`);
+    assert(profile.demoAssets[slot].every((url) => url.length > 0), `all ${slot} pool entries must be non-empty`);
+  }
 
   const maritime = ['boat', 'catamaran', 'sailing', 'dolphin', 'marina', 'yacht'];
   for (const url of assetUrls(profile)) {
@@ -53,6 +46,7 @@ function testBuggyDemoVisual() {
       assert(!url.toLowerCase().includes(word), `buggy demoAssets must not reference "${word}" image`);
     }
   }
+  assert(new Set(assetUrls(profile)).size >= 4, 'buggy demo pool must have at least 4 distinct URLs');
 
   const copySource = fs.readFileSync(path.join(root, 'lib/magazine/generate-copy.ts'), 'utf8');
   assert(
@@ -79,9 +73,11 @@ function testBuggyDemoVisual() {
 function testBoatDemoVisual() {
   const profile = resolveActivityProfile({ businessName: 'Magic Sailing', activityType: 'Boat Tour' }, 'es');
   assert(profile.demoAssets, 'boat-tour must have demoAssets');
-  const boatImage = '/template-covers/boat-trip.jpg';
-  assert.strictEqual(profile.demoAssets.cover, boatImage);
-  profile.demoAssets.gallery.forEach((img) => assert.strictEqual(img, boatImage));
+  for (const slot of ['cover', 'contents', 'welcome', 'company', 'localHighlights', 'story', 'finalCta', 'gallery']) {
+    assert(Array.isArray(profile.demoAssets[slot]), `demoAssets.${slot} must be an array`);
+    assert(profile.demoAssets[slot].every((url) => url.length > 0), `all ${slot} pool entries must be non-empty`);
+  }
+  assert(new Set(profile.demoAssets.gallery).size >= 2, 'boat gallery pool must use varied images');
   for (const url of assetUrls(profile)) {
     assert(!url.includes('buggy'), 'boat demoAssets must not reference buggy images');
   }

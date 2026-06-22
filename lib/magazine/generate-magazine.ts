@@ -35,33 +35,37 @@ function demoImageForSlot(
   assets: DemoAssets,
   galleryCounter: { n: number }
 ): string {
-  if (slotId === 'cover-photo') return assets.cover;
-  if (slotId === 'toc-photo' || slotId === 'contents-photo') return assets.contents;
-  if (slotId === 'intro-photo' || slotId === 'letter-photo') return assets.welcome;
-  if (slotId.startsWith('feature-photo') || slotId === 'hero-photo') return assets.localHighlights;
-  if (slotId === 'story-photo-1' || slotId === 'route-photo-1') return assets.story;
-  if (slotId === 'back-photo') return assets.finalCta;
+  const pick = (pool: string[], index = 0) => pool[index % pool.length] ?? pool[0] ?? '';
+
+  if (slotId === 'cover-photo') return pick(assets.cover);
+  if (slotId === 'toc-photo' || slotId === 'contents-photo') return pick(assets.contents);
+  if (slotId === 'intro-photo' || slotId === 'letter-photo') return pick(assets.welcome);
+  if (slotId.startsWith('feature-photo') || slotId === 'hero-photo') return pick(assets.localHighlights);
+  if (slotId === 'story-photo-1' || slotId === 'route-photo-1') return pick(assets.story);
+  if (slotId === 'back-photo') return pick(assets.finalCta);
 
   const idx = galleryCounter.n++ % assets.gallery.length;
-  return assets.gallery[idx];
+  return assets.gallery[idx] ?? assets.gallery[0] ?? '';
 }
 
 function stockPhotosFromDemoAssets(assets: DemoAssets): StockPhoto[] {
-  return [
-    { id: 'curated-cover', url: assets.cover, photographer: 'Wanderbook', orientation: 'portrait' },
-    { id: 'curated-contents', url: assets.contents, photographer: 'Wanderbook', orientation: 'portrait' },
-    { id: 'curated-welcome', url: assets.welcome, photographer: 'Wanderbook', orientation: 'landscape' },
-    { id: 'curated-company', url: assets.company, photographer: 'Wanderbook', orientation: 'landscape' },
-    { id: 'curated-local', url: assets.localHighlights, photographer: 'Wanderbook', orientation: 'landscape' },
-    { id: 'curated-story', url: assets.story, photographer: 'Wanderbook', orientation: 'landscape' },
-    { id: 'curated-final', url: assets.finalCta, photographer: 'Wanderbook', orientation: 'portrait' },
-    ...assets.gallery.map((url, index) => ({
-      id: `curated-gallery-${index}`,
-      url,
-      photographer: 'Wanderbook',
-      orientation: 'landscape' as const,
-    })),
-  ];
+  const seen = new Set<string>();
+  const all: StockPhoto[] = [];
+  const add = (url: string, id: string, orientation: StockPhoto['orientation']) => {
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    all.push({ id, url, photographer: 'Wanderbook', orientation });
+  };
+
+  assets.cover.forEach((url, index) => add(url, `curated-cover-${index}`, 'portrait'));
+  assets.contents.forEach((url, index) => add(url, `curated-contents-${index}`, 'portrait'));
+  assets.welcome.forEach((url, index) => add(url, `curated-welcome-${index}`, 'landscape'));
+  assets.company.forEach((url, index) => add(url, `curated-company-${index}`, 'landscape'));
+  assets.localHighlights.forEach((url, index) => add(url, `curated-local-${index}`, 'landscape'));
+  assets.story.forEach((url, index) => add(url, `curated-story-${index}`, 'landscape'));
+  assets.finalCta.forEach((url, index) => add(url, `curated-final-${index}`, 'portrait'));
+  assets.gallery.forEach((url, index) => add(url, `curated-gallery-${index}`, 'landscape'));
+  return all;
 }
 
 function isTravelerPhotoSlot(slotId: string): boolean {
