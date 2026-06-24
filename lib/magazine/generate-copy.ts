@@ -203,7 +203,7 @@ function defaultsFor(input: CopyInput): Record<string, string> {
     coverStatLabel2: 'HIDDEN PLACES',
     // Red Bold Retro template slot defaults — overlay-only template,
     // these prevent any "Lorem ipsum" from showing through the Canva PNG.
-    coverDate: new Date()
+    coverDate: new Date(Number(y), 5, 1)
       .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       .toUpperCase(),
     coverIssue: 'ISSUE NO. 01',
@@ -580,6 +580,31 @@ function applySpanishLanguageSafety(copy: Record<string, string>, input: CopyInp
   return result;
 }
 
+function enforceYearSlots(
+  copy: Record<string, string>,
+  year: string,
+  isDemo: boolean,
+  language: string
+): Record<string, string> {
+  const isSpanish = language === 'es';
+  const coverDate = new Date(Number(year), 5, 1)
+    .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    .toUpperCase();
+  return {
+    ...copy,
+    'cover-year': year,
+    'cover-date': year,
+    coverDate,
+    coverYear: year,
+    edition: isSpanish
+      ? (isDemo ? 'DEMO · EDICIÓN ' + year : 'EDICIÓN ' + year)
+      : (isDemo ? 'DEMO · ' + year + ' EDITION' : year + ' EDITION'),
+    coverSeason: isDemo ? 'DEMO · ' + year + ' EDITION' : year + ' EDITION',
+    coverIssueDate: year + ' · ISSUE 01',
+    coverVolume: 'VOLUME 01 · ' + year,
+  };
+}
+
 // Claude Haiku enrichment — generates poetic headline-level copy.
 // Runs only if ANTHROPIC_API_KEY is set; always falls back gracefully.
 async function enrichWithClaude(
@@ -640,8 +665,12 @@ export async function generateEditorialCopy(
   input: CopyInput
 ): Promise<Record<string, string>> {
   const defaults = defaultsFor(input);
+  const year = input.year ?? String(new Date().getFullYear());
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return applySpanishLanguageSafety(await enrichWithClaude(defaults, input), input);
+  if (!apiKey) {
+    const base = applySpanishLanguageSafety(await enrichWithClaude(defaults, input), input);
+    return enforceYearSlots(base, year, !!input.isDemo, input.language);
+  }
 
   try {
     const client = new OpenAI({ apiKey });
@@ -670,8 +699,10 @@ export async function generateEditorialCopy(
       ? { ...defaults, ...parsed }
       : defaults;
     // Overlay Claude's poetic fields on top of the GPT-4o-mini base
-    return applySpanishLanguageSafety(await enrichWithClaude(oaiCopy, input), input);
+    const enriched = applySpanishLanguageSafety(await enrichWithClaude(oaiCopy, input), input);
+    return enforceYearSlots(enriched, year, !!input.isDemo, input.language);
   } catch {
-    return applySpanishLanguageSafety(await enrichWithClaude(defaults, input), input);
+    const fallback = applySpanishLanguageSafety(await enrichWithClaude(defaults, input), input);
+    return enforceYearSlots(fallback, year, !!input.isDemo, input.language);
   }
 }

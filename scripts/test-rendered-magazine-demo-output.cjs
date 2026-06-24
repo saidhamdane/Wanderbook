@@ -19,6 +19,37 @@ Module._resolveFilename = function resolveFilename(request, parent, isMain, opti
   return originalResolveFilename.call(this, request, parent, isMain, options);
 };
 
+const openAiPath = require.resolve('openai');
+require.cache[openAiPath] = {
+  id: openAiPath,
+  filename: openAiPath,
+  loaded: true,
+  exports: class MockOpenAI {
+    constructor() {
+      this.chat = {
+        completions: {
+          create: async () => ({
+            choices: [{
+              message: {
+                content: JSON.stringify({
+                  'cover-year': '2023',
+                  'cover-date': 'OTOÑO 2023',
+                  edition: 'OTOÑO 2023',
+                  coverDate: 'OCTOBER 2023',
+                  coverIssueDate: '2023 · ISSUE 01',
+                  coverSeason: 'OTOÑO 2023',
+                  coverVolume: 'VOLUME 01 · 2023',
+                  coverYear: '2023',
+                }),
+              },
+            }],
+          }),
+        },
+      };
+    }
+  },
+};
+
 require.extensions['.ts'] = function loadTs(module, filename) {
   const source = fs.readFileSync(filename, 'utf8');
   const output = ts.transpileModule(source, {
@@ -313,12 +344,46 @@ async function testYearDerivation() {
   assert(!allText.includes('2023'), 'rendered output must not contain 2023');
 }
 
+async function testYearDerivationSurvivesAiOverride() {
+  const activityProfile = resolveActivityProfile({
+    businessName: 'Fuerte Experience',
+    aiDetectedActivityType: 'buggy adventure',
+    mainIsland: 'Fuerteventura',
+  }, 'es');
+
+  process.env.OPENAI_API_KEY = 'test-openai-key';
+  try {
+    const doc = await generateMagazine({
+      templateId: activityProfile.templateId,
+      destination: 'Fuerteventura',
+      travelers: 'Demo',
+      style: 'Adventurous',
+      language: 'es',
+      userPhotos: [],
+      useStockFallback: false,
+      generationMode: 'demo',
+      activityProfile,
+      createdAt: '2026-06-24T10:00:00.000Z',
+    });
+
+    const allText = doc.pages.flatMap((page) =>
+      Object.values(page.slots).filter((value) => typeof value === 'string')
+    ).join(' ');
+
+    assert(allText.includes('2026'), 'rendered output must contain 2026 after AI year override');
+    assert(!allText.includes('2023'), 'rendered output must not contain AI-provided 2023');
+  } finally {
+    process.env.OPENAI_API_KEY = '';
+  }
+}
+
 (async () => {
   await testBuggyDemo();
   await testBoatTourDemo();
   await testSurfCampDemo();
   await testTravelerModePreservesPhotos();
   await testYearDerivation();
+  await testYearDerivationSurvivesAiOverride();
   console.log('Rendered magazine demo output assertions passed.');
 })().catch((err) => {
   console.error(err);
