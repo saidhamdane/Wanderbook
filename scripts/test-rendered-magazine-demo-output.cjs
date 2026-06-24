@@ -285,11 +285,40 @@ async function testTravelerModePreservesPhotos() {
   assert.notStrictEqual(doc.pages[0].slots['cover-photo'], buggyTestPhoto.url, 'traveler image must not become the cover');
 }
 
+async function testYearDerivation() {
+  const activityProfile = resolveActivityProfile({
+    businessName: 'Fuerte Experience',
+    aiDetectedActivityType: 'buggy adventure',
+    mainIsland: 'Fuerteventura',
+  }, 'es');
+
+  const doc = await generateMagazine({
+    templateId: activityProfile.templateId,
+    destination: 'Fuerteventura',
+    travelers: 'Demo',
+    style: 'Adventurous',
+    language: 'es',
+    userPhotos: [],
+    useStockFallback: false,
+    generationMode: 'demo',
+    activityProfile,
+    createdAt: '2026-06-24T10:00:00.000Z',
+  });
+
+  const allText = doc.pages.flatMap((page) =>
+    Object.values(page.slots).filter((value) => typeof value === 'string')
+  ).join(' ');
+
+  assert(allText.includes('2026'), 'rendered output must contain 2026 when createdAt is 2026');
+  assert(!allText.includes('2023'), 'rendered output must not contain 2023');
+}
+
 (async () => {
   await testBuggyDemo();
   await testBoatTourDemo();
   await testSurfCampDemo();
   await testTravelerModePreservesPhotos();
+  await testYearDerivation();
   console.log('Rendered magazine demo output assertions passed.');
 })().catch((err) => {
   console.error(err);

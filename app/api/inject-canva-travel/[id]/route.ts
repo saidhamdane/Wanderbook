@@ -249,7 +249,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const dest   = mag.destination || 'Destination';
     const travelers = mag.travelers || mag.familyName || '';
     const family = mag.familyName || (travelers ? String(travelers).split(',')[0]?.trim() : '') || '';
-    const year   = String(new Date().getFullYear());
+    const year   = String(new Date(mag.createdAt ?? mag.generatedAt ?? Date.now()).getFullYear());
 
     // Collect unique user photos from all page slots in order
     const allPhotos: string[] = [];

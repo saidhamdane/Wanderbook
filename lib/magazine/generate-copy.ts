@@ -31,6 +31,8 @@ type CopyInput = {
   localTipsTopics?: Record<'en' | 'es', string[]>;
   copyTone?: string;
   prohibitedImageKeywords?: string[];
+  year?: string;
+  isDemo?: boolean;
 };
 
 function slotIdsForTemplate(templateId: string): string[] {
@@ -59,7 +61,7 @@ export function normalizeSpanishSentences(text: string): string {
 
 function defaultsFor(input: CopyInput): Record<string, string> {
   const d = input.destination;
-  const y = String(new Date().getFullYear());
+  const y = input.year ?? String(new Date().getFullYear());
   const defaults = {
     coverTitle: 'WANDER',
     coverSubtitle: 'Together',
@@ -102,7 +104,7 @@ function defaultsFor(input: CopyInput): Record<string, string> {
     backBrand: 'WANDER TOGETHER',
     backTagline: 'A keepsake from ' + d + ', ' + y,
     coverBigTitle: 'TRAVEL',
-    coverSeason: y + ' EDITION',
+    coverSeason: input.isDemo ? 'DEMO · ' + y + ' EDITION' : y + ' EDITION',
     coverStatNumber: '12',
     coverStatLabel: 'HIDDEN PLACES',
     coverTagline:
@@ -247,7 +249,7 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
 
   const common = isSpanish
     ? {
-        edition: 'EDICION ' + year,
+        edition: input.isDemo ? 'DEMO · EDICIÓN ' + year : 'EDICIÓN ' + year,
         'cover-title': label.toUpperCase(),
         'cover-kicker': 'FUERTEVENTURA',
         'cover-line-1': plan[0] || label + ' en ' + d,
@@ -283,7 +285,7 @@ function activityDefaultsFor(input: CopyInput, year: string): Record<string, str
         'back-contact': 'Gracias por viajar con nosotros',
       }
     : {
-        edition: year + ' EDITION',
+        edition: input.isDemo ? 'DEMO · ' + year + ' EDITION' : year + ' EDITION',
         'cover-title': label.toUpperCase(),
         'cover-kicker': 'FUERTEVENTURA',
         'cover-line-1': plan[0] || label + ' in ' + d,
@@ -555,7 +557,7 @@ function applySpanishLanguageSafety(copy: Record<string, string>, input: CopyInp
   if (input.language !== 'es') return copy;
 
   const result = { ...copy };
-  const year = String(new Date().getFullYear());
+  const year = input.year ?? String(new Date().getFullYear());
   const activityFallbacks = input.activityType ? activityDefaultsFor(input, year) : {};
   const label = (input.activityLabelsByLanguage?.es || input.activityLabel || 'Experiencia en Fuerteventura').toLowerCase();
   const genericFallback = normalizeSpanishSentences(`Experiencia de ${label} en ${input.destination}.`);

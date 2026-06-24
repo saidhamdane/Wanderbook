@@ -272,7 +272,7 @@ export async function GET(
   const slots = doc.pages[pageNum - 1]?.slots ?? {};
   const dest = (slots.destination || doc.destination || 'YOUR JOURNEY').toUpperCase();
   const family = (slots.familyName || doc.familyName || '').toUpperCase();
-  const year = slots.year || String(new Date().getFullYear());
+  const year = slots.year || String(new Date(doc.createdAt ?? doc.generatedAt).getFullYear());
   const p1 = slots.photo1 || '';
   const p2 = slots.photo2 || '';
   const p3 = slots.photo3 || '';

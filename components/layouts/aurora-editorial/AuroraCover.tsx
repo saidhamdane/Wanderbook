@@ -7,8 +7,8 @@ const TEAL = '#0e6e66';
 const SAND = '#c08a4a';
 
 export default function AuroraCover({ slots, fonts, language }: LayoutProps) {
-  const year = String(new Date().getFullYear());
-  const edition = slots['edition'] ? slots['edition'].replace(/\b20\d{2}\b/, year) : undefined;
+  const year = slots['cover-year'] || slots['year'] || slots['edition']?.match(/\b20\d{2}\b/)?.[0] || '';
+  const edition = slots['edition'] || undefined;
 
   return (
     <div style={{ width: 794, height: 1123, position: 'relative', overflow: 'hidden', background: INK }}>

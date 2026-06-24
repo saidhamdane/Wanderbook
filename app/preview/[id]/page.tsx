@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const doc = await loadMagazine(params.id);
   if (!doc) return {};
-  const year = new Date(doc.generatedAt).getFullYear();
+  const year = new Date(doc.createdAt ?? doc.generatedAt).getFullYear();
   const family = doc.familyName ? `${doc.familyName} · ` : '';
   const title = `${family}${doc.destination} ${year} | Wanderbook`;
   const ogTitle = doc.familyName

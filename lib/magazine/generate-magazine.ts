@@ -30,6 +30,10 @@ function countImageSlots(template: ReturnType<typeof getTemplateById>): number {
   return n;
 }
 
+function magazineYearFrom(createdAt?: string): string {
+  return String(new Date(createdAt ?? Date.now()).getFullYear());
+}
+
 function demoImageForSlot(
   slotId: string,
   assets: DemoAssets,
@@ -150,8 +154,10 @@ async function generateRedBoldMagazine(
   template: MagazineTemplate,
   analyzed: PhotoAnalysis[]
 ): Promise<MagazineDocument> {
-  const year = String(new Date().getFullYear());
+  const createdAt = input.createdAt ?? new Date().toISOString();
+  const year = magazineYearFrom(createdAt);
   const lang = normalizeLanguage(input.language);
+  const isDemoMode = input.generationMode === 'demo';
 
   const copy = await generateEditorialCopy({
     destination: input.destination,
@@ -159,7 +165,9 @@ async function generateRedBoldMagazine(
     style: input.style,
     templateId: input.templateId,
     notes: input.notes,
-    language: lang
+    language: lang,
+    year,
+    isDemo: isDemoMode,
   });
 
   const pageNames = template.pages.map((p) => p.name);
@@ -189,7 +197,7 @@ async function generateRedBoldMagazine(
             slots[slot.id] = input.destination.toUpperCase();
             break;
           case 'coverKicker':
-            slots[slot.id] = copy.coverKicker || year + ' EDITION';
+            slots[slot.id] = copy.coverKicker || (isDemoMode ? 'DEMO · ' + year + ' EDITION' : year + ' EDITION');
             break;
           case 'coverSubtitle':
             slots[slot.id] =
@@ -249,6 +257,7 @@ async function generateRedBoldMagazine(
     templateId: input.templateId,
     destination: input.destination,
     familyName: input.familyName || input.travelers || undefined,
+    createdAt,
     generatedAt,
     sessionId: input.sessionId,
     pages,
@@ -262,7 +271,8 @@ function generateHanoverMagazine(
   template: MagazineTemplate,
   analyzed: PhotoAnalysis[],
 ): MagazineDocument {
-  const year = String(new Date().getFullYear());
+  const createdAt = input.createdAt ?? new Date().toISOString();
+  const year = magazineYearFrom(createdAt);
   const photos = analyzed.map((p) => p.url);
   const getPhoto = (idx: number) =>
     photos.length > 0 ? photos[idx % photos.length] : '';
@@ -307,6 +317,7 @@ function generateHanoverMagazine(
     templateId: input.templateId,
     destination: input.destination,
     familyName: input.familyName || input.travelers || undefined,
+    createdAt,
     generatedAt,
     sessionId: input.sessionId,
     pages,
@@ -320,8 +331,10 @@ async function generateLuxuryMagazine(
   template: MagazineTemplate,
   analyzed: PhotoAnalysis[]
 ): Promise<MagazineDocument> {
-  const year = String(new Date().getFullYear());
+  const createdAt = input.createdAt ?? new Date().toISOString();
+  const year = magazineYearFrom(createdAt);
   const lang = normalizeLanguage(input.language);
+  const isDemoMode = input.generationMode === 'demo';
 
   const copy = await generateEditorialCopy({
     destination: input.destination,
@@ -330,6 +343,8 @@ async function generateLuxuryMagazine(
     templateId: input.templateId,
     notes: input.notes,
     language: lang,
+    year,
+    isDemo: isDemoMode,
   });
 
   const userUrls = analyzed.map((p) => p.url);
@@ -359,7 +374,7 @@ async function generateLuxuryMagazine(
       switch (slot.id) {
         // Cover
         case 'coverTitle':    slots[slot.id] = dest.toUpperCase(); break;
-        case 'coverKicker':   slots[slot.id] = copy.coverKicker || year + ' EDITION'; break;
+        case 'coverKicker':   slots[slot.id] = copy.coverKicker || (isDemoMode ? 'DEMO · ' + year + ' EDITION' : year + ' EDITION'); break;
         case 'coverSubtitle': slots[slot.id] = family ? `${family} · ${year}` : copy.coverSubtitle || dest; break;
         // TOC
         case 'pageTitle':     slots[slot.id] = page.id === 'toc' ? 'Contents' : copy.featureTitle || page.name; break;
@@ -397,6 +412,7 @@ async function generateLuxuryMagazine(
     templateId: input.templateId,
     destination: dest,
     familyName: family || undefined,
+    createdAt,
     generatedAt,
     sessionId: input.sessionId,
     pages,
@@ -413,6 +429,8 @@ export async function generateMagazine(
   const activityProfile = input.activityProfile;
   const generationMode = input.generationMode === 'demo' ? 'demo' : 'traveler';
   const isDemoMode = generationMode === 'demo';
+  const createdAt = input.createdAt ?? new Date().toISOString();
+  const year = magazineYearFrom(createdAt);
 
   if (input.templateId === 'hanover') {
     return generateHanoverMagazine(input, template, analyzed);
@@ -453,6 +471,8 @@ export async function generateMagazine(
     localTipsTopics: activityProfile?.localTipsTopics,
     copyTone: activityProfile?.copyTone,
     prohibitedImageKeywords: activityProfile?.prohibitedImageKeywords,
+    year,
+    isDemo: isDemoMode,
   });
 
   let imageAssignments: Record<string, string>;
@@ -538,6 +558,7 @@ export async function generateMagazine(
     templateId: input.templateId,
     destination: input.destination,
     familyName: input.familyName || input.travelers || undefined,
+    createdAt,
     generatedAt,
     sessionId: input.sessionId,
     pages,

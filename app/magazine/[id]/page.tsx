@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const doc = await loadMagazine(params.id);
   if (!doc) return {};
 
-  const year = new Date(doc.generatedAt).getFullYear();
+  const year = new Date(doc.createdAt ?? doc.generatedAt).getFullYear();
   const family = doc.familyName ? `${doc.familyName} · ` : '';
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://wanderbookcanarias.com').replace(/\/$/, '');
 

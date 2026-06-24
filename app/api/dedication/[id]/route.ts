@@ -17,7 +17,7 @@ export async function GET(
     ? `THE ${family} FAMILY`
     : 'OUR FAMILY';
   const dest   = doc.destination.toUpperCase();
-  const year   = new Date(doc.generatedAt).getFullYear();
+  const year   = new Date(doc.createdAt ?? doc.generatedAt).getFullYear();
 
   const html = `<!DOCTYPE html>
 <html lang="en">

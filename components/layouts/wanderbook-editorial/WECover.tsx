@@ -1,9 +1,9 @@
 import { LayoutProps } from '@/lib/magazine/types';
 
 export default function WECover({ slots, palette, fonts }: LayoutProps) {
-  const year = String(new Date().getFullYear());
+  const year = slots['cover-year'] || slots['year'] || slots['edition']?.match(/\b20\d{2}\b/)?.[0] || '';
   const stat = slots['cover-stat'] || '';
-  const edition = (slots['edition'] || 'Travel Edition').replace(/\b20\d{2}\b/, year);
+  const edition = slots['edition'] || 'Travel Edition';
   return (
     <div style={{ width: 794, height: 1123, position: 'relative', overflow: 'hidden', background: palette.primary }}>
       {/* Full-bleed background photo */}

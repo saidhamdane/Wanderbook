@@ -110,6 +110,7 @@ export type MagazineDocument = {
   templateId: string;
   destination: string;
   familyName?: string;
+  createdAt?: string;
   generatedAt: string;
   sessionId?: string;
   language?: string;
@@ -196,6 +197,7 @@ export type GenerateMagazineInput = {
   travelers: string;
   style: string;
   language: string;
+  createdAt?: string;
   notes?: string;
   tagline?: string;
   familyName?: string;
