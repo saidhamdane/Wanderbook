@@ -10,7 +10,16 @@ export type ClassificationResult = {
 
 const CONCEPT_VOCABULARY = [
   'buggy',
+  'dune buggy',
+  'side by side',
+  'utv',
+  'quad',
+  'atv',
   '4x4',
+  'suv',
+  'jeep',
+  'car',
+  'motorcycle',
   'off-road',
   'volcanic',
   'dunes',
@@ -50,6 +59,13 @@ const CONCEPT_VOCABULARY = [
 
 const EXTRA_PROHIBITED: Partial<Record<ResolvedActivityType, string[]>> = {
   'buggy-adventure': [
+    'quad',
+    'atv',
+    '4x4',
+    'suv',
+    'jeep',
+    'car',
+    'motorcycle',
     'boat',
     'sailing',
     'catamaran',
@@ -70,7 +86,7 @@ const EXTRA_PROHIBITED: Partial<Record<ResolvedActivityType, string[]>> = {
 };
 
 const REQUIRED_ALLOWED: Partial<Record<ResolvedActivityType, string[]>> = {
-  'buggy-adventure': ['buggy', '4x4', 'off-road', 'volcanic', 'dunes', 'desert', 'dirt roads', 'landscape'],
+  'buggy-adventure': ['buggy', 'dune buggy', 'side by side', 'utv'],
   'boat-tour': ['sea', 'boat', 'coast', 'sailing', 'marina', 'yacht'],
   'surf-camp': ['surf', 'surfer', 'surfboard', 'waves', 'beach'],
   'tour-guide': ['guide', 'village', 'viewpoint', 'hiking', 'landscape'],

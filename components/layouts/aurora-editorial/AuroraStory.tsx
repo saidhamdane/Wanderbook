@@ -45,77 +45,79 @@ export default function AuroraStory({ slots, fonts, language }: LayoutProps) {
           flexDirection: 'column',
           overflow: 'hidden',
         }}>
-          {/* Eyebrow */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-            <div style={{ width: 24, height: 3, background: SAND, flexShrink: 0 }} />
-            <div className="magazine-label" style={{
-              fontFamily: fonts.subheading,
-              fontSize: 9,
-              letterSpacing: '0.32em',
-              textTransform: 'uppercase',
-              color: SAND,
-              fontWeight: 800,
-            }}>
-              {magazineLabel(language, 'theStory')}
+          <div data-layout-block="story-text-stack" style={{ flex: 'none', overflow: 'hidden', maxHeight: 440 }}>
+            {/* Eyebrow */}
+            <div data-layout-block="story-eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+              <div style={{ width: 24, height: 3, background: SAND, flexShrink: 0 }} />
+              <div className="magazine-label" style={{
+                fontFamily: fonts.subheading,
+                fontSize: 9,
+                letterSpacing: '0.32em',
+                textTransform: 'uppercase',
+                color: SAND,
+                fontWeight: 800,
+              }}>
+                {magazineLabel(language, 'theStory')}
+              </div>
             </div>
-          </div>
 
-          {/* Story title */}
-          <div style={{
-            fontFamily: fonts.heading,
-            fontSize: 30,
-            fontWeight: 900,
-            color: INK,
-            lineHeight: 1.08,
-            letterSpacing: '-0.02em',
-            marginBottom: 14,
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-          }}>
-            {slots['story-title'] || magazineLabel(language, 'untilWeReturn')}
-          </div>
-
-          {/* Story lead — italic pull */}
-          {slots['story-lead'] && (
-            <div className="magazine-copy" style={{
+            {/* Story title */}
+            <div data-layout-block="story-title" style={{
               fontFamily: fonts.heading,
-              fontStyle: 'italic',
-              fontSize: 13.5,
-              color: TEAL,
-              lineHeight: 1.45,
+              fontSize: 28,
+              fontWeight: 900,
+              color: INK,
+              lineHeight: 1.08,
+              letterSpacing: '-0.02em',
+              marginBottom: 12,
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+            }}>
+              {slots['story-title'] || magazineLabel(language, 'untilWeReturn')}
+            </div>
+
+            {/* Story lead — italic pull */}
+            {slots['story-lead'] && (
+              <div data-layout-block="story-lead" className="magazine-copy" style={{
+                fontFamily: fonts.heading,
+                fontStyle: 'italic',
+                fontSize: 12.5,
+                color: TEAL,
+                lineHeight: 1.4,
+                marginBottom: 14,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}>
+                {slots['story-lead']}
+              </div>
+            )}
+
+            {/* Sand rule */}
+            <div data-layout-block="story-rule" style={{ width: 32, height: 1.5, background: SAND, marginBottom: 14 }} />
+
+            {/* Story body */}
+            <div data-layout-block="story-body" className="magazine-copy" style={{
+              fontFamily: fonts.body,
+              fontSize: 10.5,
+              lineHeight: 1.72,
+              color: `${INK}c2`,
               marginBottom: 16,
               overflow: 'hidden',
               display: '-webkit-box',
-              WebkitLineClamp: 2,
+              WebkitLineClamp: 6,
               WebkitBoxOrient: 'vertical',
+              flex: 'none',
             }}>
-              {slots['story-lead']}
+              {slots['story-body'] || ''}
             </div>
-          )}
-
-          {/* Sand rule */}
-          <div style={{ width: 32, height: 1.5, background: SAND, marginBottom: 14 }} />
-
-          {/* Story body */}
-          <div className="magazine-copy" style={{
-            fontFamily: fonts.body,
-            fontSize: 10.5,
-            lineHeight: 1.72,
-            color: `${INK}c2`,
-            marginBottom: 20,
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 7,
-            WebkitBoxOrient: 'vertical',
-            flex: 'none',
-          }}>
-            {slots['story-body'] || ''}
           </div>
 
           {/* Two stacked smaller photos */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div data-layout-block="story-photo-stack" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
             {['story-photo-2', 'story-photo-3'].map((key, i) => (
               <div key={key} style={{
                 flex: 1,

@@ -523,6 +523,61 @@ function buildUserPrompt(input: CopyInput): string {
   ].join('\n');
 }
 
+function looksEnglishCopy(value: string): boolean {
+  const lower = value.toLowerCase();
+  if (/fuerteventura's rugged landscapes await your exploration/.test(lower)) return true;
+  if (/\b(book your|await your|your exploration|landscapes await|discover rugged)\b/.test(lower)) return true;
+
+  const markers = [
+    'the',
+    'your',
+    'our',
+    'await',
+    'rugged',
+    'explore',
+    'discover',
+    'landscapes',
+    'exploration',
+    'unforgettable',
+    'experience',
+    'with',
+    'and',
+    'for',
+    'from',
+    'travelers',
+    'journey',
+    'memory',
+  ];
+  return markers.filter((marker) => new RegExp(`\\b${marker}\\b`).test(lower)).length >= 2;
+}
+
+function applySpanishLanguageSafety(copy: Record<string, string>, input: CopyInput): Record<string, string> {
+  if (input.language !== 'es') return copy;
+
+  const result = { ...copy };
+  const year = String(new Date().getFullYear());
+  const activityFallbacks = input.activityType ? activityDefaultsFor(input, year) : {};
+  const label = (input.activityLabelsByLanguage?.es || input.activityLabel || 'Experiencia en Fuerteventura').toLowerCase();
+  const genericFallback = normalizeSpanishSentences(`Experiencia de ${label} en ${input.destination}.`);
+  const safeSpanish: Record<string, string> = {
+    ...activityFallbacks,
+    coverKicker: 'Fuerteventura',
+    welcomeBody: activityFallbacks['intro-body'] || genericFallback,
+    pullQuote: activityFallbacks['quote-text'] || genericFallback,
+    coverFeatureTitle: activityFallbacks['feature-title'] || genericFallback,
+    quoteBody: activityFallbacks['quote-text'] || genericFallback,
+    body: activityFallbacks['intro-body'] || genericFallback,
+  };
+
+  for (const [key, value] of Object.entries(result)) {
+    if (typeof value === 'string' && looksEnglishCopy(value)) {
+      result[key] = safeSpanish[key] || genericFallback;
+    }
+  }
+
+  return result;
+}
+
 // Claude Haiku enrichment — generates poetic headline-level copy.
 // Runs only if ANTHROPIC_API_KEY is set; always falls back gracefully.
 async function enrichWithClaude(
@@ -584,7 +639,7 @@ export async function generateEditorialCopy(
 ): Promise<Record<string, string>> {
   const defaults = defaultsFor(input);
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return enrichWithClaude(defaults, input);
+  if (!apiKey) return applySpanishLanguageSafety(await enrichWithClaude(defaults, input), input);
 
   try {
     const client = new OpenAI({ apiKey });
@@ -613,8 +668,8 @@ export async function generateEditorialCopy(
       ? { ...defaults, ...parsed }
       : defaults;
     // Overlay Claude's poetic fields on top of the GPT-4o-mini base
-    return enrichWithClaude(oaiCopy, input);
+    return applySpanishLanguageSafety(await enrichWithClaude(oaiCopy, input), input);
   } catch {
-    return enrichWithClaude(defaults, input);
+    return applySpanishLanguageSafety(await enrichWithClaude(defaults, input), input);
   }
 }

@@ -2,6 +2,8 @@ const assert = require('assert');
 const fs = require('fs');
 const Module = require('module');
 const path = require('path');
+const React = require('react');
+const ReactDOMServer = require('react-dom/server');
 const ts = require('typescript');
 
 const root = process.cwd();
@@ -24,11 +26,13 @@ require.extensions['.ts'] = function loadTs(module, filename) {
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2019,
       esModuleInterop: true,
-      jsx: ts.JsxEmit.React,
+      jsx: ts.JsxEmit.ReactJSX,
     },
   }).outputText;
   module._compile(output, filename);
 };
+
+require.extensions['.tsx'] = require.extensions['.ts'];
 
 const classifierPath = require.resolve(path.join(root, 'lib/magazine/classify-demo-image.ts'));
 require.cache[classifierPath] = {
@@ -65,6 +69,7 @@ require.cache[classifierPath] = {
 
 const { generateMagazine } = require(path.join(root, 'lib/magazine/generate-magazine.ts'));
 const { resolveActivityProfile } = require(path.join(root, 'lib/magazine/resolveActivityProfile.ts'));
+const AuroraStory = require(path.join(root, 'components/layouts/aurora-editorial/AuroraStory.tsx')).default;
 
 const boatTestPhoto = {
   url: '/test-assets/boat-demo.jpg',
@@ -83,6 +88,7 @@ const buggyTestPhoto = {
 };
 
 const MARITIME = ['boat', 'sailing', 'catamaran', 'yacht', 'dolphin', 'marina', 'surf'];
+const BUGGY_IMAGE_BAN = ['quad', 'atv', '4x4', 'suv', 'jeep', 'car'];
 const ENGLISH_MARKERS = [/^the\s/i, /\sunleash\s/i, /\byour\b/i, /buggy adventure/i];
 
 function imageSlots(doc) {
@@ -120,6 +126,51 @@ function assertNoEnglishFallback(doc) {
   }
 }
 
+function renderedBlock(html, name) {
+  const marker = `data-layout-block="${name}"`;
+  const markerIndex = html.indexOf(marker);
+  assert(markerIndex >= 0, `rendered story layout must include ${name}`);
+  const tagStart = html.lastIndexOf('<', markerIndex);
+  const tagEnd = html.indexOf('>', markerIndex);
+  const tag = html.slice(tagStart, tagEnd + 1);
+  const style = tag.match(/style="([^"]*)"/)?.[1] || '';
+  return { tag, style };
+}
+
+async function assertBuggyStoryPageRenderedLayout(doc) {
+  const storyPage = doc.pages.find((page) => page.layout === 'are-story');
+  assert(storyPage, 'buggy demo must include an Aurora story page');
+
+  const storyHtml = ReactDOMServer.renderToStaticMarkup(React.createElement(AuroraStory, {
+    slots: {
+      ...storyPage.slots,
+      'story-title': 'Historias de nuestros clientes',
+    },
+    palette: doc.template.palette,
+    fonts: doc.template.fonts,
+    pageIndex: 5,
+    language: 'es',
+  }));
+
+  assert(storyHtml.includes('Historias de nuestros clientes'), 'rendered story page must include the long Spanish heading regression case');
+
+  const textStack = renderedBlock(storyHtml, 'story-text-stack');
+  const photoStack = renderedBlock(storyHtml, 'story-photo-stack');
+  assert(textStack.style.includes('max-height:440px'), 'story text stack must be bounded to prevent overlap');
+  assert(textStack.style.includes('overflow:hidden'), 'story text stack must clip as one bounded group');
+  assert(photoStack.style.includes('flex:1'), 'story photo stack must take remaining column height');
+  assert(photoStack.style.includes('min-height:0'), 'story photo stack must be allowed to shrink inside the column');
+  assert(photoStack.style.includes('overflow:hidden'), 'story photo stack must stay inside the magazine page');
+
+  for (const name of ['story-title', 'story-lead', 'story-body']) {
+    const block = renderedBlock(storyHtml, name);
+    assert(!block.style.includes('max-height'), `${name} must not use independent max-height clipping`);
+  }
+
+  const rightColumnHeight = 1123 - 52 - 44;
+  assert(rightColumnHeight - 440 >= 180, 'story layout must reserve at least 180px for the photo stack');
+}
+
 async function testBuggyDemo() {
   const activityProfile = resolveActivityProfile({
     businessName: 'Fuerte Experience',
@@ -155,6 +206,14 @@ async function testBuggyDemo() {
     for (const term of MARITIME) {
       assert(!entry.url.toLowerCase().includes(term), `selected image audit must not include ${term}: ${entry.url}`);
     }
+    for (const term of BUGGY_IMAGE_BAN) {
+      assert(!entry.url.toLowerCase().includes(term), `selected buggy image audit must not include ${term}: ${entry.url}`);
+    }
+  }
+  for (const { value } of imageSlots(doc)) {
+    for (const term of BUGGY_IMAGE_BAN) {
+      assert(!value.toLowerCase().includes(term), `rendered buggy image URL must not include ${term}: ${value}`);
+    }
   }
   assertNoTermsInRenderedDoc(doc, MARITIME, 'buggy demo');
   assertNoEnglishFallback(doc);
@@ -162,6 +221,7 @@ async function testBuggyDemo() {
     doc.pages[0].slots['cover-title'] === 'AVENTURA EN BUGGY',
     'Spanish buggy cover title must be localized'
   );
+  await assertBuggyStoryPageRenderedLayout(doc);
 }
 
 async function testBoatTourDemo() {

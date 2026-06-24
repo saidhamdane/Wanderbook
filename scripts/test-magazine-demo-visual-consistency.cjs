@@ -35,6 +35,9 @@ function testBuggyDemoVisual() {
   }, 'es');
 
   assert(profile.demoAssets, 'buggy-adventure must have demoAssets');
+  for (const word of ['quad', 'atv', '4x4', 'suv', 'jeep', 'car', 'motorcycle']) {
+    assert(profile.prohibitedImageKeywords.includes(word), `buggy profile must prohibit ${word} images`);
+  }
   for (const slot of ['cover', 'contents', 'welcome', 'company', 'localHighlights', 'story', 'finalCta', 'gallery']) {
     assert(Array.isArray(profile.demoAssets[slot]), `demoAssets.${slot} must be an array`);
     assert(profile.demoAssets[slot].every((url) => url.length > 0), `all ${slot} pool entries must be non-empty`);
@@ -46,7 +49,24 @@ function testBuggyDemoVisual() {
       assert(!url.toLowerCase().includes(word), `buggy demoAssets must not reference "${word}" image`);
     }
   }
-  assert(new Set(assetUrls(profile)).size >= 4, 'buggy demo pool must have at least 4 distinct URLs');
+  const vehicleBan = ['quad', 'atv', '4x4', 'suv', 'jeep', 'car'];
+  for (const url of assetUrls(profile)) {
+    for (const word of vehicleBan) {
+      assert(!url.toLowerCase().includes(word), `buggy demoAssets URL must not reference "${word}": ${url}`);
+    }
+  }
+
+  const majorSlots = ['cover', 'contents', 'welcome', 'company', 'localHighlights', 'story', 'finalCta'];
+  const majorUrls = majorSlots.map((slot) => profile.demoAssets[slot][0]);
+  assert.strictEqual(new Set(majorUrls).size, majorSlots.length, 'each major buggy slot must use a distinct image URL');
+  assert(new Set(profile.demoAssets.gallery).size >= 3, 'buggy gallery pool must have at least 3 distinct URLs');
+  assert(new Set(assetUrls(profile)).size >= 6, 'buggy demo pool must have at least 6 distinct URLs');
+
+  const classifierSource = fs.readFileSync(path.join(root, 'lib/magazine/classify-demo-image.ts'), 'utf8');
+  assert(classifierSource.includes("'buggy-adventure': ['buggy', 'dune buggy', 'side by side', 'utv']"), 'buggy classifier must require a visible buggy/UTV concept');
+  for (const word of vehicleBan) {
+    assert(classifierSource.includes(`'${word}'`), `buggy classifier must include "${word}" as a rejectable concept`);
+  }
 
   const copySource = fs.readFileSync(path.join(root, 'lib/magazine/generate-copy.ts'), 'utf8');
   assert(

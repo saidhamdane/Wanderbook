@@ -1,8 +1,9 @@
 import { LayoutProps } from '@/lib/magazine/types';
 
 export default function WECover({ slots, palette, fonts }: LayoutProps) {
-  const year = slots['cover-year'] || String(new Date().getFullYear());
+  const year = String(new Date().getFullYear());
   const stat = slots['cover-stat'] || '';
+  const edition = (slots['edition'] || 'Travel Edition').replace(/\b20\d{2}\b/, year);
   return (
     <div style={{ width: 794, height: 1123, position: 'relative', overflow: 'hidden', background: palette.primary }}>
       {/* Full-bleed background photo */}
@@ -24,7 +25,7 @@ export default function WECover({ slots, palette, fonts }: LayoutProps) {
           Wanderbook
         </div>
         <div style={{ fontFamily: fonts.body, fontSize: 9, letterSpacing: 4, color: palette.accent, textTransform: 'uppercase', fontWeight: 600, textAlign: 'right' }}>
-          {slots['edition'] || 'Travel Edition'}
+          {edition}
         </div>
       </div>
 

@@ -46,6 +46,8 @@ const ENGLISH_FALLBACKS = [
   /your exploration/i,
   /landscapes await/i,
   /discover rugged/i,
+  /\bbook your\b/i,
+  /\bunforgettable experience\b/i,
 ];
 
 function allAssetUrls(profile) {
@@ -164,19 +166,18 @@ async function testBuggySpanishDemo() {
     assert(profile.demoAssets[slot].length >= 1, `buggy demoAssets.${slot} must not be empty`);
   }
   assertNoTerms(allAssetUrls(profile), MARITIME, 'buggy demo assets');
-  assert(new Set(allAssetUrls(profile)).size >= 4, 'buggy demo pool must contain at least four distinct URLs');
+  assert(new Set(allAssetUrls(profile)).size >= 6, 'buggy demo pool must contain at least six distinct URLs');
 
   const major = [
     profile.demoAssets.cover[0],
     profile.demoAssets.contents[0],
     profile.demoAssets.welcome[0],
+    profile.demoAssets.company[0],
     profile.demoAssets.localHighlights[0],
     profile.demoAssets.story[0],
     profile.demoAssets.finalCta[0],
   ];
-  for (let i = 1; i < major.length; i++) {
-    assert.notStrictEqual(major[i - 1], major[i], 'consecutive buggy major slots must not reuse the same image URL');
-  }
+  assert.strictEqual(new Set(major).size, major.length, 'each major buggy slot must use a distinct image URL');
 
   const doc = await generateMagazine({
     templateId: profile.templateId,
@@ -193,9 +194,12 @@ async function testBuggySpanishDemo() {
   const texts = allSlotText(doc).map(({ value }) => value);
   assert.strictEqual(doc.pages[0].slots['cover-title'], 'AVENTURA EN BUGGY');
   assert.strictEqual(doc.imageAudit.mode, 'demo');
+  assert.strictEqual(doc.generationMode, 'demo', 'generationMode must stay "demo"');
+  assert.strictEqual(doc.isPubliclyShareable, false, 'demo magazine must not be publicly shareable');
   assertNoEnglishFallbackText(texts, 'buggy demo');
   assertNoTerms(doc.imageAudit.selectedImages.map((entry) => entry.url), MARITIME, 'buggy selected images');
-  assert(new Set(doc.imageAudit.selectedImages.map((entry) => entry.url)).size >= 4, 'buggy selected images must be varied');
+  const distinctImages = new Set(doc.imageAudit.selectedImages.map((entry) => entry.url).filter(Boolean));
+  assert(distinctImages.size >= 5, 'buggy demo generated doc must contain at least 5 distinct image URLs');
 }
 
 async function testBoatSpanishDemo() {

@@ -134,7 +134,7 @@ export const buggyAdventureExperienceTemplate = experienceTemplate({
   tags: {
     hero: ['people', 'group', 'buggy', 'adventure', 'road', 'hero'],
     secondary: ['dunes', 'dust', 'road', 'landscape', 'outdoor'],
-    gallery: ['action', 'buggy', 'quad', 'dust', 'dunes'],
+    gallery: ['action', 'buggy', 'off-road', 'dust', 'dunes'],
   },
 });
 
