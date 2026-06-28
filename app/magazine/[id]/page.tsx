@@ -18,7 +18,7 @@ export const revalidate = 0;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const doc = await loadMagazine(params.id);
-  if (!doc) return {};
+  if (!doc || doc.isAdminDemo) return {};
 
   const year = new Date(doc.createdAt ?? doc.generatedAt).getFullYear();
   const family = doc.familyName ? `${doc.familyName} · ` : '';
@@ -40,6 +40,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function DigitalMagazinePage({ params, searchParams }: Params) {
   const doc = await loadMagazine(params.id);
   if (!doc) notFound();
+  if (doc.isAdminDemo) notFound();
 
   const anyDoc = doc as any;
   const source = anyDoc.source || (anyDoc.partner?.enabled ? 'business_owner' : 'personal');

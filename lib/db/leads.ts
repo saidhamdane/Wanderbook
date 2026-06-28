@@ -17,6 +17,8 @@ export type Lead = {
   rating: number;
   reviews: number;
   type: string;
+  website?: string;
+  detectedCategory?: string;
   wanderbookAngle: string;
   status: LeadStatus;
   notes: string;
@@ -31,6 +33,9 @@ type SupabaseLeadRow = {
   rating: number | null;
   reviews: number | null;
   business_type: string | null;
+  website?: string | null;
+  detected_category?: string | null;
+  google_primary_type?: string | null;
   wanderbook_angle: string | null;
   status: string | null;
   notes: string | null;
@@ -46,6 +51,8 @@ function rowToLead(row: SupabaseLeadRow): Lead {
     rating: row.rating ?? 0,
     reviews: row.reviews ?? 0,
     type: row.business_type || '',
+    website: row.website || undefined,
+    detectedCategory: row.detected_category || row.google_primary_type || undefined,
     wanderbookAngle: row.wanderbook_angle || '',
     status: (row.status as LeadStatus) || 'Not contacted',
     notes: row.notes || '',

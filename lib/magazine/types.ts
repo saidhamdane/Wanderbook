@@ -129,6 +129,7 @@ export type MagazineDocument = {
   imageAudit?: ImageAudit;
   generationMode?: MagazineGenerationMode;
   isPubliclyShareable?: boolean;
+  isAdminDemo?: boolean;
   [key: string]: unknown;
   pages: Array<{
     pageId: string;

@@ -21,6 +21,8 @@ export type Lead = {
   rating: number;
   reviews: number;
   type: string;
+  website?: string;
+  detectedCategory?: string;
   wanderbookAngle: string;
   status: LeadStatus;
   notes: string;
@@ -196,7 +198,7 @@ export default function LeadsClient({
               Fuerteventura sales CRM
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Track outreach, open WhatsApp with a prepared message, and create demo partner accounts from one hidden page.
+              Track outreach, open WhatsApp with a prepared message, preview private demos, and create real partner accounts only when needed.
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm">
@@ -330,6 +332,44 @@ function StatusSelect({ value, onChange }: { value: LeadStatus; onChange: (statu
 }
 
 function LeadActions({ lead, demoLink }: { lead: Lead; demoLink: string }) {
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState('');
+
+  async function handlePreviewDemo() {
+    setPreviewError('');
+    setPreviewLoading(true);
+    try {
+      const response = await fetch('/api/private/demo-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business: lead.business,
+          type: lead.type,
+          detectedCategory: lead.detectedCategory || lead.type,
+          location: lead.location || 'Fuerteventura',
+          phone: lead.phone,
+          rating: lead.rating,
+          reviews: lead.reviews,
+          website: lead.website,
+        }),
+      });
+      const payload = await response.json().catch(() => ({} as { id?: string; error?: string }));
+      if (!response.ok || !payload.id) {
+        throw new Error(payload.error || 'Unable to create demo preview.');
+      }
+      window.open(`/private/demo/${payload.id}`, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      setPreviewError(error instanceof Error ? error.message : 'Unable to create demo preview.');
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  function handleCreateRealAccount() {
+    if (!window.confirm('This creates a real partner account. Continue?')) return;
+    window.open(demoSignupHref(lead), '_blank', 'noopener,noreferrer');
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <a
@@ -340,12 +380,22 @@ function LeadActions({ lead, demoLink }: { lead: Lead; demoLink: string }) {
       >
         WhatsApp
       </a>
-      <Link
-        href={demoSignupHref(lead)}
-        className="inline-flex justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700"
+      <button
+        type="button"
+        onClick={handlePreviewDemo}
+        disabled={previewLoading}
+        className="inline-flex justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-65"
       >
-        Create demo partner
-      </Link>
+        {previewLoading ? 'Creating preview...' : 'Preview demo'}
+      </button>
+      <button
+        type="button"
+        onClick={handleCreateRealAccount}
+        className="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+      >
+        Create real partner account
+      </button>
+      {previewError && <p className="text-xs font-semibold text-red-700">{previewError}</p>}
     </div>
   );
 }

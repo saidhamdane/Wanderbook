@@ -16,6 +16,7 @@ export async function GET(
 
   const doc = await loadMagazine(id);
   if (!doc) return new Response('Magazine not found', { status: 404 });
+  if (doc.isAdminDemo) return new Response('Magazine not found', { status: 404 });
 
   const pageNum = parseInt(page, 10);
 

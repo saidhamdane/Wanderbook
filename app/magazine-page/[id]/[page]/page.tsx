@@ -13,6 +13,7 @@ export default async function MagazinePageRender({
 }) {
   const doc = await loadMagazine(params.id);
   if (!doc) notFound();
+  if (doc.isAdminDemo) notFound();
 
   const pageIndex = parseInt(params.page, 10) - 1; // FlipBook sends 1-based
   if (isNaN(pageIndex) || pageIndex < 0 || pageIndex >= doc.pages.length) {

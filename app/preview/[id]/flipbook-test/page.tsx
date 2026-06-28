@@ -11,7 +11,7 @@ export default async function FlipbookTestPage({
 }) {
   const doc = await loadMagazine(params.id);
 
-  if (!doc) {
+  if (!doc || doc.isAdminDemo) {
     return (
       <main style={{
         minHeight: '100vh',
