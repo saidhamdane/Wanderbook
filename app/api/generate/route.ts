@@ -7,6 +7,7 @@ import { getPartnerBySlug } from '@/lib/db/partners';
 import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
 import { canPartnerCreateMagazine, FREE_MONTHLY_MAGAZINE_LIMIT } from '@/lib/subscription';
 import { trackPartnerEvent } from '@/lib/db/partner-events';
+import { getAdminSession } from '@/lib/admin-auth';
 import type { LayoutPartner, MagazineGenerationMode } from '@/lib/magazine/types';
 
 export const runtime = 'nodejs';
@@ -201,7 +202,7 @@ export async function POST(req: NextRequest) {
       familyName = body.familyName ? String(body.familyName) : undefined;
       useStockFallback = body.useStockFallback !== false;
       partnerSlug = body.partnerSlug ? String(body.partnerSlug) : undefined;
-      generationMode = body.generationMode === 'demo' ? 'demo' : 'traveler';
+      generationMode = body.generationMode === 'demo' || body.mode === 'demo' ? 'demo' : 'traveler';
     } else {
       const form = await req.formData();
       templateId = String(form.get('templateId') || '');
@@ -214,7 +215,7 @@ export async function POST(req: NextRequest) {
       familyName = form.get('familyName') ? String(form.get('familyName')) : undefined;
       useStockFallback = String(form.get('useStockFallback') || 'true') === 'true';
       partnerSlug = form.get('partnerSlug') ? String(form.get('partnerSlug')) : undefined;
-      generationMode = String(form.get('generationMode') || 'traveler') === 'demo' ? 'demo' : 'traveler';
+      generationMode = String(form.get('generationMode') || form.get('mode') || 'traveler') === 'demo' ? 'demo' : 'traveler';
       const fileEntries = form.getAll('photos');
       for (const entry of fileEntries) {
         if (entry instanceof File && entry.size > 0) photoFiles.push(entry);
@@ -226,6 +227,13 @@ export async function POST(req: NextRequest) {
     }
 
     language = normalizeLanguage(language);
+
+    if (generationMode === 'demo' && !getAdminSession()) {
+      return NextResponse.json(
+        { error: 'Demo generation is restricted to Wanderbook admins.' },
+        { status: 403 }
+      );
+    }
 
     if (!templateId || !destination) {
       return NextResponse.json(

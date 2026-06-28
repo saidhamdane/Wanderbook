@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { formatSpanishWhatsapp, getCanonicalPartnerUrl, getPartnerDisplayName, isValidHttpUrl, isValidLogoSrc, normalizeExternalUrl } from '@/lib/partner-utils';
 import { Logo } from '@/components/Logo';
 import { ACTIVITY_TYPES } from '@/lib/partner-activity';
@@ -57,7 +56,6 @@ export default function PartnerDashboardClient({
   stats: { total: number; month: number };
   analytics: PartnerAnalytics;
 }) {
-  const router = useRouter();
   const [account, setAccount] = useState(partner);
   const [form, setForm] = useState({
     businessName: account.businessName,
@@ -81,9 +79,6 @@ export default function PartnerDashboardClient({
   const [logoMessage, setLogoMessage] = useState('');
   const [logoError, setLogoError] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
-  const [demoFiles, setDemoFiles] = useState<File[]>([]);
-  const [creatingDemo, setCreatingDemo] = useState(false);
-  const [demoError, setDemoError] = useState('');
   const initialProfileStatus: CompanyProfileState['status'] = account.googleMatchStatus === 'synced'
     ? 'synced'
     : account.googleMatchStatus === 'not_found'
@@ -243,39 +238,6 @@ export default function PartnerDashboardClient({
     }
   }
 
-  async function createCompanyDemo() {
-    setDemoError('');
-    setCreatingDemo(true);
-    const fd = new FormData();
-    fd.append('generationMode', 'demo');
-    fd.append('partnerSlug', account.slug);
-    fd.append('templateId', 'aurora-editorial');
-    fd.append('destination', account.mainIsland || 'Fuerteventura');
-    fd.append('travelers', 'Demo');
-    fd.append('style', 'Warm & Personal');
-    fd.append('language', 'es');
-    fd.append('useStockFallback', 'false');
-    for (const file of demoFiles) fd.append('demoPhotos', file, file.name);
-
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        credentials: 'include',
-        body: fd,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setDemoError(data.error || 'No se pudo crear la demo.');
-        return;
-      }
-      router.push(`/magazine/${data.id}?mode=demo`);
-    } catch {
-      setDemoError('Error de red. Intentalo de nuevo.');
-    } finally {
-      setCreatingDemo(false);
-    }
-  }
-
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
@@ -401,45 +363,6 @@ export default function PartnerDashboardClient({
           <AnalyticStat label="WhatsApp shares" value={String(analytics.whatsappShares)} />
           <AnalyticStat label="Review clicks" value={String(analytics.reviewClicks)} />
           <AnalyticStat label="Booking clicks" value={String(analytics.bookingClicks)} />
-        </section>
-
-        <section className="mt-6 rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <h2 className="text-2xl text-slate-950" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Crear demo de la empresa
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                Create company demo. Esta vista es interna, no consume el limite mensual de revistas reales y filtra las fotos de prueba por tipo de actividad.
-              </p>
-              <label className="mt-4 block">
-                <span className="mb-2 block text-xs font-semibold tracking-widest text-slate-600">
-                  FOTOS DE PRUEBA (OPCIONAL - SE FILTRAN POR TIPO DE ACTIVIDAD)
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(event) => setDemoFiles(Array.from(event.target.files || []))}
-                  className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700"
-                />
-              </label>
-              {demoFiles.length > 0 && (
-                <p className="mt-2 text-xs font-semibold text-slate-500">
-                  {demoFiles.length} archivo{demoFiles.length === 1 ? '' : 's'} seleccionado{demoFiles.length === 1 ? '' : 's'}
-                </p>
-              )}
-              {demoError && <p className="mt-3 text-sm font-semibold text-red-700">{demoError}</p>}
-            </div>
-            <button
-              type="button"
-              onClick={createCompanyDemo}
-              disabled={creatingDemo}
-              className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-60"
-            >
-              {creatingDemo ? 'Creando demo...' : 'Crear demo de la empresa'}
-            </button>
-          </div>
         </section>
 
         <form onSubmit={saveProfile} className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
