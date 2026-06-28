@@ -36,6 +36,14 @@ type LeadOverride = {
   notes?: string;
 };
 
+export type SalesDemoState = {
+  token?: string;
+  expiresAt?: string;
+  viewCount?: number;
+  whatsappClicks?: number;
+  signupClicks?: number;
+};
+
 type SortDirection = 'desc' | 'asc';
 
 function leadKey(lead: Lead): string {
@@ -53,17 +61,6 @@ function whatsappPhone(value: string): string {
   return digits;
 }
 
-function signupBusinessType(type: string): string {
-  const normalized = type.toLowerCase();
-  if (normalized.includes('holiday') || normalized.includes('villa') || normalized.includes('apartment')) return 'Holiday Rental';
-  if (normalized.includes('photo')) return 'Photographer';
-  if (normalized.includes('guide')) return 'Tour Guide';
-  if (normalized.includes('hotel')) return 'Hotel';
-  if (normalized.includes('surf') || normalized.includes('kite')) return 'Surf School';
-  if (normalized.includes('boat') || normalized.includes('buggy') || normalized.includes('tour') || normalized.includes('excursion')) return 'Excursion Company';
-  return 'Other';
-}
-
 function whatsappHref(lead: Lead, demoLink: string): string {
   const message = [
     `Hi ${lead.business},`,
@@ -78,25 +75,50 @@ function whatsappHref(lead: Lead, demoLink: string): string {
   return `https://wa.me/${whatsappPhone(lead.phone)}?text=${encodeURIComponent(message)}`;
 }
 
-function demoSignupHref(lead: Lead): string {
-  const params = new URLSearchParams({
-    businessName: lead.business,
-    businessType: signupBusinessType(lead.type),
-    mainIsland: 'Fuerteventura',
-    whatsapp: lead.phone,
-  });
+function salesDemoUrl(publicOrigin: string, token: string): string {
+  return `${publicOrigin.replace(/\/$/, '')}/demo/${token}`;
+}
 
-  return `/partner/signup?${params.toString()}`;
+function buildSalesDemoWhatsAppHref(lead: Lead, token: string, publicOrigin: string): string {
+  const demoUrl = salesDemoUrl(publicOrigin, token);
+  const message = [
+    `Hola ${lead.business},`,
+    '',
+    'Te escribimos desde Wanderbook Canarias.',
+    'Hemos creado una demo personalizada de tu revista digital de viajes:',
+    '',
+    demoUrl,
+    '',
+    '¿Te gustaría hablar sobre cómo funciona para tu negocio?',
+  ].join('\n');
+
+  return `https://wa.me/${whatsappPhone(lead.phone)}?text=${encodeURIComponent(message)}`;
+}
+
+function formatDemoDate(value?: string): string {
+  if (!value) return 'Not set';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Invalid date';
+  return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(date);
+}
+
+function salesDemoStatus(value?: string): 'Active' | 'Expired' | 'Unknown' {
+  if (!value) return 'Unknown';
+  return new Date(value).getTime() > Date.now() ? 'Active' : 'Expired';
 }
 
 export default function LeadsClient({
   leads: initialLeads,
   demoLink,
+  publicOrigin,
+  initialSalesDemos = {},
   dbSource = 'json',
   children,
 }: {
   leads: Lead[];
   demoLink: string;
+  publicOrigin: string;
+  initialSalesDemos?: Record<string, SalesDemoState>;
   dbSource?: 'supabase' | 'json';
   children?: ReactNode;
 }) {
@@ -105,6 +127,7 @@ export default function LeadsClient({
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [overrides, setOverrides] = useState<Record<string, LeadOverride>>({});
+  const [salesDemos, setSalesDemos] = useState<Record<string, SalesDemoState>>(initialSalesDemos);
   const [loadedOverrides, setLoadedOverrides] = useState(false);
 
   useEffect(() => {
@@ -165,6 +188,13 @@ export default function LeadsClient({
     });
   }
 
+  function updateSalesDemo(lead: Lead, demo: SalesDemoState) {
+    setSalesDemos((current) => ({
+      ...current,
+      [leadKey(lead)]: demo,
+    }));
+  }
+
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white px-5 py-4">
@@ -223,7 +253,15 @@ export default function LeadsClient({
 
         <section className="mt-5 grid gap-4 lg:hidden">
           {visibleLeads.map((lead) => (
-            <LeadCard key={leadKey(lead)} lead={lead} demoLink={demoLink} onUpdate={updateLead} />
+            <LeadCard
+              key={leadKey(lead)}
+              lead={lead}
+              demoLink={demoLink}
+              publicOrigin={publicOrigin}
+              salesDemo={salesDemos[leadKey(lead)]}
+              onUpdate={updateLead}
+              onSalesDemoCreated={updateSalesDemo}
+            />
           ))}
         </section>
 
@@ -269,7 +307,13 @@ export default function LeadsClient({
                       />
                     </td>
                     <td className="px-4 py-4">
-                      <LeadActions lead={lead} demoLink={demoLink} />
+                      <LeadActions
+                        lead={lead}
+                        demoLink={demoLink}
+                        publicOrigin={publicOrigin}
+                        salesDemo={salesDemos[leadKey(lead)]}
+                        onSalesDemoCreated={updateSalesDemo}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -331,9 +375,24 @@ function StatusSelect({ value, onChange }: { value: LeadStatus; onChange: (statu
   );
 }
 
-function LeadActions({ lead, demoLink }: { lead: Lead; demoLink: string }) {
+function LeadActions({
+  lead,
+  demoLink,
+  publicOrigin,
+  salesDemo,
+  onSalesDemoCreated,
+}: {
+  lead: Lead;
+  demoLink: string;
+  publicOrigin: string;
+  salesDemo?: SalesDemoState;
+  onSalesDemoCreated: (lead: Lead, demo: SalesDemoState) => void;
+}) {
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [salesDemoLoading, setSalesDemoLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
+  const [salesDemoError, setSalesDemoError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   async function handlePreviewDemo() {
     setPreviewError('');
@@ -365,10 +424,66 @@ function LeadActions({ lead, demoLink }: { lead: Lead; demoLink: string }) {
     }
   }
 
-  function handleCreateRealAccount() {
-    if (!window.confirm('This creates a real partner account. Continue?')) return;
-    window.open(demoSignupHref(lead), '_blank', 'noopener,noreferrer');
+  async function handleCreateSalesDemo() {
+    setSalesDemoError('');
+    setSalesDemoLoading(true);
+    try {
+      const response = await fetch('/api/private/sales-demo/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          leadId: lead.id,
+          business: lead.business,
+          type: lead.type,
+          detectedCategory: lead.detectedCategory || lead.type,
+          location: lead.location || 'Fuerteventura',
+          phone: lead.phone,
+          rating: lead.rating,
+          reviews: lead.reviews,
+          website: lead.website,
+        }),
+      });
+      const payload = await response.json().catch(() => ({} as {
+        token?: string;
+        expiresAt?: string;
+        viewCount?: number;
+        whatsappClicks?: number;
+        signupClicks?: number;
+        error?: string;
+      }));
+
+      if (!response.ok || !payload.token) {
+        throw new Error(payload.error || 'Unable to create sales demo.');
+      }
+
+      onSalesDemoCreated(lead, {
+        token: payload.token,
+        expiresAt: payload.expiresAt,
+        viewCount: payload.viewCount,
+        whatsappClicks: payload.whatsappClicks,
+        signupClicks: payload.signupClicks,
+      });
+    } catch (error) {
+      setSalesDemoError(error instanceof Error ? error.message : 'Unable to create sales demo.');
+    } finally {
+      setSalesDemoLoading(false);
+    }
   }
+
+  async function copyDemoLink(token: string) {
+    setSalesDemoError('');
+    const url = salesDemoUrl(publicOrigin, token);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setSalesDemoError('Unable to copy demo link.');
+    }
+  }
+
+  const token = salesDemo?.token;
+  const status = salesDemoStatus(salesDemo?.expiresAt);
 
   return (
     <div className="flex flex-col gap-2">
@@ -388,19 +503,69 @@ function LeadActions({ lead, demoLink }: { lead: Lead; demoLink: string }) {
       >
         {previewLoading ? 'Creating preview...' : 'Preview demo'}
       </button>
-      <button
-        type="button"
-        onClick={handleCreateRealAccount}
-        className="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
-      >
-        Create real partner account
-      </button>
+      {token ? (
+        <div className="flex flex-col gap-2 rounded-xl border border-amber-200 bg-amber-50 p-2">
+          <a
+            href={`/demo/${token}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex justify-center rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700"
+          >
+            Open demo
+          </a>
+          <button
+            type="button"
+            onClick={() => copyDemoLink(token)}
+            className="inline-flex justify-center rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-bold text-amber-900 hover:bg-amber-100"
+          >
+            {copied ? 'Copied demo link' : 'Copy demo link'}
+          </button>
+          <a
+            href={buildSalesDemoWhatsAppHref(lead, token, publicOrigin)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex justify-center rounded-xl bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"
+          >
+            Send by WhatsApp
+          </a>
+          <p className="text-xs font-semibold leading-5 text-amber-950">
+            Status: {status} · Expires: {formatDemoDate(salesDemo?.expiresAt)}
+            <br />
+            Demo created · {salesDemo?.viewCount ?? 0} opens · {salesDemo?.whatsappClicks ?? 0} WhatsApp clicks ·{' '}
+            {salesDemo?.signupClicks ?? 0} signup clicks
+          </p>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleCreateSalesDemo}
+          disabled={salesDemoLoading}
+          className="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-65"
+        >
+          {salesDemoLoading ? 'Creating demo...' : 'Create shareable demo'}
+        </button>
+      )}
       {previewError && <p className="text-xs font-semibold text-red-700">{previewError}</p>}
+      {salesDemoError && <p className="text-xs font-semibold text-red-700">{salesDemoError}</p>}
     </div>
   );
 }
 
-function LeadCard({ lead, demoLink, onUpdate }: { lead: Lead; demoLink: string; onUpdate: (lead: Lead, patch: LeadOverride) => void }) {
+function LeadCard({
+  lead,
+  demoLink,
+  publicOrigin,
+  salesDemo,
+  onUpdate,
+  onSalesDemoCreated,
+}: {
+  lead: Lead;
+  demoLink: string;
+  publicOrigin: string;
+  salesDemo?: SalesDemoState;
+  onUpdate: (lead: Lead, patch: LeadOverride) => void;
+  onSalesDemoCreated: (lead: Lead, demo: SalesDemoState) => void;
+}) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -436,7 +601,13 @@ function LeadCard({ lead, demoLink, onUpdate }: { lead: Lead; demoLink: string; 
       </div>
 
       <div className="mt-4">
-        <LeadActions lead={lead} demoLink={demoLink} />
+        <LeadActions
+          lead={lead}
+          demoLink={demoLink}
+          publicOrigin={publicOrigin}
+          salesDemo={salesDemo}
+          onSalesDemoCreated={onSalesDemoCreated}
+        />
       </div>
     </article>
   );
