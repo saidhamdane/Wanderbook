@@ -134,6 +134,7 @@ async function run() {
   const leadsSource = read('app/private/leads/LeadsClient.tsx');
   const routeSource = read('app/api/private/demo-preview/route.ts');
   const privateDemoPageSource = read('app/private/demo/[id]/page.tsx');
+  const privateDemoToolbarSource = read('components/magazine/AdminDemoToolbar.tsx');
   const previewPageSource = read('app/preview/[id]/page.tsx');
   const magazinePageSource = read('app/magazine/[id]/page.tsx');
   const screenshotRouteSource = read('app/api/page-screenshot/[id]/[page]/route.ts');
@@ -210,8 +211,8 @@ async function run() {
 
   assert(privateDemoPageSource.includes('getAdminSession()'), 'private demo page must require admin session');
   assert(privateDemoPageSource.includes('!doc || !doc.isAdminDemo'), 'private demo page must only render admin demos');
-  assert(privateDemoPageSource.includes('DEMO PREVIEW'), 'private demo page must show a demo badge');
-  assert(privateDemoPageSource.includes('No PDF'), 'private demo page must not expose PDF download UI');
+  assert(privateDemoToolbarSource.includes('DEMO PREVIEW'), 'private demo page must show a demo badge');
+  assert(privateDemoToolbarSource.includes('PDF LOCKED'), 'private demo page must not expose PDF download UI');
   pass('private demo viewer is admin-only and clearly badged');
 
   assert(previewPageSource.includes('if (doc.isAdminDemo) notFound();'), 'public preview must block admin demos');
