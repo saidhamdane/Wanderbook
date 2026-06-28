@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAdminSession } from '@/lib/admin-auth';
 import { updateLeadStatus, type LeadStatus } from '@/lib/db/leads';
 
 export const runtime = 'nodejs';
@@ -13,21 +14,8 @@ const VALID_STATUSES: LeadStatus[] = [
   'Not interested',
 ];
 
-async function isAdminAuthorized(req: NextRequest): Promise<boolean> {
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return false;
-  const provided = req.headers.get('x-admin-secret');
-  if (!provided || provided.length !== adminSecret.length) return false;
-  try {
-    const { timingSafeEqual } = await import('crypto').then(m => m);
-    return timingSafeEqual(Buffer.from(provided), Buffer.from(adminSecret));
-  } catch {
-    return provided === adminSecret;
-  }
-}
-
 export async function PATCH(req: NextRequest) {
-  if (!await isAdminAuthorized(req)) {
+  if (!getAdminSession()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

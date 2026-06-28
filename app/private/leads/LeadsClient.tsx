@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
@@ -90,10 +91,12 @@ export default function LeadsClient({
   leads: initialLeads,
   demoLink,
   dbSource = 'json',
+  children,
 }: {
   leads: Lead[];
   demoLink: string;
   dbSource?: 'supabase' | 'json';
+  children?: ReactNode;
 }) {
   const [tierFilter, setTierFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
@@ -180,6 +183,7 @@ export default function LeadsClient({
             >
               Database: {dbSource === 'supabase' ? 'Supabase' : 'Local JSON fallback'}
             </span>
+            {children}
           </div>
         </div>
       </header>
