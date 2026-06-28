@@ -256,6 +256,7 @@ export function updatePartnerAccount(id: string, input: Partial<Omit<PartnerAcco
     businessName,
     slug: input.slug ? slugifyPartnerName(input.slug) : current.slug,
     businessType: input.businessType || current.businessType,
+    activityType: input.activityType !== undefined ? (input.activityType || undefined) : current.activityType,
     mainIsland: input.mainIsland || current.mainIsland,
     whatsapp: input.whatsapp?.trim() || current.whatsapp,
     website: input.website?.trim() || undefined,

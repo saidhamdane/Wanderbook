@@ -40,6 +40,7 @@ export type ActivityProfile = {
 };
 
 type ActivitySource = {
+  slug?: string | null;
   activityType?: string | null;
   aiDetectedActivityType?: string | null;
   businessType?: string | null;
@@ -63,6 +64,10 @@ const ACTIVITY_TYPES: ResolvedActivityType[] = [
   'hotel',
   'other',
 ];
+
+const SLUG_ACTIVITY_OVERRIDES: Partial<Record<string, ResolvedActivityType>> = {
+  'family-buggy-fuerteventura': 'buggy-adventure',
+};
 
 const SURF_COVER_IMAGE = 'https://images.pexels.com/photos/390051/pexels-photo-390051.jpeg?auto=compress&cs=tinysrgb&w=1200';
 const PHOTOGRAPHER_COVER_IMAGE = 'https://images.pexels.com/photos/1456613/pexels-photo-1456613.jpeg?auto=compress&cs=tinysrgb&w=1200';
@@ -247,7 +252,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       es: ['pistas volcanicas', 'caminos de tierra', 'ruta de aventura'],
     },
     copyTone: 'active, grounded and adventurous, focused on buggies, volcanic roads and off-road landscape',
-    previewTitle: { en: 'Buggy Adventure', es: 'Aventura en Buggy' },
+    previewTitle: { en: 'Your buggy adventure in Fuerteventura', es: 'Tu aventura en buggy en Fuerteventura' },
     previewSubtitle: {
       en: 'Volcanic roads, dunes and off-road thrills',
       es: 'Pistas volcanicas, dunas y aventura todoterreno',
@@ -392,6 +397,9 @@ export function isResolvedActivityType(value: unknown): value is ResolvedActivit
 }
 
 export function resolveActivityType(source?: ActivitySource | null): ResolvedActivityType {
+  const slugOverride = source?.slug ? SLUG_ACTIVITY_OVERRIDES[source.slug.trim().toLowerCase()] : undefined;
+  if (slugOverride) return slugOverride;
+
   const ai = resolveFromText(source?.aiDetectedActivityType);
   if (ai) return ai;
 

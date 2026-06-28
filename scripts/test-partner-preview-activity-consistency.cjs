@@ -134,7 +134,7 @@ function assertFuerteBuggy() {
   const text = previewText(profile, 'es');
 
   assert.strictEqual(profile.activityType, 'buggy-adventure', 'Fuerte Experience must resolve to buggy-adventure');
-  assert.strictEqual(profile.previewTitle.es, 'Aventura en Buggy');
+  assert.strictEqual(profile.previewTitle.es, 'Tu aventura en buggy en Fuerteventura');
   assertContainsOne('buggy preview', text, ['buggy', 'aventura']);
   assertContainsOne('buggy preview concept', text, ['volcanic', 'volcanicas', 'dunes', 'dunas', 'off-road', 'todoterreno']);
   assertContainsNone('buggy preview', text, ['tour guide', 'guide', 'guia', 'boat', 'barco', 'catamaran', 'surf']);
@@ -180,8 +180,8 @@ function assertLanguageAwarePreview() {
   const es = resolveActivityProfile({ activityType: 'buggy-adventure' }, 'es');
   const en = resolveActivityProfile({ activityType: 'buggy-adventure' }, 'en');
 
-  assert.strictEqual(es.previewTitle.es, 'Aventura en Buggy');
-  assert.strictEqual(en.previewTitle.en, 'Buggy Adventure');
+  assert.strictEqual(es.previewTitle.es, 'Tu aventura en buggy en Fuerteventura');
+  assert.strictEqual(en.previewTitle.en, 'Your buggy adventure in Fuerteventura');
   assert.strictEqual(resolveActivityProfile({ activityType: 'boat-tour' }, 'es').previewTitle.es, 'Experiencia en Barco');
   assert.strictEqual(resolveActivityProfile({ activityType: 'surf-camp' }, 'es').previewTitle.es, 'Semana de Surf');
   assert.strictEqual(resolveActivityProfile({ activityType: 'tour-guide' }, 'es').previewTitle.es, 'Ruta Guiada');

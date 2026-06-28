@@ -34,6 +34,7 @@ function resolvePartnerPreviewProfile(
 ) {
   return resolveActivityProfile(
     {
+      slug: partner?.slug,
       activityType: partner?.activityType,
       aiDetectedActivityType: partner?.aiDetectedActivityType,
       businessType: partner?.businessType,
@@ -140,7 +141,7 @@ export default async function PartnerLandingPage({ params, searchParams }: Partn
           />
         )}
         <p className="max-w-full text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-300 sm:text-xs sm:tracking-[0.28em]">
-          {partner.businessType.toUpperCase()} PARTNER
+          {activityBadge}
         </p>
         <h1
           className="mt-4 w-full max-w-[720px] break-words text-center text-[clamp(2.625rem,10vw,4.75rem)] leading-[1.02] sm:text-[clamp(3.5rem,7vw,5.8rem)] lg:max-w-4xl"
