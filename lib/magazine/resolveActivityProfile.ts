@@ -24,6 +24,7 @@ export type ActivityProfile = {
   activityType: ResolvedActivityType;
   activityLabel: string;
   activityLabelsByLanguage: Record<'en' | 'es', string>;
+  activityBadge: Record<'en' | 'es', string>;
   templateId: string;
   allowedImageKeywords: string[];
   prohibitedImageKeywords: string[];
@@ -63,6 +64,10 @@ const ACTIVITY_TYPES: ResolvedActivityType[] = [
   'other',
 ];
 
+const SURF_COVER_IMAGE = 'https://images.pexels.com/photos/390051/pexels-photo-390051.jpeg?auto=compress&cs=tinysrgb&w=1200';
+const PHOTOGRAPHER_COVER_IMAGE = 'https://images.pexels.com/photos/1456613/pexels-photo-1456613.jpeg?auto=compress&cs=tinysrgb&w=1200';
+const RESTAURANT_COVER_IMAGE = 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=1200';
+
 function demoAssetsFor(image: string): DemoAssets {
   return {
     cover: [image],
@@ -79,6 +84,7 @@ function demoAssetsFor(image: string): DemoAssets {
 const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'activityType' | 'activityLabel'>> = {
   'surf-camp': {
     activityLabelsByLanguage: { en: 'Surf Camp', es: 'Escuela de Surf' },
+    activityBadge: { en: 'SURF SCHOOL', es: 'ESCUELA DE SURF' },
     templateId: 'wanderbook-editorial',
     allowedImageKeywords: ['fuerteventura surf lesson', 'corralejo waves', 'surf camp canary islands'],
     prohibitedImageKeywords: ['buggy', 'quad', 'catamaran', 'sailing', 'dolphin'],
@@ -94,15 +100,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
     copyTone: 'energetic, coastal and practical, focused on surf progression and island rhythm',
     previewTitle: { en: 'Surf Camp Experience', es: 'Semana de Surf' },
     previewSubtitle: { en: 'Waves, board and island sun', es: 'Olas, tabla y sol en la isla' },
-    previewImage: '/template-covers/default-cover.jpg',
+    previewImage: SURF_COVER_IMAGE,
     previewAlt: {
       en: 'Surfer riding waves at a Fuerteventura surf camp',
       es: 'Surfista en las olas de una escuela de surf en Fuerteventura',
     },
-    demoAssets: demoAssetsFor('/template-covers/default-cover.jpg'),
+    demoAssets: demoAssetsFor(SURF_COVER_IMAGE),
   },
   'villa-rental': {
     activityLabelsByLanguage: { en: 'Holiday Rental', es: 'Alquiler Vacacional' },
+    activityBadge: { en: 'HOLIDAY RENTAL', es: 'ALQUILER VACACIONAL' },
     templateId: 'holiday-rental-memory',
     allowedImageKeywords: ['fuerteventura villa pool', 'canary islands holiday apartment', 'fuerteventura terrace'],
     prohibitedImageKeywords: ['buggy', 'quad', 'catamaran', 'sailing', 'dolphin'],
@@ -127,6 +134,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
   },
   'tour-guide': {
     activityLabelsByLanguage: { en: 'Tour Guide', es: 'Guia Turistico' },
+    activityBadge: { en: 'TOUR GUIDE', es: 'GUIA TURISTICO' },
     templateId: 'tour-guide-experience',
     allowedImageKeywords: ['fuerteventura volcanic landscape', 'betancuria village', 'fuerteventura island route'],
     prohibitedImageKeywords: ['boat', 'sailing', 'catamaran', 'buggy', 'quad', 'surf'],
@@ -154,6 +162,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
   },
   'boat-tour': {
     activityLabelsByLanguage: { en: 'Boat Tour', es: 'Tour en Barco' },
+    activityBadge: { en: 'BOAT TRIP', es: 'TOUR EN BARCO' },
     templateId: 'boat-trip-experience',
     allowedImageKeywords: ['fuerteventura boat tour atlantic', 'fuerteventura coast boat', 'atlantic ocean boat fuerteventura'],
     prohibitedImageKeywords: ['buggy', 'quad', 'off-road', 'dunes'],
@@ -196,6 +205,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
   },
   photographer: {
     activityLabelsByLanguage: { en: 'Photographer', es: 'Fotografo' },
+    activityBadge: { en: 'PHOTOGRAPHY', es: 'FOTOGRAFIA' },
     templateId: 'photographer-experience',
     allowedImageKeywords: ['fuerteventura beach photography session', 'canary islands portrait session', 'family photoshoot fuerteventura'],
     prohibitedImageKeywords: ['buggy', 'quad', 'catamaran', 'sailing', 'dolphin'],
@@ -214,15 +224,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Portraits in the Fuerteventura light',
       es: 'Retratos con la luz de Fuerteventura',
     },
-    previewImage: '/template-covers/aurora-editorial.jpg',
+    previewImage: PHOTOGRAPHER_COVER_IMAGE,
     previewAlt: {
       en: 'Photography session on a Fuerteventura beach',
       es: 'Sesion fotografica en una playa de Fuerteventura',
     },
-    demoAssets: demoAssetsFor('/template-covers/aurora-editorial.jpg'),
+    demoAssets: demoAssetsFor(PHOTOGRAPHER_COVER_IMAGE),
   },
   'buggy-adventure': {
     activityLabelsByLanguage: { en: 'Buggy Adventure', es: 'Aventura en Buggy' },
+    activityBadge: { en: 'BUGGY ADVENTURE', es: 'AVENTURA EN BUGGY' },
     templateId: 'buggy-adventure-experience',
     allowedImageKeywords: ['fuerteventura buggy adventure', 'fuerteventura off road buggy', 'volcanic road buggy fuerteventura'],
     prohibitedImageKeywords: ['quad', 'atv', '4x4', 'suv', 'jeep', 'car', 'motorcycle', 'sailing', 'catamaran', 'dolphin', 'surf', 'boat', 'marina', 'hotel', 'villa', 'barco', 'delfin'],
@@ -265,6 +276,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
   },
   restaurant: {
     activityLabelsByLanguage: { en: 'Restaurant', es: 'Restaurante' },
+    activityBadge: { en: 'RESTAURANT', es: 'RESTAURANTE' },
     templateId: 'aurora-editorial',
     allowedImageKeywords: ['fuerteventura restaurant local food', 'canary islands restaurant', 'fuerteventura dining'],
     prohibitedImageKeywords: ['buggy', 'quad', 'catamaran', 'sailing', 'dolphin'],
@@ -283,15 +295,16 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
       en: 'Local food and dining atmosphere',
       es: 'Gastronomia local y ambiente de restaurante',
     },
-    previewImage: '/template-covers/aurora-editorial.jpg',
+    previewImage: RESTAURANT_COVER_IMAGE,
     previewAlt: {
       en: 'Restaurant dining experience in Fuerteventura',
       es: 'Experiencia gastronomica en Fuerteventura',
     },
-    demoAssets: demoAssetsFor('/template-covers/aurora-editorial.jpg'),
+    demoAssets: demoAssetsFor(RESTAURANT_COVER_IMAGE),
   },
   hotel: {
     activityLabelsByLanguage: { en: 'Hotel', es: 'Hotel' },
+    activityBadge: { en: 'HOTEL', es: 'HOTEL' },
     templateId: 'holiday-rental-memory',
     allowedImageKeywords: ['fuerteventura hotel pool', 'fuerteventura hotel stay', 'canary islands hotel'],
     prohibitedImageKeywords: ['buggy', 'quad', 'catamaran', 'sailing', 'dolphin'],
@@ -319,6 +332,7 @@ const ACTIVITY_PROFILES: Record<ResolvedActivityType, Omit<ActivityProfile, 'act
   },
   other: {
     activityLabelsByLanguage: { en: 'Fuerteventura Experience', es: 'Experiencia en Fuerteventura' },
+    activityBadge: { en: 'FUERTEVENTURA EXPERIENCE', es: 'EXPERIENCIA EN FUERTEVENTURA' },
     templateId: 'aurora-editorial',
     allowedImageKeywords: ['fuerteventura landscape', 'fuerteventura village', 'fuerteventura island'],
     prohibitedImageKeywords: ['buggy', 'quad', 'catamaran', 'sailing', 'dolphin', 'surf'],

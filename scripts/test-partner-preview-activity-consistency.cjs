@@ -58,6 +58,9 @@ function assertContainsNone(name, text, terms) {
 
 function assertPreviewImageExists(profile) {
   assert(profile.previewImage, `${profile.activityType} must define previewImage`);
+  if (/^https:\/\/images\.pexels\.com\/photos\/.+\.(jpe?g|png|webp)(\?|$)/i.test(profile.previewImage)) {
+    return;
+  }
   assert(
     fs.existsSync(path.join(root, 'public', profile.previewImage.replace(/^\//, ''))),
     `${profile.activityType} previewImage must exist: ${profile.previewImage}`
@@ -66,10 +69,11 @@ function assertPreviewImageExists(profile) {
 
 function assertPageWiring() {
   assert(pageSource.includes('resolveActivityProfile'), 'public partner page must use resolveActivityProfile');
+  assert(pageSource.includes('resolvePartnerHeroImage'), 'public partner page must resolve hero and cover image centrally');
   assert(pageSource.includes('activityProfile.previewTitle'), 'public partner page must read previewTitle from activityProfile');
   assert(pageSource.includes('activityProfile.previewSubtitle'), 'public partner page must read previewSubtitle from activityProfile');
-  assert(pageSource.includes('activityProfile.previewImage'), 'public partner page must read previewImage from activityProfile');
   assert(pageSource.includes('activityProfile.previewAlt'), 'public partner page must read previewAlt from activityProfile');
+  assert(pageSource.includes('activityProfile.activityBadge'), 'public partner page must render the activity badge');
   assert(!pageSource.includes("'Tour Guide Experience'"), 'public partner page must not hardcode Tour Guide Experience');
   assert(!pageSource.includes('"Tour Guide Experience"'), 'public partner page must not hardcode Tour Guide Experience');
   assert(!pageSource.includes('tour-guide.jpg'), 'public partner page must not hardcode tour-guide image');

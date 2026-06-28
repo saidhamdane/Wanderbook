@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPublicPartnerBySlugFromDb } from '@/lib/db/partners';
 import { resolveActivityProfile } from '@/lib/magazine/resolveActivityProfile';
+import { resolvePartnerHeroImage } from '@/lib/magazine/resolvePartnerHeroImage';
 import { getSafeTemplateId } from '@/lib/magazine/template-registry';
 import { DEFAULT_PARTNER_OG_IMAGE, PUBLIC_SITE_ORIGIN, getCanonicalPartnerUrl, getPartnerDisplayName } from '@/lib/partner-utils';
 import { PartnerLogoBadge } from './PartnerLogoBadge';
@@ -55,7 +56,7 @@ export async function generateMetadata({ params }: PartnerPageParams): Promise<M
   const canonicalUrl = getCanonicalPartnerUrl(partner.slug);
   const title = `Create your ${partner.mainIsland} travel magazine with ${businessName}`;
   const description = 'Upload your photos and receive a premium digital flipbook magazine of your experience.';
-  const ogImage = absolutePublicUrl(activityProfile.previewImage);
+  const ogImage = absolutePublicUrl(resolvePartnerHeroImage(partner, activityProfile));
 
   return {
     metadataBase: new URL(PUBLIC_SITE_ORIGIN),
@@ -96,8 +97,9 @@ export default async function PartnerLandingPage({ params, searchParams }: Partn
   const selectedTemplateId = getSafeTemplateId(partner.preferredTemplateId || activityProfile.templateId);
   const previewTitle = activityProfile.previewTitle[lang];
   const previewSubtitle = activityProfile.previewSubtitle[lang];
-  const previewImage = activityProfile.previewImage;
+  const previewImage = resolvePartnerHeroImage(partner, activityProfile);
   const previewAlt = activityProfile.previewAlt[lang];
+  const activityBadge = activityProfile.activityBadge[lang];
   const createHref =
     '/create?' +
     new URLSearchParams({
@@ -109,16 +111,28 @@ export default async function PartnerLandingPage({ params, searchParams }: Partn
     }).toString();
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-slate-950 text-white">
       <style>{'html,body{overflow-x:hidden}'}</style>
-      <header className="flex items-center justify-between gap-4 border-b border-amber-400/30 px-5 py-4">
+      <header className="relative z-20 flex items-center justify-between gap-4 border-b border-amber-400/30 px-5 py-4">
         <Logo size="md" variant="dark" />
         <Link href="/partner/login" className="shrink-0 text-right text-sm font-semibold text-amber-200 hover:text-amber-100">
           Business owner? Log in
         </Link>
       </header>
 
-      <section className="mx-auto flex min-h-[calc(100vh-70px)] w-full max-w-[720px] flex-col items-center justify-center px-5 py-12 text-center sm:px-6 sm:py-16 lg:max-w-4xl">
+      <div className="pointer-events-none absolute inset-x-0 top-[69px] z-0 h-[460px] overflow-hidden">
+        <Image
+          src={previewImage}
+          alt={previewAlt}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-slate-950/75 to-slate-950" />
+      </div>
+
+      <section className="relative z-10 mx-auto flex min-h-[calc(100vh-70px)] w-full max-w-[720px] flex-col items-center justify-center px-5 py-12 text-center sm:px-6 sm:py-16 lg:max-w-4xl">
         {partner.logoUrl && (
           <PartnerLogoBadge
             src={partner.logoUrl}
@@ -153,7 +167,10 @@ export default async function PartnerLandingPage({ params, searchParams }: Partn
                 className="object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-3 pt-12 text-left">
-                <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-amber-200">
+                <p className="break-words text-[7px] font-black uppercase leading-tight tracking-[0.18em] text-amber-400 sm:text-[8px] sm:tracking-[0.24em]">
+                  {activityBadge}
+                </p>
+                <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.24em] text-amber-200">
                   Your magazine style
                 </p>
                 <p className="mt-1 text-base font-bold leading-tight text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
